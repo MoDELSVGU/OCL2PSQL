@@ -53,7 +53,6 @@ public class VariableUtils {
         for(VarSelectExpression var : selectBody.getVars()) {
                 if(!targetRefList.contains(var)) {
                     VarSelectExpression newVar = new VarSelectExpression(var.getVar());
-                    newVar.setClosed(var.isClosed());
                     newVar.setRefExpression(new Column(source.getAlias().getName().concat(".").concat(var.getRef().getAlias().getName())));
                     target.addVar(newVar);
                 }
@@ -76,11 +75,9 @@ public class VariableUtils {
         for(VarSelectExpression var : selectBody.getVars()) {
             if(!targetRefList.contains(var)) {
                 VarSelectExpression newVar = new VarSelectExpression(var.getVar());
-                newVar.setClosed(var.isClosed());
                 newVar.setRefExpression(new Column(source.getAlias().getName().concat(".").concat(var.getRef().getAlias().getName())));
                 target.addVar(newVar);
                 if(iterator.getName().equals(var.getVar())) {
-                    var.setClosed(true);
                 }
             }
         }
@@ -92,11 +89,9 @@ public class VariableUtils {
         for(VarSelectExpression var : selectBody.getVars()) {
             if(!targetRefList.contains(var)) {
                 if(iterator.getName().equals(var.getVar())) {
-                    var.setClosed(true);
                     continue;
                 }
                 VarSelectExpression newVar = new VarSelectExpression(var.getVar());
-                newVar.setClosed(var.isClosed());
                 newVar.setRefExpression(new Column(source.getAlias().getName().concat(".").concat(var.getRef().getAlias().getName())));
                 target.addVar(newVar);
             }
@@ -202,13 +197,13 @@ public class VariableUtils {
         return SVars;
     }
 
-    public static List<String> FVars(OclExpression ocl, List<String> boundVars) {
-        if(ocl instanceof IteratorExp) {
-            IteratorExp iteratorExp = (IteratorExp) ocl;
-            boundVars.add(iteratorExp.getIterator().getName());
-            List<>
-            return FVars(iteratorExp.getSource(), boundVars).
-        }
-        return null;
-    }
+//    public static List<String> FVars(OclExpression ocl, List<String> boundVars) {
+//        if(ocl instanceof IteratorExp) {
+//            IteratorExp iteratorExp = (IteratorExp) ocl;
+//            boundVars.add(iteratorExp.getIterator().getName());
+//            List<>
+//            return FVars(iteratorExp.getSource(), boundVars).
+//        }
+//        return null;
+//    }
 }

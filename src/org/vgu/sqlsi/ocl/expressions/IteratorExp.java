@@ -1977,10 +1977,10 @@ public final class IteratorExp extends LoopExp {
         tempCollectBody.setAlias(aliasTempCollectBody);
         
         String currentIter = this.getIterator().getName();
-        List<String> fVarsExpression = VariableUtils.FVars(this, new ArrayList<String>());
-        List<String> fVarsBody = VariableUtils.FVars(this.getBody(), new ArrayList<String>());
-//        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempCollectSource.getSelectBody());
-//        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempCollectBody.getSelectBody());
+//        List<String> fVarsExpression = VariableUtils.FVars(this, new ArrayList<String>());
+//        List<String> fVarsBody = VariableUtils.FVars(this.getBody(), new ArrayList<String>());
+        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempCollectSource.getSelectBody());
+        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempCollectBody.getSelectBody());
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempCollectBody.getName().concat(".").concat("res"))));

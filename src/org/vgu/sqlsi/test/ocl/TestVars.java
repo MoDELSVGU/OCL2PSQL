@@ -15,10 +15,10 @@ public class TestVars {
         suite.add(new Pair("Car::allInstances()->collect(c|c.Car:color)", new ArrayList<String>()));
         suite.add(new Pair("Car::allInstances()->exists(c|c.Car:color='black')", new ArrayList<String>()));
     
-        for (Pair item : suite) {
-            String ocl = item.getOcl();
-            List<String> freeVars = item.getVars();
-            VariableUtils.FVars(selectBody)
-        }
+//        for (Pair item : suite) {
+//            String ocl = item.getOcl();
+//            List<String> freeVars = item.getVars();
+//            VariableUtils.FVars(selectBody)
+//        }
     }
 }
