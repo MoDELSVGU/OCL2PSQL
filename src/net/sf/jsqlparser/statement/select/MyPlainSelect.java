@@ -11,10 +11,15 @@ import net.sf.jsqlparser.expression.LongValue;
 
 public class MyPlainSelect extends PlainSelect {
     private LinkedList<VarSelectExpression> vars = new LinkedList<VarSelectExpression>();
-    
+
     public MyPlainSelect() {
         super();
         this.setValAsTrue();
+    }
+    
+    public void setAllColumn() {
+        this.getSelectItems().clear();
+        this.addSelectItem(new AllColumns());
     }
     
     public void setValAsTrue() {
