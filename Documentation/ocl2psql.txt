@@ -1,0 +1,329 @@
+**** Testing ****
+- org.vgu.sqlsi.test.ocl [Not very "elegant" main-class for testing]
+- org.vgu.sqlsi.test.salsi.TesterOcl2PSql [unit test]
+
+**** Data representation ****
+Let D = ⟨C,HI,AT,AS⟩, be a data model. The SQL-implementation of D is as follows:
+• For every c ∈ C,
+CREATE TABLE c (
+c_id int NOT NULL AUTO INCREMENT PRIMARY KEY, 
+c_ref text);
+
+c_id: it uniquely identifies the object "internally" (within oclpsql)
+c_ref: it identifies the object "externally": it is the "name" of the object; 
+obviously, when object are anonymous, c_ref is "useless". Moreover, it is crucially
+used to identify the object "across" the class-hierarchy: for each (super) class in the
+hierarchy, the "same" object is identified with a different c_id, but with the same c_ref. 
+
+• For every c, for every c′ ∈ Ances(c, HI )
+ALTER TABLE c ADD COLUMN c′ int;
+ALTER TABLE c ADD FOREIGN KEY fk c′(c′) REFERENCES c′(c′_id);
+
+• For every attribute ⟨iat, c, t⟩ ∈ AT
+ALTER TABLE c ADD COLUMN iat SqlType(t);
+where:
+– if t = Integer, then SqlType(t) = int; 
+– if t = String, then SqlType(t) = text; 
+– if t ∈ C, then SqlType(t) = int.
+Moreover, if t ∈ C, then
+ALTER TABLE c ADD FOREIGN KEY fk_c_iat(iat) REFERENCES t(t_id);
+
+• For every association ⟨ias,ien,c,ieno,co⟩ ∈ AS,
+CREATE TABLE ias ( 
+ien int,
+ieno int,
+FOREIGN KEY fk c ien(ien) REFERENCES co(co id), 
+FOREIGN KEY fk c ieno(ieno) REFERENCES c(c id));
+
+--- Correctness ---
+To be completed
+
+**** Object representation ****
+• For every (ioc,c)∈OC,
+
+INSERT INTO c (c_ref) VALUES (ioc); 
+Moreover, for every c′ ∈ Ances(c, HI ),
+INSERT INTO c′ (c′_ref) VALUES (ioc); 
+UPDATE c SET c′ = (SELECT c′_id FROM c′ WHERE c′_ref = ioc) WHERE c_ref = ioc;
+
+
+• For every ⟨⟨iat, c′, t⟩, (ioc, c), iv⟩ ∈ OAT 
+(recall that, by definition, c_ref = c′_ref) 
+
+UPDATE Person SET name = "Hoang" WHERE Person_ref = "HoangNguyen";
+
+• For every ⟨ias,ien,c,ieno,co⟩,(iocl,cl),(iocr,cr)⟩ ∈ OAS,
+INSERT INTO ias (ien, ieno) VALUES (
+(SELECT cl id FROM cl WHERE cl ref = iocl) , 
+(SELECT cl id FROM cl WHERE cl ref = iocl) );
+
+****  Libraries **** 
+ocl2psql uses the following libraries
+
+--- simple-ocl ---
+// https://libraries.io/github/rherschke/simple-ocl
+// simple-ocl is used to parse (String) OCL expressions
+// simple-ocl eval method is of no use here
+// NOTE: The parser tries to parse a literal as a Type 
+// if and only if the literal consists of a fully qualified class name 
+// (e.g. package::subpackage::classifier) that is accessible by the parser. 
+// (Except it is a primitive type (String, Boolean, Integer, Real))
+
+- main class: OCLExpression.java [org.vgu.sqlsi.oclexpressions]
+------> implements SmtVisitable interface [ocl2psql's own interface]
+
+--- jsqlparser ---
+// http://jsqlparser.sourceforge.net/
+// jsqlparser is used to build (String) MySQL statements
+
+- main interface Statement [net.sf.jsqlparser.statement]
+- main class Select [net.sf.jsqlparser.statement.select]
+- implements Statement interface 
+
+****  ocl2psql **** 
+--- interfaces ---
+- interface StmVisitor [org.vgu.sqlsi.ocl.expressions]
+- method: Statement visit(OclExpression source)
+
+- interface StmVisitable [org.vgu.sqlsi.ocl.expressions]
+- method Statement accept(StmVisitor visitor);
+
+--- classes ---
+* main class: OCL2Sql.java [org.vgu.sqlsi.main]
+- implements StmVisitor interface [ocl2psql's own interface]
+
+- [int] alias [to create fresh 'alias']
+- [ArrayList<IteratorSource>()] context [to store ocl2psql's "context" (see below)]
+
+--- Correctness ---
+- ocl2sql is correct in the following sense. Let D be a data model.
+Let exp be an OCL D-expression and let O be a D-scenario. Then,
+eval(exp, O) = v iff 
+  exec(map_expression(exp, D), map_data(O, D)) =_{"item"} exec(map_value(v)).
+
+map_expression : OCLExpression JSON-DataModel -> SQL(Select)
+map_data : JSON-ObjectModel JSON-DataModel -> SQL (List<Statement>)
+map_value : JSON-Value [JSON-ObjectModel JSON-DataModel] -> SQL(Select)
+
+- ocl2psql operates within a "context". A context is
+a map from SELECT-expressions (each with a unique alias), 
+and (OCL) variables (each with a unique name). Intuitively, 
+the "context" determines the specific "collection" 
+over which each (iterator) variable should "iterate".
+
+- ocl2psql assumes that input expressions are well-formed with respect to
+the underlying data-model
+(*) TODO: validate this assumption to avoid (unexpected) error messages
+
+- ocl2psql assumes that all input expressions are "closed". More specifically,
+--  either they do not contain any free variable,
+--  or the context maps each free variable to a SELECT-expression.
+(*) TODO: validate this assumption to avoid (unexpected) error messages
+
+- Syntactic restrictions:
+-- Class-types, attributes, associations must be used with their full-names
+-- Variables must be used with their types.
+(*) TODO: understand better OclContext to avoid (if possible) having to use full names
+and types.
+-- Iterators must  only introduce one variable at a time.
+
+**** Definition ****
+--- Notes ---
+- ocl2psql is defined recursively over the structure of OCL expressions.
+
+- Each OCL-expression exp is translated into a SELECT-expression, map_x(exp), 
+with a unique alias, alias(map_x(exp)).
+
+- Each map_x(exp) has a distinguished column (aliased) "item". Intuitively,
+this column contains the value(s) of (evaluating) exp.
+
+- When an expression contains a free variable <var>, 
+map_x(exp) has, in addition, a distinguished column (aliased) <var>_var.
+
+(*) The following applies to ALL (recursive) clauses in the definition below
+- Moreover, if an expression has proper subexpressions exp_1,..., exp_n that contain 
+a free variable <var>, then, for an arbitrarily i,  1<=i<=n,
+-- the column (aliased) <var>_var in map_x(exp) is alias(map_x(exp_i)).<var>_var, 
+-- map_x(exp) includes the following WHERE-clause:
+alias(exp_i).<var>_var = alias(exp_1).<var>_var
+...
+AND alias(exp_i).<var>_var = alias(exp_(i-1).<var>_var
+AND alias(exp_i).<var>_var = alias(exp_(i+1).<var>_var
+... 
+AND alias(exp_i).<var>_var = alias(exp_n).<var>_var
+
+--- Base-cases ---
+----------------------------------------
+--- map_x(literal <integer> | <boolean> | <string>
+----------------------------------------
+- the fromItem is empty.
+- the column (aliased) "item" stores the corresponding literal.
+
+----------------------------------------
+--- map_x(<class>.allInstances(), C)
+----------------------------------------
+(*) TODO: This definition needs to be generalized to cope with general Class-expressions
+- the fromItem is the corresponding table <class> (see definition of map_d()).
+- the column (aliased) "item" stores the corresponding column <class>_id 
+(see definition of map_d()).
+
+----------------------------------------
+-- map_x(<var>, C)
+----------------------------------------
+- the fromItem is context(<var>).
+- the column (aliased) "item" stores alias(context(<var>)).item
+- there is an additional column (aliased) <var>_var also 
+storing the value alias(context(<var>)).item.
+
+----------------------------------------
+-- map_x(<var>.<class>::<attr>, C)
+----------------------------------------
+- the fromItem is (SELECT * FROM map_d(<class>)) AS $unique_alias
+RIGHT JOIN with map_x(<var>, C) ON $unique_alias.item = alias(map_x(<var>, C)).item
+- the column (aliased) "item" stores alias(map_x(<class>, C)).<attr> 
+(see definition of map_d()).
+(*) REMEMBER: The RIGHT JOIN keyword returns all records 
+from the right table, and the matched records from the left table. 
+The result is NULL from the left side, when there is no match. 
+In our case, there is ALWAYS MATCH (on the left side)
+(*) TODO: the column (aliased) "item" CURRENTLY stores <attr> (to be fixed).
+----------------------------------------
+-- map_x(<var>.<class>::<assoc-end>, C)
+----------------------------------------
+- the fromItem is (SELECT * FROM map_d(assoc(<assoc_end>)) AS $unique_alias
+RIGHT JOIN with map_x(<var>, C) ON $unique_alias.<assoc_end> = alias(map_x(<var>, C)).item
+- the column (aliased) "item" stores alias(map_x(<class>, C)).<attr> 
+(see definition of map_d()).
+(*) assoc(<assoc-end>) is the association that owns <assoc-end> (see definition of map_d())
+(*) REMEMBER: The RIGHT JOIN keyword returns all records 
+from the right table, and the matched records from the left table. 
+The result is NULL from the left side, when there is no match. 
+In this case, there could be a no match (an object may not be linked with any other
+object via <assoc-end>; and there could be also SEVERAL matches.
+ 
+--- Recursive-cases ---
+----------------------------------------
+--- map_x(<exp1> = <exp2>, C)
+----------------------------------------
+- the fromItem is the Cartesian product of map_x(<exp1>, C) and map_x(<exp2>, C)
+- the column (aliased) "item" stores:
+alias(map_x(<exp1>, C)).item = alias(map_x(<exp2>, C)).item
+
+----------------------------------------
+-- map_x(<source>->size(), C)
+----------------------------------------
+- the fromItem is map_x(<source>, C)
+- the column (aliased) "item" stores:
+------- WRONG: COUNT(alias(map_x(<source>, C)).item) (See different forms of count() in mysql)
+COUNT(*)
+
+----------------------------------------
+-- map_x(<source>->notEmpty(), C)
+----------------------------------------
+- the fromItem is map_x(<source>, C)
+- the column (aliased) "item" stores:
+COUNT(alias(map_x(<source>, C).item)) > 0.
+
+----------------------------------------
+-- map_x(<source>->collect(<var> | <body>), C)
+----------------------------------------
+- the fromItem is the Cartesian product of 
+map_x(<source>, C), map_x(<body>, C + {<var> -> map_x(<source>, C)})
+- the column (aliased) "item" stores:
+alias(map_x(<body>, C + {<var> -> map_x(<source>, C)})).item.
+- when <var> is "free" in <body>, then there is an additional WHERE-clause:
+alias(map_x(<body>, C + {<var> -> map_x(<source>, C)})).<var>_var = alias(map_x(<source>, C)).item
+
+----------------------------------------
+-- map_x(<source>->select(<var> | <body>), C)
+----------------------------------------
+- the fromItem is the Cartesian product of 
+map_x(<source>, C), map_x(<body>, C + {<var> -> map_x(<source>, C)})
+- the column (aliased) "item" stores:
+alias(map_x(<source>, C).item.
+- the WHERE clause is:
+alias(map_x(<body>, C + {<var> -> map_x(<source>, C)})).item = 1
+- when <var> is "free" in <body>, then there is an additional WHERE-clause:
+alias(map_x(<body>, C + {<var> -> map_x(<source>, C)})).<var>_var = alias(map_x(<source>, C)).item
+
+----------------------------------------
+-- map_x(<source>->forAll(<var> | <body>), C)
+----------------------------------------
+- the fromItem is the Cartesian product of 
+map_x(<source>, C), map_x(<body>, C + {<var> -> map_x(<source>, C)})
+- the column (aliased) "item" stores:
+COUNT(alias(map_x(<body>, C + {<var> -> map_x(<source>, C)}))).item) = 0
+- the WHERE clause is:
+alias(map_x(<body>, C + {<var> -> map_x(<source>, C)})).item = 0
+- when <var> is "free" in <body>, then there is an additional WHERE-clause:
+alias(map_x(<body>, C + {<var> -> map_x(<source>, C)})).<var>_var = alias(map_x(<source>, C)).item
+
+----------------------------------------
+-- map_x(<source>->exists(<var> | <body>), C)
+----------------------------------------
+- the fromItem is the Cartesian product of 
+map_x(<source>, C), map_x(<body>, C + {<var> -> map_x(<source>, C)})
+- the column (aliased) "item" stores:
+COUNT(alias(map_x(<body>, C + {<var> -> map_x(<source>, C)}))).item) > 0
+- the WHERE clause is:
+alias(map_x(<body>, C + {<var> -> map_x(<source>, C)})).item = 1
+- when <var> is "free" in <body>, then there is an additional WHERE-clause:
+alias(map_x(<body>, C + {<var> -> map_x(<source>, C)})).<var>_var = alias(map_x(<source>, C)).item
+
+
+
+================== PROBLEMS/TASKS ================
+- how to deal with "objects" different from variables?
+- how to represent "invalid"? Is -1 a valid solution?
+- make sure that "when things go wrong (undefined, invalid)" in OCL, the same "behavior" 
+occurs in SQL.
+We have mentioned also a bottom type, namely OclVoid. 
+This type is populated by one extra value denoted by null. 
+As in the database language SQL, this value can be used 
+to express that some particular information is not available. 
+Because, OclVoid is a subtype of any other atomic type, 
+the value null is present in all atomic types and can be used 
+in collections and tuples. 
+The literal null was introduced in a newer OCL version. 
+Formerly, there was the check oclIsUndefined on OclAny 
+with which it is still possible to test for this value. 
+Let us consider some uses of null.
+
+Set{’800-275-2273’,’800-694-7466’,null} : Set(String)
+
+As in SQL, the value null is an exceptional value distinct from all ordinary values. 
+For example, in OCL we have that the following propositions are true: 
+0<>null, ’’<>null, ’null’<>null, ’NULL’<>null, and ’Null’<>null.
+
+=================== WORKING ON IT =================
+https://www.baeldung.com/java-type-casting
+- upcasting: IMPLICIT
+- downcasting: oclAsType()
+- overriding ALWAYS so that upcasting is IMPLICIT (or, BY-NEED)
+
+- instanceof =? isKindOf() / isTypeOf()
+
+----------------------------------------
+-- map_x(<object>->oclAsType(<type>))
+----------------------------------------
+
+Employee::allInstances()->collect(e|e.oclAsType(Person))
+
+SELECT TEMP_2.item AS item, TEMP_2.ref AS ref 
+FROM 
+  (SELECT Person_id AS item, Person_ref AS ref, TEMP_1.e_var AS e_var 
+    FROM Person 
+    RIGHT JOIN 
+       (SELECT TEMP_0.item AS item, TEMP_0.ref AS ref, TEMP_0.item AS e_var 
+         FROM (SELECT Employee_id AS item, Employee_ref as ref FROM Employee) AS TEMP_0)  
+         AS TEMP_1 
+    ON TEMP_1.ref = Person.Person_ref) AS TEMP_2, 
+
+(SELECT Employee_id AS item FROM Employee) AS TEMP_3 
+WHERE TEMP_2.e_var = TEMP_3.item
+		
+		
+		
+
+			
+			

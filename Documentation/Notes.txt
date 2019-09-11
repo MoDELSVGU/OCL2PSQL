@@ -1,0 +1,18 @@
+
+
+
+* table reg_user; size 91 MB
++-------------+--------------+------+-----+---------+----------------+
+| Field       | Type         | Null | Key | Default | Extra          |
++-------------+--------------+------+-----+---------+----------------+
+| reg_user_id | int(11)      | NO   | PRI | NULL    | auto_increment |
+| given_name  | varchar(100) | YES  |     | NULL    |                |
+| middle_name | varchar(100) | YES  |     | NULL    |                |
+| family_name | varchar(100) | YES  |     | NULL    |                |
+| gender      | char(1)      | YES  |     | NULL    |                |
+| data_birth  | date         | YES  |     | NULL    |                |
+| role        | int(11)      | NO   | MUL | NULL    |                |
++-------------+--------------+------+-----+---------+----------------+
+
+> select count(*) from reg_user;
+1 row in set (0.37 sec)

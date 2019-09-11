@@ -1,0 +1,32 @@
+[
+{"class" : "Role",
+ "attributes" : [
+    {"name" : "name", "type" : "String"}],
+},
+{"class" : "Reg_User",
+ "attributes" : [
+    {"name" : "family_name", "type" : "String"},
+    {"name" : "middle_name", "type" : "String"},
+    {"name" : "given_name", "type" : "String"},
+    {"name" : "email", "type" : "String"},
+    {"name" : "role", "type" : "Integer"}],
+ },
+{"class" : "Student",
+ "super" : "Reg_User"
+},
+{"class" : "Lecturer",
+ "super" : "Reg_User",
+},
+{"class" : "Course",
+ "attributes" : [
+    {"name" : "name", "type" : "String"}],
+},
+{"association" : "Enrollment"
+ "ends" : ["courses", "students"],
+ "classes" : ["Student", "Course"]
+},
+{"association" : "Teaching"
+ "ends" : ["lectures", "lecturers"],
+ "classes" : ["Lecturer", "Course"]
+} 
+]

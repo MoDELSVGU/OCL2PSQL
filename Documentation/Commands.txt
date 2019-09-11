@@ -1,0 +1,22 @@
+
+* loading large file
+mysql -utanbinhtech -p sosymdb107 --local-infile --execute="LOAD DATA LOCAL INFILE 'sosymdb107_car' INTO TABLE car FIELDS TERMINATED BY ',' LINES STARTING BY '#' ("color"); SHOW WARNINGS"
+
+mysql -utanbinhtech -p sosymdb107 --local-infile --execute="LOAD DATA LOCAL INFILE 'sosymdb107_person' INTO TABLE person FIELDS TERMINATED BY ',' LINES STARTING BY '#' ("name"); SHOW WARNINGS"
+
+mysql -utanbinhtech -p sosymdb107 --local-infile --execute="LOAD DATA LOCAL INFILE 'sosymdb107_employee' INTO TABLE employee FIELDS TERMINATED BY ',' LINES STARTING BY '#' ("person"); SHOW WARNINGS"
+
+mysql -utanbinhtech -p sosymdb107 --local-infile --execute="LOAD DATA LOCAL INFILE 'sosymdb107_car_person' INTO TABLE ownership FIELDS TERMINATED BY ',' LINES STARTING BY '#' ("ownedCars","owners"); SHOW WARNINGS"
+
+* size of a table
+SELECT table_name AS `car`, round(((data_length + index_length) / 1024 / 1024), 2) `Size in MB` FROM information_schema.TABLES  WHERE table_schema = "thesis_test"  AND table_name = "car";
+
+
+*Hoang Windows:
+mysql -uroot -p sosymDB107 --local-infile --execute="LOAD DATA LOCAL INFILE 'sosymdb107_car' INTO TABLE Car FIELDS TERMINATED BY ',' LINES STARTING BY '#' TERMINATED BY '\r\n' ("Car_ref", "color"); SHOW WARNINGS"
+
+mysql -uroot -p sosymDB107 --local-infile --execute="LOAD DATA LOCAL INFILE 'sosymdb107_person' INTO TABLE Person FIELDS TERMINATED BY ',' LINES STARTING BY '#' TERMINATED BY '\r\n' ("Person_ref", "name"); SHOW WARNINGS"
+
+mysql -uroot -p sosymDB107 --local-infile --execute="LOAD DATA LOCAL INFILE 'sosymdb107_employee' INTO TABLE Employee FIELDS TERMINATED BY ',' LINES STARTING BY '#' TERMINATED BY '\r\n' ("Employee_ref", "person"); SHOW WARNINGS"
+
+mysql -uroot -p sosymDB107 --local-infile --execute="LOAD DATA LOCAL INFILE 'sosymdb107_car_person' INTO TABLE ownership FIELDS TERMINATED BY ',' LINES STARTING BY '#' TERMINATED BY '\r\n' ("ownedCars","owners"); SHOW WARNINGS"

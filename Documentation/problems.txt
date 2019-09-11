@@ -1,0 +1,12 @@
+1. unique names for properties: right now, assuming attribute
+have different names for different classes
+2. parsing: if an expression is wrongly type, unexpected result
+may happen. For example, because "x" is really nothing
+else than "item", 
+"Reg_User::allInstances()->collect(u:Reg_User|u = u1)"
+returns a valid sql query (when it should not).
+3. Also, for association-ends: right now, we use lexicographic
+order to "fix" the name of the "product"-tables.
+
+4. Semantics of ->size() when is the result of a collect (bag?)
+5. Select / Collect: several nested iterators ---> WHERE?
