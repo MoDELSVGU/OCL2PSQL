@@ -57,4 +57,4 @@ This table represents a detailed overview of supported Object Constraint Languag
 |`asSet`  |  *bag-expr* -> `asSet()`|
 
 ###### [<sup>1</sup>] For the time being, this can operate *ONLY* after the `collect` operation
-[<sup>1</sup>]:#-For-the-time-being-,-this-can-operate-*ONLY*-after-the-`collect`-operation
+[<sup>1</sup>]:#-For
