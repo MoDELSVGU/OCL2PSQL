@@ -71,4 +71,8 @@ public class OCL2SQLParser implements StmVisitor{
     public void setPlainUMLContextFromString(String umlContext) throws ParseException {
         this.plainUMLContext = (JSONArray) new JSONParser().parse(umlContext);
     }
+    
+    public void setPlainUMLContext(JSONArray plainUMLContext) {
+        this.plainUMLContext = plainUMLContext;
+    }
 }

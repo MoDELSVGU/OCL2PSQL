@@ -9,6 +9,7 @@ import org.vgu.sqlsi.ocl.context.DefaultOclContext;
 import org.vgu.sqlsi.ocl.exception.OclParseException;
 import org.vgu.sqlsi.ocl.expressions.IteratorSource;
 import org.vgu.sqlsi.ocl.expressions.OclExpression;
+import org.vgu.sqlsi.ocl.visitor.OCL2SQLParser;
 import org.vgu.sqlsi.uml.Multiplicity;
 import org.vgu.sqlsi.uml.UMLAssociationEnd;
 import org.vgu.sqlsi.uml.UMLAttribute;
@@ -482,7 +483,7 @@ public static JSONArray getAssociations(JSONArray context, String className){
 				count = count + 1;	
 			}
 			
-			Ocl2Sql ocl2sql = new Ocl2Sql();
+			OCL2SQLParser ocl2sql = new OCL2SQLParser();
 			//ocl2sql.setUMLContext(Utilities.buildUMLContextBis(context));
 			//ocl2sql.setUMLContext(context);
 			ocl2sql.setAlias(0);

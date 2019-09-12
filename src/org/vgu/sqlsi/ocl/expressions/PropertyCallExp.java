@@ -8,7 +8,6 @@
  */
 package org.vgu.sqlsi.ocl.expressions;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,7 +22,6 @@ import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.CaseExpression;
 import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -31,12 +29,9 @@ import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.MyPlainSelect;
-import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 /**
@@ -61,162 +56,6 @@ public final class PropertyCallExp extends NavigationCallExp {
             return context.getFieldValue(source.eval(context), this.name);
         } catch (Exception e) {
             throw new OclEvaluationException("cannot get the field value: " + this.name, e);
-        }
-    }
-
-    @Override
-    public Statement accept(StmVisitor visitor) {
-        // 1. get the "source" of the variable
-
-        // 1. save the current iterator source list (outer-iterators), and alias
-        // in a temporal variable
-        List<IteratorSource> cur_iters = new ArrayList<IteratorSource>();
-        cur_iters.addAll(visitor.getVisitorContext());
-        //
-        // 3. visit the source and save the result
-        SubSelect subselect_Source = new SubSelect();
-        subselect_Source.setSelectBody(((Select) visitor.visit(this.getSource())).getSelectBody());
-        visitor.setVisitorContext(cur_iters);
-        Alias alias_Source = new Alias(Utilities.genAliasName(visitor));
-        subselect_Source.setAlias(alias_Source);
-
-        String prop = this.name.substring(this.name.indexOf(":") + 1, this.name.length());
-        String propClass = this.name.substring(0, this.name.indexOf(":"));
-
-        // System.out.println(propClass + " " + prop);
-
-        if (org.vgu.sqlsi.main.Utilities.isAttribute(visitor.getPlainUMLContext(), propClass, prop)) {
-            /*
-             * attribute
-             */
-
-            // 1. find the attribute
-            // UMLAttribute attr = null;
-            // for (UMLAttribute item_attr : visitor.getUMLContext().getAttributes()) {
-            // if (item_attr.getName().equals(prop)
-            // && item_attr.getSource().getName().equals(propClass)) {
-            // attr = item_attr;
-            // break;
-            // }
-            // }
-
-            // build the expression
-            PlainSelect pselect = new PlainSelect();
-
-            SelectExpressionItem item = new SelectExpressionItem();
-            // item.setExpression(new Column(attr.getName()));
-            item.setExpression(new Column(prop));
-            item.setAlias(new Alias("item"));
-            pselect.addSelectItems(item);
-
-            // FROM ITEM
-            SubSelect lselect = new SubSelect();
-            Table table = new Table();
-            PlainSelect body = new PlainSelect();
-            // table.setName(attr.getSource().getName());
-            table.setName(propClass);
-            body.setFromItem(table);
-            body.addSelectItems(new AllColumns());
-            lselect.setSelectBody(body);
-            Alias alias_Class = new Alias(Utilities.genAliasName(visitor));
-            lselect.setAlias(alias_Class);
-
-            pselect.setFromItem(lselect);
-
-            // RIGHT JOIN
-            Join join = new Join();
-            join.setRight(true);
-            join.setRightItem(subselect_Source);
-            // set the expected on expression
-            BinaryExpression bexpr = new EqualsTo();
-            bexpr.setLeftExpression(new Column(alias_Class.getName().concat(".").concat(propClass).concat("_id")));
-            bexpr.setRightExpression(new Column(alias_Source.getName().concat(".").concat("item")));
-            join.setOnExpression(bexpr);
-
-            List<Join> joins = new ArrayList<Join>();
-            joins.add(join);
-            pselect.setJoins(joins);
-
-            // variables rippling up
-            Utilities.ripplingUpVariables(pselect, null, subselect_Source, null);
-
-            Select select = new Select();
-            select.setSelectBody(pselect);
-
-            return select;
-
-        } else
-        /*
-         * association-end
-         */
-
-        {
-            // 1. find the association-end
-            // UMLAssociationEnd end = null;
-            // for (UMLAssociationEnd item_end : visitor.getPlainUMLContext()) {
-            // if (item_end.getName().equals(prop)
-            // && item_end.getSource().getName().equals(propClass)) {
-            // end = item_end;
-            // break;
-            // }
-            // }
-
-            // 2. find and add the product table in the result-table
-            // String nameEndTable = null;
-            // String source = end.getSource().getName();
-            // String target = end.getTarget().getName();
-            // if (source.compareTo(target) > 0) {
-            // nameEndTable = target.concat("_").concat(source);
-            // } else {
-            // nameEndTable = source.concat("_").concat(target);
-            // }
-
-            // build the expression
-            PlainSelect pselect = new PlainSelect();
-
-            SelectExpressionItem item = new SelectExpressionItem();
-            item.setExpression(new Column(prop));
-            item.setAlias(new Alias("item"));
-            pselect.addSelectItems(item);
-
-            // FROM ITEM
-            SubSelect lselect = new SubSelect();
-            Table table = new Table();
-            PlainSelect body = new PlainSelect();
-            // table.setName(nameEndTable);
-            table.setName(org.vgu.sqlsi.main.Utilities.getAssociation(visitor.getPlainUMLContext(), propClass, prop));
-            body.setFromItem(table);
-            body.addSelectItems(new AllColumns());
-            lselect.setSelectBody(body);
-            Alias alias_Table = new Alias(Utilities.genAliasName(visitor));
-            lselect.setAlias(alias_Table);
-            pselect.setFromItem(lselect);
-
-            // RIGHT JOIN
-            Join join = new Join();
-            join.setRight(true);
-            join.setRightItem(subselect_Source);
-
-            // set the expected on expression
-            BinaryExpression bexpr = new EqualsTo();
-            bexpr.setLeftExpression(new Column(alias_Table.getName().concat(".").concat(org.vgu.sqlsi.main.Utilities
-                    .getAssociationOpposite(visitor.getPlainUMLContext(), propClass, prop))));
-            bexpr.setRightExpression(new Column(alias_Source.getName().concat(".").concat("item")));
-
-            join.setOnExpression(bexpr);
-
-            List<Join> joins = new ArrayList<Join>();
-            joins.add(join);
-            pselect.setJoins(joins);
-
-            // variables rippling up
-            Utilities.ripplingUpVariables(pselect, null, subselect_Source, null);
-
-            Select select = new Select();
-            select.setSelectBody(pselect);
-
-            return select;
-
         }
     }
 

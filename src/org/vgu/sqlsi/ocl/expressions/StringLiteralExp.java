@@ -12,13 +12,10 @@ import org.vgu.sqlsi.ocl.context.OclContext;
 import org.vgu.sqlsi.ocl.exception.OclEvaluationException;
 import org.vgu.sqlsi.sql.statement.select.ResSelectExpression;
 
-import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.MyPlainSelect;
-import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
 /**
  * Class StringLiteralExp
@@ -37,19 +34,6 @@ public class StringLiteralExp extends PrimitiveLiteralExp {
     public Object eval(OclContext context) throws OclEvaluationException {
 	return this.stringSymbol;
     }
-
-	@Override
-	public Statement accept(StmVisitor visitor) {
-		PlainSelect pselect = new PlainSelect();
-		SelectExpressionItem item = new SelectExpressionItem();
-		item.setExpression(new StringValue(this.stringSymbol));
-		item.setAlias(new Alias("item"));
-		pselect.addSelectItems(item);	
-		
-		Select select = new Select();
-		select.setSelectBody(pselect);
-		return select;
-	}
 
 	@Override
 	public Statement map(StmVisitor visitor) {

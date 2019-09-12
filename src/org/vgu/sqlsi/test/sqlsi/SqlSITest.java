@@ -17,11 +17,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
-import org.vgu.sqlsi.main.Ocl2Sql;
 import org.vgu.sqlsi.ocl.context.DefaultOclContext;
 import org.vgu.sqlsi.ocl.exception.OclParseException;
 import org.vgu.sqlsi.ocl.expressions.IteratorSource;
 import org.vgu.sqlsi.ocl.expressions.OclExpression;
+import org.vgu.sqlsi.ocl.visitor.OCL2SQLParser;
 
 public class SqlSITest {
 
@@ -44,8 +44,7 @@ public class SqlSITest {
 		JSONArray context;
 		try {
 			context = (JSONArray) new JSONParser().parse(new FileReader("/Users/clavel/programDB_context.json"));
-			Ocl2Sql ocl2sql = new Ocl2Sql();
-			ocl2sql.setAlias(0);
+			OCL2SQLParser ocl2sql = new OCL2SQLParser();
 			ocl2sql.setPlainUMLContext(context);
 			ocl2sql.setVisitorContext(new ArrayList<IteratorSource>());
 			

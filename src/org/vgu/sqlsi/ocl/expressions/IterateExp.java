@@ -49,14 +49,7 @@ public final class IterateExp extends LoopExp {
 	Object initAccu = this.accumulator.init(context);
 	return OclIterateSupport.iterate(collection, context, iteratorName,
 		accuName, initAccu, this.getBody());
-
     }
-
-	@Override
-	public Statement accept(StmVisitor visitor) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
     @Override
     public Statement map(StmVisitor visitor) {

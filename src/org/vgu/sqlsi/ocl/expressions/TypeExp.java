@@ -11,7 +11,6 @@ package org.vgu.sqlsi.ocl.expressions;
 import org.vgu.sqlsi.ocl.context.OclContext;
 import org.vgu.sqlsi.ocl.exception.OclEvaluationException;
 
-import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.statement.Statement;
 
 /**
@@ -46,12 +45,6 @@ public final class TypeExp extends OclExpression {
 	    return context.getType(this.referredType);
 	}
     }
-
-	@Override
-	public Statement accept(StmVisitor visitor) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
     @Override
     public Statement map(StmVisitor visitor) {

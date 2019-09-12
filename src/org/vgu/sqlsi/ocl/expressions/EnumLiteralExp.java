@@ -39,12 +39,6 @@ public final class EnumLiteralExp extends LiteralExp {
 		+ this.type.referredType);
     }
 
-	@Override
-	public Statement accept(StmVisitor visitor) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
     @Override
     public Statement map(StmVisitor visitor) {
         // TODO Auto-generated method stub

@@ -31,12 +31,6 @@ public class RealLiteralExp extends NumericLiteralExp {
 	return this.realSymbol;
     }
 
-	@Override
-	public Statement accept(StmVisitor visitor) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
     @Override
     public Statement map(StmVisitor visitor) {
         // TODO Auto-generated method stub
