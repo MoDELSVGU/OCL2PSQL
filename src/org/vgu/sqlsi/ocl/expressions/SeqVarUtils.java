@@ -3,7 +3,8 @@ package org.vgu.sqlsi.ocl.expressions;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.vgu.sqlsi.test.ocl.Pair;
+import org.vgu.sqlsi.main.Pair;
+
 
 public class SeqVarUtils {
     public static Pair<List<String>, OclExpression> SeqVar(OclExpression source, String posString) throws RuntimeException {

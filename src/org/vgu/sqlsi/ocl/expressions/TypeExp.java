@@ -53,6 +53,12 @@ public final class TypeExp extends OclExpression {
 		return null;
 	}
 
+    @Override
+    public Statement map(StmVisitor visitor) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 	
 
 }

@@ -46,5 +46,11 @@ public final class TupleLiteralExp extends LiteralExp {
 		return null;
 	}
 
+    @Override
+    public Statement map(StmVisitor visitor) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 	
 }

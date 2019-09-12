@@ -10,7 +10,6 @@ package org.vgu.sqlsi.ocl.expressions;
 
 import org.vgu.sqlsi.ocl.context.OclContext;
 
-import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.statement.Statement;
 
 /**
@@ -28,6 +27,12 @@ public class NullLiteralExp extends LiteralExp {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    @Override
+    public Statement map(StmVisitor visitor) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 
 }
