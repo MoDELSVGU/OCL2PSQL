@@ -1,9 +1,7 @@
 # OCL2PSQL
 
-The Object Constraint Language (OCL) is a textual, declarative language
-typically used as part of the UML standard
-for specifying constraints and queries
-on models.
+The Object Constraint Language (OCL) is a textual, declarative language typically used as part of the UML standard
+for specifying constraints and queries on models.
 
 OCL2PSQL implements a novel mapping
 from OCL to pure SQL that deals with
