@@ -1,11 +1,8 @@
 package org.vgu.sqlsi.test.ocl;
 
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
 import org.vgu.sqlsi.ocl.context.DefaultOclContext;
 import org.vgu.sqlsi.ocl.exception.OclParseException;
 import org.vgu.sqlsi.ocl.exception.SetOfSetException;
@@ -28,14 +25,12 @@ public class TesterOCL2SQLParser {
          * Note: the file programDB_context.json is needed for the examples below it can
          * be found in Documentation
          */
-        JSONArray context = (JSONArray) new JSONParser().parse(
-//                new FileReader("C:\\Users\\ngpbh\\eclipse-workspace\\sqlsi\\Documentation\\CarPerson_context.json"));
-        new FileReader("/Users/thian/prjcts/eclipseWork/OCL2PSQL/Documentation/CarPerson_context.json"));
-//        JSONArray context = (JSONArray) new JSONParser().parse(new
-//        FileReader("/Users/clavel/VGU/Repositories/SqlSI/Documentation/CarPerson_context.json"));
+//        String filePath = "/Users/thian/prjcts/eclipseWork/OCL2PSQL/Documentation/CarPerson_context.json";
+        String filePath = "C:\\Users\\ngpbh\\eclipse-workspace\\sqlsi\\Documentation\\CarPerson_context.json";
+//        String filePath = "/Users/clavel/VGU/Repositories/SqlSI/Documentation/CarPerson_context.json";
 
         OCL2SQLParser ocl2psqlParser = new OCL2SQLParser();
-        ocl2psqlParser.setPlainUMLContext(context);
+        ocl2psqlParser.setPlainUMLContextFromFile(filePath);
         
         test(ocl2psqlParser, "Car::allInstances()->forAll(c|c.Car:owners->collect(p|p.Person:ownedCars)->flatten()->size()=1)");
         test(ocl2psqlParser, "Car::allInstances()->forAll(c|c.Car:owners->select(p|p.Person:name.oclIsUndefined())->size()=0)");
