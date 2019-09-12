@@ -19,28 +19,28 @@ This table represents a detailed overview of supported Object Constraint Languag
 
 ##### Class operations
 ||
-|--------------------------|
+|--------------------------||
 |`allInstances`  |  *class*.`allInstances()` |
 |`attributes`  |  *var*.`att` |
 |`association ends`  |  *var*.`assoc` |
 
 ##### Constants operations
 ||
-|--------------------------|
+|--------------------------||
 |`Boolean Literal`  |  `{TRUE, FALSE}`|
 |`Integer Literal`  |  `{..., -2, 1, 0, 1, 2, ...}`|
 |`String Literal`  |  `'string'`|
 
 ##### Boolean operations
 ||
-|--------------------------|
+|--------------------------||
 |`not`  |  `NOT` *bool-expr* |
 |`and`, `or`, `xor`  | *bool-expr* `logic-operator` *bool-expr'*|
 |`String Literal`  |  `'string'`|
 
 ##### Iterative operations
 ||
-|--------------------------|
+|--------------------------||
 |`collect`  |  *source-expr* -> `collect`(*var* &#124; *body-expr*) |
 |`forAll`  |  *source-expr* -> `forAll`(*var* &#124; *bool-expr*) |
 |`exists`  |  *source-expr* -> `exists`(*var* &#124; *bool-expr*) |
@@ -53,7 +53,7 @@ This table represents a detailed overview of supported Object Constraint Languag
 
 ##### Bag operations
 ||
-|--------------------------|
+|--------------------------||
 |`asSet`  |  *bag-expr* -> `asSet()`|
 
 [<sup>1</sup>]:For the time being, this can operate *ONLY* after the `collect` operation
