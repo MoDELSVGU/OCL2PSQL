@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.vgu.sqlsi.ocl.visitor.OCL2SQLParser;
+import org.vgu.sqlsi.sql.statement.select.MyPlainSelect;
 import org.vgu.sqlsi.sql.statement.select.RefSelectExpression;
 import org.vgu.sqlsi.sql.statement.select.VarSelectExpression;
 
@@ -17,7 +18,6 @@ import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.MyPlainSelect;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;

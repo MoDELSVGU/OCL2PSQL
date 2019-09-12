@@ -9,6 +9,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectBody;
@@ -85,7 +86,9 @@ public class Utilities {
 				gexps.add(new Column(var_name.concat("_var")));
 			}
 		}
-		pselect.setGroupByColumnReferences(gexps);
+		GroupByElement groupByElemt = new GroupByElement();
+		groupByElemt.setGroupByExpressions( gexps );
+		pselect.setGroupByElement(groupByElemt);
 		
 	}
 	

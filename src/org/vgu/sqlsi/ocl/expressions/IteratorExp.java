@@ -23,7 +23,9 @@ import org.vgu.sqlsi.ocl.exception.SetOfSetException;
 import org.vgu.sqlsi.ocl.impl.OclCollectionSupport;
 import org.vgu.sqlsi.ocl.impl.OclIteratorSupport;
 import org.vgu.sqlsi.ocl.visitor.OCL2SQLParser;
+import org.vgu.sqlsi.sql.statement.select.MyPlainSelect;
 import org.vgu.sqlsi.sql.statement.select.ResSelectExpression;
+import org.vgu.sqlsi.sql.statement.select.SubSelect;
 import org.vgu.sqlsi.sql.statement.select.ValSelectExpression;
 import org.vgu.sqlsi.sql.statement.select.VarSelectExpression;
 
@@ -45,13 +47,14 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.Distinct;
+import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.MyPlainSelect;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.SubSelect;
+//import net.sf.jsqlparser.statement.select.SubSelect;
+
 
 /**
  * Class IteratorExp
@@ -1015,18 +1018,14 @@ public final class IteratorExp extends LoopExp {
      * 
      * s->collect(v|b)->flatten()
      */
-    private Statement flattenMap_1(StmVisitor visitor) {
+    private Statement flattenMap(StmVisitor visitor) {
 
         if(this.getSource() instanceof IteratorExp) {
             Select source = (Select) visitor.visit(this.getSource());
             
-            
-//            if(VariableUtils.isSetOfSetAfterCollect(this, visitor)) {
-//                throw new SetOfSetException("Invalid set of sets operation");
-//            }
-            
             MyPlainSelect finalPlainSelect = new MyPlainSelect();
-            Select finalSelect = new Select(finalPlainSelect);
+            Select finalSelect = new Select();
+            finalSelect.setSelectBody(finalPlainSelect);
             
             SubSelect tempFlattenSource = new SubSelect();
             tempFlattenSource.setSelectBody( source.getSelectBody() );
@@ -1064,10 +1063,7 @@ public final class IteratorExp extends LoopExp {
 
                 SubSelect tempFlat = new SubSelect( sCollectvB, "TEMP_flat" );
 
-//                SubSelect tempFlat = new SubSelect();
-//                tempFlat.setSelectBody(sCollectvB);
                 Alias aliasTempFlat = tempFlat.getAlias();
-//                tempFlat.setAlias(aliasTempFlat);
                 
                 Join join = new Join();
                 join.setLeft(true);
@@ -1078,11 +1074,6 @@ public final class IteratorExp extends LoopExp {
                 MyPlainSelect s = (MyPlainSelect) tempFlattenSource.getSelectBody();
                 
                 SubSelect tempCollectSource = new SubSelect( s, "TEMP_src" );
-                
-//                SubSelect tempCollectSource = new SubSelect();
-//                tempCollectSource.setSelectBody(s);
-//                Alias aliasTempCollectSource = new Alias("TEMP_src");
-//                tempCollectSource.setAlias(aliasTempCollectSource);
 
                 finalPlainSelect.setFromItem(tempCollectSource);
                 
@@ -1140,19 +1131,16 @@ public final class IteratorExp extends LoopExp {
         throw new SetOfSetException("The source is not set of set to be flattened");
     }
 
-    private Statement flattenMap(StmVisitor visitor) {
+    private Statement flattenMap_1(StmVisitor visitor) {
         if(this.getSource() instanceof IteratorExp) {
             Select source = (Select) visitor.visit(this.getSource());
             
             SubSelect tempFlattenSource = new SubSelect();
             tempFlattenSource.setSelectBody(source.getSelectBody());
             
-//            if(VariableUtils.isSetOfSetAfterCollect(this, visitor)) {
-//                throw new SetOfSetException("Invalid set of sets operation");
-//            }
-            
             MyPlainSelect finalPlainSelect = new MyPlainSelect();
-            Select finalSelect = new Select(finalPlainSelect);
+            Select finalSelect = new Select();
+            finalSelect.setSelectBody( finalPlainSelect );
             
             List<String> sVarSource = VariableUtils.FVars((MyPlainSelect) tempFlattenSource.getSelectBody());
             if(sVarSource.isEmpty()) {
@@ -1183,8 +1171,7 @@ public final class IteratorExp extends LoopExp {
                 finalPlainSelect.setFromItem(tempCollectSource);
                 
                 MyPlainSelect sCollectvB = new MyPlainSelect();
-                sCollectvB.getSelectItems().clear();
-                sCollectvB.addSelectItem(new AllColumns());
+                sCollectvB.setAllColumn();
                 sCollectvB.setFromItem(tempFlattenSource);
                 BinaryExpression valisOne = new EqualsTo();
                 valisOne.setLeftExpression(new Column(aliasTempFlattenSource.getName().concat(".val")));
@@ -1225,7 +1212,6 @@ public final class IteratorExp extends LoopExp {
                 List<String> sVarsSource = VariableUtils.SVars((MyPlainSelect) tempFlattenSource.getSelectBody(), visitor.getVisitorContext());
                 BinaryExpression onCondition = null;
                 for(String v : sVarsSource) {
-//                    if(v.equals(flattenVar)) continue;
                     VarSelectExpression newVar = new VarSelectExpression(v);
                     newVar.setRefExpression(new Column(aliasTempFlat.getName().concat(".ref_").concat(v)));
                     finalPlainSelect.addVar(newVar);
@@ -1259,7 +1245,8 @@ public final class IteratorExp extends LoopExp {
         finalSubSelect.setAlias(aliasFinalSubSelect);
         
         MyPlainSelect finalPlainSelect = new MyPlainSelect();
-        Select finalSelect = new Select(finalPlainSelect);
+        Select finalSelect = new Select();
+        finalSelect.setSelectBody(finalPlainSelect);
         
         finalPlainSelect.setFromItem(finalSubSelect);
         ResSelectExpression uniqueRes = new ResSelectExpression();
@@ -1359,10 +1346,6 @@ public final class IteratorExp extends LoopExp {
         Alias aliasTempExistsSource = new Alias("TEMP_src");
         tempExistsSource.setAlias(aliasTempExistsSource);
         
-//        if(VariableUtils.isSetOfSetAfterCollect(this, visitor)) {
-//            throw new SetOfSetException("Invalid set of sets operation");
-//        }
-        
         MyPlainSelect finalPlainSelect = new MyPlainSelect();
 
         if(visitor.getVisitorContext().stream()
@@ -1445,22 +1428,13 @@ public final class IteratorExp extends LoopExp {
                     gBody.addVar(newVar);
                     groupByExpressions.add(new Column(aliasTempExistsBody.getName().concat(".ref_").concat(v)));
                 }
-                gBody.setGroupByColumnReferences(groupByExpressions);
+
+                GroupByElement groupByElement = new GroupByElement();
+                groupByElement.setGroupByExpressions( groupByExpressions );
+                gBody.setGroupByElement( groupByElement );
                 
                 List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempExistsBody.getSelectBody(), visitor.getVisitorContext());
-//                for(String v : SVarsBody) {
-//                    if(v.equals(currentIter)) {
-//                        groupByExpressions.add(new Column(aliasTempExistsBody.getName().concat(".ref_").concat(v)));
-//                        continue;
-//                    }
-//                    if(SVarsSource.contains(v)) {
-//                        continue;
-//                    }
-//                    VarSelectExpression newVar = new VarSelectExpression(v);
-//                    newVar.setRefExpression(new Column(aliasTempExistsBody.getName().concat(".ref_").concat(v)));
-//                    finalPlainSelect.addVar(newVar);
-//                }
-                
+
                 finalPlainSelect.setFromItem(tempVar);
                 Join join = new Join();
                 join.setRightItem(tempGBody);
@@ -1503,28 +1477,21 @@ public final class IteratorExp extends LoopExp {
                 finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
                 
             }
-            Select finalSelect = new Select(finalPlainSelect);
+            Select finalSelect = new Select();
+            finalSelect.setSelectBody( finalPlainSelect );
             return finalSelect;
         }
         else {
             finalPlainSelect.setValAsTrue();
             
             List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempExistsSource.getSelectBody(), visitor.getVisitorContext());
-//            List<Expression> groupByExpressions = new ArrayList<Expression>();
             for(String v : SVarsSource) {
                 VarSelectExpression newVar = new VarSelectExpression(v);
                 newVar.setRefExpression(new Column(aliasTempExistsSource.getName().concat(".ref_").concat(v)));
                 finalPlainSelect.addVar(newVar);
-//                groupByExpressions.add(new Column(aliasTempExistsSource.getName().concat(".ref_").concat(v)));
             }
             List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempExistsBody.getSelectBody(), visitor.getVisitorContext());
-//            for(String v : SVarsBody) {
-//                if(v.equals(currentIter) || SVarsSource.contains(v)) continue;
-//                VarSelectExpression newVar = new VarSelectExpression(v);
-//                newVar.setRefExpression(new Column(aliasTempExistsBody.getName().concat(".ref_").concat(v)));
-//                finalPlainSelect.addVar(newVar);
-////                groupByExpressions.add(new Column(aliasTempExistsBody.getName().concat(".ref_").concat(v)));
-//            }
+
             BinaryExpression bodyWhereExp = new EqualsTo();
             bodyWhereExp.setLeftExpression(new Column(aliasTempExistsBody.getName().concat(".res")));
             bodyWhereExp.setRightExpression(new LongValue(1L));
@@ -1534,10 +1501,7 @@ public final class IteratorExp extends LoopExp {
             Join join = new Join();
             join.setRightItem(tempExistsBody);
             
-//            BinaryExpression onExp = new EqualsTo();
             BinaryExpression onExp = null;
-//            onExp.setLeftExpression(new Column(aliasTempExistsSource.getName().concat(".res")));
-//            onExp.setRightExpression(new Column(aliasTempExistsBody.getName().concat(".ref_").concat(currentIter)));
             
             List<String> sVarsIntercept = new ArrayList<String>();
             for(String sr : SVarsBody) {
@@ -1556,7 +1520,6 @@ public final class IteratorExp extends LoopExp {
                     }
                 }
             }
-//            join.setOnExpression(onExp);
             
             finalPlainSelect.setJoins(Arrays.asList(join));
             
@@ -1577,9 +1540,8 @@ public final class IteratorExp extends LoopExp {
             caseResExpression.setElseExpression(greaterThanZero);
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
             
-//            finalPlainSelect.setGroupByColumnReferences(groupByExpressions);
-            
-            Select finalSelect = new Select(finalPlainSelect);
+            Select finalSelect = new Select();
+            finalSelect.setSelectBody( finalPlainSelect );
             return finalSelect;
         }
     }
@@ -1594,10 +1556,6 @@ public final class IteratorExp extends LoopExp {
         tempForAllSource.setSelectBody(source.getSelectBody());
         Alias aliasTempForAllSource = new Alias("TEMP_src");
         tempForAllSource.setAlias(aliasTempForAllSource);
-        
-//        if(VariableUtils.isSetOfSetAfterCollect(this, visitor)) {
-//            throw new SetOfSetException("Invalid set of sets operation");
-//        }
         
         MyPlainSelect finalPlainSelect = new MyPlainSelect();
 
@@ -1685,22 +1643,13 @@ public final class IteratorExp extends LoopExp {
                     gBody.addVar(newVar);
                     groupByExpressions.add(new Column(aliasTempForAllBody.getName().concat(".ref_").concat(v)));
                 }
-                gBody.setGroupByColumnReferences(groupByExpressions);
+                GroupByElement groupByElement = new GroupByElement();
+                groupByElement.setGroupByExpressions( groupByExpressions );
+                gBody.setGroupByElement( groupByElement );
+                
                 
                 List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempForAllBody.getSelectBody(), visitor.getVisitorContext());
-//                for(String v : SVarsBody) {
-//                    if(v.equals(currentIter)) {
-//                        groupByExpressions.add(new Column(aliasTempExistsBody.getName().concat(".ref_").concat(v)));
-//                        continue;
-//                    }
-//                    if(SVarsSource.contains(v)) {
-//                        continue;
-//                    }
-//                    VarSelectExpression newVar = new VarSelectExpression(v);
-//                    newVar.setRefExpression(new Column(aliasTempExistsBody.getName().concat(".ref_").concat(v)));
-//                    finalPlainSelect.addVar(newVar);
-//                }
-                
+
                 finalPlainSelect.setFromItem(tempVar);
                 Join join = new Join();
                 join.setRightItem(tempGBody);
@@ -1743,28 +1692,21 @@ public final class IteratorExp extends LoopExp {
                 finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
                 
             }
-            Select finalSelect = new Select(finalPlainSelect);
+            Select finalSelect = new Select();
+            finalSelect.setSelectBody( finalPlainSelect );
             return finalSelect;
         }
         else {
             finalPlainSelect.setValAsTrue();
             
             List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempForAllSource.getSelectBody(), visitor.getVisitorContext());
-//            List<Expression> groupByExpressions = new ArrayList<Expression>();
             for(String v : SVarsSource) {
                 VarSelectExpression newVar = new VarSelectExpression(v);
                 newVar.setRefExpression(new Column(aliasTempForAllSource.getName().concat(".ref_").concat(v)));
                 finalPlainSelect.addVar(newVar);
-//                groupByExpressions.add(new Column(aliasTempExistsSource.getName().concat(".ref_").concat(v)));
             }
             List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempForAllBody.getSelectBody(), visitor.getVisitorContext());
-//            for(String v : SVarsBody) {
-//                if(v.equals(currentIter) || SVarsSource.contains(v)) continue;
-//                VarSelectExpression newVar = new VarSelectExpression(v);
-//                newVar.setRefExpression(new Column(aliasTempForAllBody.getName().concat(".ref_").concat(v)));
-//                finalPlainSelect.addVar(newVar);
-//                groupByExpressions.add(new Column(aliasTempExistsBody.getName().concat(".ref_").concat(v)));
-//            }
+
             BinaryExpression bodyWhereExp = new EqualsTo();
             bodyWhereExp.setLeftExpression(new Column(aliasTempForAllBody.getName().concat(".res")));
             bodyWhereExp.setRightExpression(new LongValue(0L));
@@ -1774,11 +1716,8 @@ public final class IteratorExp extends LoopExp {
             Join join = new Join();
             join.setRightItem(tempForAllBody);
             
-//            BinaryExpression onExp = new EqualsTo();
             BinaryExpression onExp = null;
-//            onExp.setLeftExpression(new Column(aliasTempExistsSource.getName().concat(".res")));
-//            onExp.setRightExpression(new Column(aliasTempExistsBody.getName().concat(".ref_").concat(currentIter)));
-            
+
             List<String> sVarsIntercept = new ArrayList<String>();
             for(String sr : SVarsBody) {
                 if(SVarsSource.contains(sr)) sVarsIntercept.add(sr);
@@ -1796,7 +1735,6 @@ public final class IteratorExp extends LoopExp {
                     }
                 }
             }
-//            join.setOnExpression(onExp);
             
             finalPlainSelect.setJoins(Arrays.asList(join));
             
@@ -1817,9 +1755,8 @@ public final class IteratorExp extends LoopExp {
             caseResExpression.setElseExpression(eqZero);
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
             
-//            finalPlainSelect.setGroupByColumnReferences(groupByExpressions);
-            
-            Select finalSelect = new Select(finalPlainSelect);
+            Select finalSelect = new Select();
+            finalSelect.setSelectBody( finalPlainSelect );
             return finalSelect;
         }
     }
@@ -1834,10 +1771,6 @@ public final class IteratorExp extends LoopExp {
         tempSelectSource.setSelectBody(source.getSelectBody());
         Alias aliasTempSelectSource = new Alias("TEMP_src");
         tempSelectSource.setAlias(aliasTempSelectSource);
-        
-//        if(VariableUtils.isSetOfSetAfterCollect(this, visitor)) {
-//            throw new SetOfSetException("Invalid set of sets operation");
-//        }
         
         MyPlainSelect finalPlainSelect = new MyPlainSelect();
 
@@ -1860,7 +1793,7 @@ public final class IteratorExp extends LoopExp {
                 MyPlainSelect gBody = new MyPlainSelect();
                 gBody.setFromItem(tempSelectBody);
                 gBody.getSelectItems().clear();
-                gBody.addSelectItem(new AllColumns());
+                gBody.addSelectItems(new AllColumns());
                 
                 SubSelect tempGBody = new SubSelect();
                 tempGBody.setSelectBody(gBody);
@@ -1888,7 +1821,7 @@ public final class IteratorExp extends LoopExp {
                 MyPlainSelect gBody = new MyPlainSelect();
                 gBody.setFromItem(tempSelectBody);
                 gBody.getSelectItems().clear();
-                gBody.addSelectItem(new AllColumns());
+                gBody.addSelectItems(new AllColumns());
                 
                 SubSelect tempGBody = new SubSelect();
                 tempGBody.setSelectBody(gBody);
@@ -1945,7 +1878,7 @@ public final class IteratorExp extends LoopExp {
                 
                 finalPlainSelect.setFromItem(tempSelectSource);
                 Join join = new Join();
-//                join.setLeft(true);
+
                 join.setRightItem(tempGBody);
                 finalPlainSelect.setJoins(Arrays.asList(join));
                 
@@ -1953,43 +1886,10 @@ public final class IteratorExp extends LoopExp {
             }
             
         }
-//        else {
-//            CaseExpression caseResExpression = new CaseExpression();
-//            BinaryExpression isValValid = new EqualsTo();
-//            isValValid.setLeftExpression(new Column(aliasTempSelectSource.getName().concat(".val")));
-//            isValValid.setRightExpression(new LongValue(0L));
-//            WhenClause whenResClause = new WhenClause();
-//            whenResClause.setWhenExpression(isValValid);
-//            whenResClause.setThenExpression(new NullValue());
-//            caseResExpression.setWhenClauses(Arrays.asList(whenResClause));
-//            caseResExpression.setElseExpression(new Column(aliasTempSelectBody.getName().concat(".res")));
-//            finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
-//            
-//            CaseExpression caseValExpression = new CaseExpression();
-//            WhenClause whenValClause = new WhenClause();
-//            whenValClause.setWhenExpression(isValValid);
-//            whenValClause.setThenExpression(new LongValue(0L));
-//            caseValExpression.setWhenClauses(Arrays.asList(whenValClause));
-//            caseValExpression.setElseExpression(new Column(aliasTempSelectBody.getName().concat(".val")));
-//            finalPlainSelect.setVal(new ValSelectExpression(caseValExpression));
-//            
-//            finalPlainSelect.setFromItem(tempSelectSource);
-//            Join join = new Join();
-//            join.setRightItem(tempSelectBody);
-//            finalPlainSelect.setJoins(Arrays.asList(join));
-//            BinaryExpression additionalMappingConditions = VariableUtils.onMappingCondition(tempSelectSource, tempSelectBody);
-//            join.setOnExpression(additionalMappingConditions);
-//            
-//            List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempSelectSource.getSelectBody(), visitor.getVisitorContext());
-//            for(String v : SVarsBody) {
-//                if(v.equals(currentIter)) continue;
-//                VarSelectExpression newVar = new VarSelectExpression(v);
-//                newVar.setRefExpression(new Column(aliasTempSelectSource.getName().concat(".ref_").concat(v)));
-//                finalPlainSelect.addVar(newVar);
-//            }
-//        }
+
         // create result
-        Select finalSelect = new Select(finalPlainSelect);
+        Select finalSelect = new Select();
+        finalSelect.setSelectBody( finalPlainSelect );
 
         return finalSelect;  
     }
@@ -2004,14 +1904,15 @@ public final class IteratorExp extends LoopExp {
         finalSubSelect.setAlias(aliasFinalSubSelect);
         
         MyPlainSelect finalPlainSelect = new MyPlainSelect();
-        Select finalSelect = new Select(finalPlainSelect);
+        Select finalSelect = new Select();
+        finalSelect.setSelectBody( finalPlainSelect );
         
         finalPlainSelect.setFromItem(finalSubSelect);
         ResSelectExpression countRes = new ResSelectExpression();
         Function count = new Function();
         count.setName("COUNT");
         count.setAllColumns(true);
-//        count.setParameters(new ExpressionList(Arrays.asList(new Column(aliasFinalSubSelect.getName().concat(".res")))));
+
         BinaryExpression gtEx = new GreaterThan();
         gtEx.setLeftExpression(count);
         gtEx.setRightExpression(new LongValue(0));
@@ -2030,7 +1931,10 @@ public final class IteratorExp extends LoopExp {
                     groupByExps.add(new Column("ref_".concat(iter.getIterator().getName())));
                 }
             }
-            finalPlainSelect.setGroupByColumnReferences(groupByExps);
+            GroupByElement groupByElement = new GroupByElement();
+            groupByElement.setGroupByExpressions( groupByExps );
+            finalPlainSelect.setGroupByElement(groupByElement);
+
             VariableUtils.reserveVars(finalPlainSelect, finalSubSelect);
         }
         
@@ -2047,7 +1951,8 @@ public final class IteratorExp extends LoopExp {
         finalSubSelect.setAlias(aliasFinalSubSelect);
         
         MyPlainSelect finalPlainSelect = new MyPlainSelect();
-        Select finalSelect = new Select(finalPlainSelect);
+        Select finalSelect = new Select();
+        finalSelect.setSelectBody( finalPlainSelect );
         
         finalPlainSelect.setFromItem(finalSubSelect);
         ResSelectExpression countRes = new ResSelectExpression();
@@ -2073,7 +1978,11 @@ public final class IteratorExp extends LoopExp {
                     groupByExps.add(new Column("ref_".concat(iter.getIterator().getName())));
                 }
             }
-            finalPlainSelect.setGroupByColumnReferences(groupByExps);
+
+            GroupByElement groupByElement = new GroupByElement();
+            groupByElement.setGroupByExpressions( groupByExps );
+            finalPlainSelect.setGroupByElement(groupByElement);
+
             VariableUtils.reserveVars(finalPlainSelect, finalSubSelect);
         }
         
@@ -2091,10 +2000,6 @@ public final class IteratorExp extends LoopExp {
         Alias aliasTempCollectSource = new Alias("TEMP_src");
         tempCollectSource.setAlias(aliasTempCollectSource);
         
-//        if(VariableUtils.isSetOfSetAfterCollect(this, visitor)) {
-//            throw new SetOfSetException("Invalid set of sets operation");
-//        }
-        
         MyPlainSelect finalPlainSelect = new MyPlainSelect();
 
         if(visitor.getVisitorContext().stream()
@@ -2109,8 +2014,6 @@ public final class IteratorExp extends LoopExp {
         tempCollectBody.setAlias(aliasTempCollectBody);
         
         String currentIter = this.getIterator().getName();
-//        List<String> fVarsExpression = VariableUtils.FVars(this, new ArrayList<String>());
-//        List<String> fVarsBody = VariableUtils.FVars(this.getBody(), new ArrayList<String>());
         List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempCollectSource.getSelectBody());
         List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempCollectBody.getSelectBody());
         
@@ -2162,85 +2065,9 @@ public final class IteratorExp extends LoopExp {
                 join.setOnExpression(onExp);
             }
         }
-//        }
-//        else {
-//            if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
-//                CaseExpression caseResExpression = new CaseExpression();
-//                BinaryExpression isValValid = new EqualsTo();
-//                isValValid.setLeftExpression(new Column(aliasTempCollectSource.getName().concat(".val")));
-//                isValValid.setRightExpression(new LongValue(0L));
-//                WhenClause whenResClause = new WhenClause();
-//                whenResClause.setWhenExpression(isValValid);
-//                whenResClause.setThenExpression(new NullValue());
-//                caseResExpression.setWhenClauses(Arrays.asList(whenResClause));
-//                caseResExpression.setElseExpression(new Column(aliasTempCollectBody.getName().concat(".res")));
-//                finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
-//                
-//                CaseExpression caseValExpression = new CaseExpression();
-//                WhenClause whenValClause = new WhenClause();
-//                whenValClause.setWhenExpression(isValValid);
-//                whenValClause.setThenExpression(new LongValue(0L));
-//                caseValExpression.setWhenClauses(Arrays.asList(whenValClause));
-//                caseValExpression.setElseExpression(new Column(aliasTempCollectBody.getName().concat(".val")));
-//                finalPlainSelect.setVal(new ValSelectExpression(caseValExpression));
-//                
-//                finalPlainSelect.setFromItem(tempCollectSource);
-//                Join join = new Join();
-//                join.setLeft(true);
-//                join.setRightItem(tempCollectBody);
-//                finalPlainSelect.setJoins(Arrays.asList(join));
-//                BinaryExpression onCondition = new EqualsTo();
-//                onCondition.setLeftExpression(new Column(aliasTempCollectSource.getName().concat(".res")));
-//                onCondition.setRightExpression(new Column(aliasTempCollectBody.getName().concat(".ref_").concat(currentIter)));
-//                BinaryExpression additionalMappingConditions = VariableUtils.onMappingCondition(tempCollectSource, tempCollectBody);
-//                join.setOnExpression(new AndExpression(onCondition, additionalMappingConditions));
-//                
-//                List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempCollectSource.getSelectBody(), visitor.getVisitorContext());
-//                for(String v : SVarsBody) {
-//                    if(v.equals(currentIter)) continue;
-//                    VarSelectExpression newVar = new VarSelectExpression(v);
-//                    newVar.setRefExpression(new Column(aliasTempCollectSource.getName().concat(".ref_").concat(v)));
-//                    finalPlainSelect.addVar(newVar);
-//                }
-//            }
-//            else {
-//                CaseExpression caseResExpression = new CaseExpression();
-//                BinaryExpression isValValid = new EqualsTo();
-//                isValValid.setLeftExpression(new Column(aliasTempCollectSource.getName().concat(".val")));
-//                isValValid.setRightExpression(new LongValue(0L));
-//                WhenClause whenResClause = new WhenClause();
-//                whenResClause.setWhenExpression(isValValid);
-//                whenResClause.setThenExpression(new NullValue());
-//                caseResExpression.setWhenClauses(Arrays.asList(whenResClause));
-//                caseResExpression.setElseExpression(new Column(aliasTempCollectBody.getName().concat(".res")));
-//                finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
-//                
-//                CaseExpression caseValExpression = new CaseExpression();
-//                WhenClause whenValClause = new WhenClause();
-//                whenValClause.setWhenExpression(isValValid);
-//                whenValClause.setThenExpression(new LongValue(0L));
-//                caseValExpression.setWhenClauses(Arrays.asList(whenValClause));
-//                caseValExpression.setElseExpression(new Column(aliasTempCollectBody.getName().concat(".val")));
-//                finalPlainSelect.setVal(new ValSelectExpression(caseValExpression));
-//                
-//                finalPlainSelect.setFromItem(tempCollectSource);
-//                Join join = new Join();
-//                join.setRightItem(tempCollectBody);
-//                finalPlainSelect.setJoins(Arrays.asList(join));
-//                BinaryExpression additionalMappingConditions = VariableUtils.onMappingCondition(tempCollectSource, tempCollectBody);
-//                join.setOnExpression(additionalMappingConditions);
-//                
-//                List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempCollectSource.getSelectBody(), visitor.getVisitorContext());
-//                for(String v : SVarsBody) {
-//                    if(v.equals(currentIter)) continue;
-//                    VarSelectExpression newVar = new VarSelectExpression(v);
-//                    newVar.setRefExpression(new Column(aliasTempCollectSource.getName().concat(".ref_").concat(v)));
-//                    finalPlainSelect.addVar(newVar);
-//                }
-//            }
-//        }
         // create result
-        Select finalSelect = new Select(finalPlainSelect);
+        Select finalSelect = new Select();
+        finalSelect.setSelectBody( finalPlainSelect );
 
         return finalSelect;  
     }
@@ -2250,17 +2077,9 @@ public final class IteratorExp extends LoopExp {
         
         SubSelect tempSizeSource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
-//        SubSelect tempSizeSource = new SubSelect();
-//        tempSizeSource.setSelectBody(source.getSelectBody());
-//        Alias aliasTempSizeSource = new Alias("TEMP_src");
-//        tempSizeSource.setAlias(aliasTempSizeSource);
-        
-//        if(VariableUtils.isSetOfSetAfterCollect(this, visitor)) {
-//            throw new SetOfSetException("Invalid set of sets operation");
-//        }
-        
         MyPlainSelect finalPlainSelect = new MyPlainSelect();
-        Select finalSelect = new Select(finalPlainSelect);
+        Select finalSelect = new Select();
+        finalSelect.setSelectBody( finalPlainSelect );
         
         if(VariableUtils.FVars((MyPlainSelect) tempSizeSource.getSelectBody()).isEmpty()) {
             finalPlainSelect.setFromItem(tempSizeSource);
@@ -2310,7 +2129,10 @@ public final class IteratorExp extends LoopExp {
             }
 
             groupByExpressions.add(new Column(aliasTempSizeSource.getName().concat(".val")));
-            finalPlainSelect.setGroupByColumnReferences(groupByExpressions);
+
+            GroupByElement groupByElement = new GroupByElement();
+            groupByElement.setGroupByExpressions( groupByExpressions );
+            finalPlainSelect.setGroupByElement(groupByElement);
             
         }
         

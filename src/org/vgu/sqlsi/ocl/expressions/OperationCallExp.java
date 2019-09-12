@@ -23,6 +23,7 @@ import org.vgu.sqlsi.ocl.impl.OclCollectionSupport;
 import org.vgu.sqlsi.ocl.impl.OclNumberSupport;
 import org.vgu.sqlsi.ocl.impl.OclStringSupport;
 import org.vgu.sqlsi.ocl.visitor.OCL2SQLParser;
+import org.vgu.sqlsi.sql.statement.select.MyPlainSelect;
 import org.vgu.sqlsi.sql.statement.select.ResSelectExpression;
 import org.vgu.sqlsi.sql.statement.select.ValSelectExpression;
 import org.vgu.sqlsi.sql.statement.select.VarSelectExpression;
@@ -39,7 +40,6 @@ import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
-import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
@@ -52,11 +52,12 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.MyPlainSelect;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SubSelect;
+
+
 
 /**
  * Class OperationCallExp
@@ -456,10 +457,6 @@ public final class OperationCallExp extends FeatureCallExp {
 
             String type = ((VariableExp) this.getArguments().get(0)).getReferredVariable().getName();
 
-            // String superType =
-            // org.vgu.sqlsi.main.Utilities.getSuperClass(visitor.getPlainUMLContext(),
-            // type);
-            // if (superType != null) {
             PlainSelect pselect = new PlainSelect();
             SelectExpressionItem item = new SelectExpressionItem(new Column(type.concat("_id")));
             item.setAlias(new Alias("item"));
@@ -487,7 +484,7 @@ public final class OperationCallExp extends FeatureCallExp {
                 // set the expected on expression
                 BinaryExpression bexpr = new EqualsTo();
                 bexpr.setLeftExpression(new Column(alias_Source.getName().concat(".").concat("item")));
-                bexpr.setRightExpression(new Column(type)); // .concat(".").concat(superType)));
+                bexpr.setRightExpression(new Column(type)); 
                 join.setOnExpression(bexpr);
 
                 List<Join> joins = new ArrayList<Join>();
@@ -729,7 +726,12 @@ public final class OperationCallExp extends FeatureCallExp {
             whenResClause.setWhenExpression(valEq);
             whenResClause.setThenExpression(new NullValue());
             caseResExpression.setWhenClauses(Arrays.asList(whenResClause));
-            caseResExpression.setElseExpression(new IsNullExpression(new Column(aliasSource.getName().concat(".res"))));
+
+            IsNullExpression isNullExpr = new IsNullExpression();
+            isNullExpr.setLeftExpression( new Column(aliasSource.getName().concat(".res")) );
+            caseResExpression.setElseExpression(isNullExpr);
+//            caseResExpression.setElseExpression(new IsNullExpression(new Column(aliasSource.getName().concat(".res"))));
+
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
             
             finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasSource.getName().concat(".val"))));
@@ -759,9 +761,11 @@ public final class OperationCallExp extends FeatureCallExp {
             
             if(fVarsLeft.isEmpty() && fVarsRight.isEmpty()) {
                 ResSelectExpression resExp = new ResSelectExpression();
-                BinaryExpression eqExp = generateBinaryExpression(this.name);
-                eqExp.setLeftExpression(new Column(alias_Left.getName().concat(".res")));
-                eqExp.setRightExpression(new Column(alias_Right.getName().concat(".res")));
+                BinaryExpression eqExp = generateBinaryExpression(this.name,
+                    new Column(alias_Left.getName().concat(".res")),
+                    new Column(alias_Right.getName().concat(".res")));
+//                eqExp.setLeftExpression(new Column(alias_Left.getName().concat(".res")));
+//                eqExp.setRightExpression(new Column(alias_Right.getName().concat(".res")));
                 resExp.setExpression(eqExp);
                 finalPlainSelect.setRes(resExp);
                 finalPlainSelect.setFromItem(tempLeft);
@@ -779,9 +783,10 @@ public final class OperationCallExp extends FeatureCallExp {
                 rightValEq.setLeftExpression(new Column(alias_Right.getName().concat(".val")));
                 rightValEq.setRightExpression(new LongValue(0L));
                 OrExpression orExp = new OrExpression(leftValEq, rightValEq);
-                BinaryExpression eqExp = generateBinaryExpression(this.name);
-                eqExp.setLeftExpression(new Column(alias_Left.getName().concat(".res")));
-                eqExp.setRightExpression(new Column(alias_Right.getName().concat(".res")));
+
+                BinaryExpression eqExp = generateBinaryExpression(this.name,
+                    new Column(alias_Left.getName().concat(".res")),
+                    new Column(alias_Right.getName().concat(".res")));
                 
                 finalPlainSelect.setRes(new ResSelectExpression(eqExp));
                 
@@ -834,9 +839,10 @@ public final class OperationCallExp extends FeatureCallExp {
                 rightValEq.setLeftExpression(new Column(alias_Right.getName().concat(".val")));
                 rightValEq.setRightExpression(new LongValue(0L));
                 OrExpression orExp = new OrExpression(leftValEq, rightValEq);
-                BinaryExpression eqExp = generateBinaryExpression(this.name);
-                eqExp.setLeftExpression(new Column(alias_Left.getName().concat(".res")));
-                eqExp.setRightExpression(new Column(alias_Right.getName().concat(".res")));
+
+                BinaryExpression eqExp = generateBinaryExpression(this.name,
+                    new Column(alias_Left.getName().concat(".res")),
+                    new Column(alias_Right.getName().concat(".res")));
                 
                 finalPlainSelect.setRes(new ResSelectExpression(eqExp));
                 
@@ -889,9 +895,9 @@ public final class OperationCallExp extends FeatureCallExp {
                 rightValEq.setLeftExpression(new Column(alias_Right.getName().concat(".val")));
                 rightValEq.setRightExpression(new LongValue(0L));
                 OrExpression orExp = new OrExpression(leftValEq, rightValEq);
-                BinaryExpression eqExp = generateBinaryExpression(this.name);
-                eqExp.setLeftExpression(new Column(alias_Left.getName().concat(".res")));
-                eqExp.setRightExpression(new Column(alias_Right.getName().concat(".res")));
+                BinaryExpression eqExp = generateBinaryExpression(this.name,
+                    new Column(alias_Left.getName().concat(".res")),
+                    new Column(alias_Right.getName().concat(".res")));
                 
                 finalPlainSelect.setRes(new ResSelectExpression(eqExp));
                 
@@ -922,79 +928,10 @@ public final class OperationCallExp extends FeatureCallExp {
                 finalPlainSelect.setJoins(Arrays.asList(join));
             }
             
-//            if(this.getSource() instanceof PrimitiveLiteralExp) {
-//                BinaryExpression bexp = generateBinaryExpression(this.name);
-//                if(Objects.isNull(bexp)) return null;
-//                bexp.setLeftExpression(getExpression(this.getSource()));
-//                if(this.getArguments().get(0) instanceof PrimitiveLiteralExp) {
-//                    bexp.setRightExpression(getExpression(this.getArguments().get(0)));
-//                    SelectExpressionItem resExpression = new ResSelectExpression();
-//                    resExpression.setExpression(bexp);
-//                    
-//                    finalPlainSelect.addSelectItems(resExpression);
-//                } else {
-//                    
-//
-//                    bexp.setRightExpression(new Column(alias_Right.getName().concat(".").concat("res")));
-//                    
-//                    SelectExpressionItem resExpression = new ResSelectExpression();
-//                    resExpression.setExpression(bexp);
-//
-//                    finalPlainSelect.addSelectItems(resExpression);
-//                    finalPlainSelect.setFromItem(tempRight);
-//                    
-//                    VariableUtils.reserveVars(finalPlainSelect, tempRight);
-//                }
-//            } else {
-//                
-//                
-//                if(this.getArguments().get(0) instanceof PrimitiveLiteralExp) {
-//                    BinaryExpression bexp = generateBinaryExpression(this.name);
-//                    if(Objects.isNull(bexp)) return null;
-//                    bexp.setLeftExpression(new Column(alias_Left.getName().concat(".").concat("res")));
-//                    bexp.setRightExpression(getExpression(this.getArguments().get(0)));
-//                    
-//                    SelectExpressionItem resExpression = new ResSelectExpression();
-//                    resExpression.setExpression(bexp);
-//                    
-//                    finalPlainSelect.addSelectItems(resExpression);
-//                    finalPlainSelect.setFromItem(tempLeft);
-//                    
-//                    VariableUtils.reserveVars(finalPlainSelect, tempLeft);
-//                } else {
-//                    SubSelect tempRight = new SubSelect();
-//                    tempRight.setSelectBody(((Select) visitor.visit(this.getArguments().get(0))).getSelectBody());
-//                    Alias alias_Right = new Alias("TEMP_RIGHT");
-//                    tempRight.setAlias(alias_Right);
-//
-//                    BinaryExpression bexp = generateBinaryExpression(this.name);
-//                    if(Objects.isNull(bexp)) return null;
-//                    bexp.setLeftExpression(new Column(alias_Left.getName().concat(".").concat("res")));
-//                    bexp.setRightExpression(new Column(alias_Right.getName().concat(".").concat("res")));
-//                    
-//                    SelectExpressionItem resExpression = new ResSelectExpression();
-//                    resExpression.setExpression(bexp);
-//
-//                    Join join = new Join();
-//                    join.setRightItem(tempRight);
-//
-//                    finalPlainSelect.addSelectItems(resExpression);
-//                    finalPlainSelect.setFromItem(tempLeft);
-//                    finalPlainSelect.setJoins(Arrays.asList(join));
-//                    
-//                    BinaryExpression onCondition = VariableUtils.onMappingCondition(tempLeft, tempRight);
-//                    
-//                    if(Objects.nonNull(onCondition)) {
-//                        join.setOnExpression(onCondition);
-//                    }
-//
-//                    VariableUtils.reserveVars(finalPlainSelect, tempLeft);
-//                    VariableUtils.reserveVars(finalPlainSelect, tempRight);
-//                }
-//            }
         }
         
-        Select finalSelect = new Select(finalPlainSelect);
+        Select finalSelect = new Select();
+        finalSelect.setSelectBody(finalPlainSelect);
 
         return finalSelect;
     }
@@ -1008,28 +945,50 @@ public final class OperationCallExp extends FeatureCallExp {
             return new LongValue(((IntegerLiteralExp) oclExpression).getIntegerSymbol());
     }
 
-    private BinaryExpression generateBinaryExpression(String operation) {
-        switch (operation) {
-        case "=":
-            return new EqualsTo();
-        case "<>":
-            return new NotEqualsTo();
-        case ">":
-            return new GreaterThan();
-        case "<":
-            return new MinorThan();
-        case ">=":
-            return new GreaterThanEquals();
-        case "<=":
-            return new MinorThanEquals();
-        case "and":
-            return new AndExpression();
-        case "or":
-            return new OrExpression();
-        case "xor":
-            return new XorExpression();
-        default:
-            return null;
+    private BinaryExpression generateBinaryExpression(
+        String operation, 
+        Expression leftExpression,
+        Expression rightExpression) {
+
+        BinaryExpression binaryExpr = null;
+
+        switch ( operation ) {
+            case "=" :
+                binaryExpr = new EqualsTo();
+                binaryExpr.setLeftExpression( leftExpression );
+                binaryExpr.setRightExpression( rightExpression );
+                return binaryExpr;
+            case "<>" :
+                binaryExpr = new NotEqualsTo();
+                binaryExpr.setLeftExpression( leftExpression );
+                binaryExpr.setRightExpression( rightExpression );
+                return binaryExpr;
+            case ">" :
+                binaryExpr = new GreaterThan();
+                binaryExpr.setLeftExpression( leftExpression );
+                binaryExpr.setRightExpression( rightExpression );
+                return binaryExpr;
+            case "<" :
+                binaryExpr = new MinorThan();
+                binaryExpr.setLeftExpression( leftExpression );
+                binaryExpr.setRightExpression( rightExpression );
+                return binaryExpr;
+            case ">=" :
+                binaryExpr = new GreaterThanEquals();
+                binaryExpr.setLeftExpression( leftExpression );
+                binaryExpr.setRightExpression( rightExpression );
+                return binaryExpr;
+            case "<=" :
+                binaryExpr = new MinorThanEquals();
+                binaryExpr.setLeftExpression( leftExpression );
+                binaryExpr.setRightExpression( rightExpression );
+                return binaryExpr;
+            case "and" :
+                return new AndExpression( leftExpression, rightExpression );
+            case "or" :
+                return new OrExpression( leftExpression, rightExpression );
+            default :
+                return null;
         }
     }
 
