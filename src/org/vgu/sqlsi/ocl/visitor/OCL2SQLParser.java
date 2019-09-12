@@ -1,9 +1,14 @@
 package org.vgu.sqlsi.ocl.visitor;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.vgu.sqlsi.ocl.expressions.IteratorSource;
 import org.vgu.sqlsi.ocl.expressions.OclExpression;
 import org.vgu.sqlsi.ocl.expressions.StmVisitor;
@@ -31,9 +36,6 @@ public class OCL2SQLParser implements StmVisitor{
     public JSONArray getPlainUMLContext() {
         return plainUMLContext;
     }
-    public void setPlainUMLContext(JSONArray plainUMLContext) {
-        this.plainUMLContext = plainUMLContext;
-    }
     @Override
     public int getAlias() {
         return 0;
@@ -60,5 +62,13 @@ public class OCL2SQLParser implements StmVisitor{
     
     public void resetLevelOfSet() {
         levelOfSets = 0;
+    }
+    
+    public void setPlainUMLContextFromFile(String filePath) throws FileNotFoundException, IOException, ParseException {
+        this.plainUMLContext = (JSONArray) new JSONParser().parse(new FileReader(filePath));
+    }
+    
+    public void setPlainUMLContextFromString(String umlContext) throws ParseException {
+        this.plainUMLContext = (JSONArray) new JSONParser().parse(umlContext);
     }
 }
