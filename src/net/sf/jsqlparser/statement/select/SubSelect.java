@@ -50,7 +50,7 @@ public class SubSelect extends ASTNodeAccessImpl implements FromItem, Expression
     
     public SubSelect() {}
 
-    public SubSelect(MyPlainSelect selectBody, String alias) {
+    public SubSelect(SelectBody selectBody, String alias) {
         this.selectBody = selectBody;
         this.alias = new Alias(alias);
     }

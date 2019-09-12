@@ -1008,6 +1008,138 @@ public final class IteratorExp extends LoopExp {
         }
     }
 
+    /**
+     * 
+     * @param visitor
+     * @return
+     * 
+     * s->collect(v|b)->flatten()
+     */
+    private Statement flattenMap_1(StmVisitor visitor) {
+
+        if(this.getSource() instanceof IteratorExp) {
+            Select source = (Select) visitor.visit(this.getSource());
+            
+            
+//            if(VariableUtils.isSetOfSetAfterCollect(this, visitor)) {
+//                throw new SetOfSetException("Invalid set of sets operation");
+//            }
+            
+            MyPlainSelect finalPlainSelect = new MyPlainSelect();
+            Select finalSelect = new Select(finalPlainSelect);
+            
+            SubSelect tempFlattenSource = new SubSelect();
+            tempFlattenSource.setSelectBody( source.getSelectBody() );
+            
+            List<String> sVarSource = VariableUtils.FVars((MyPlainSelect) tempFlattenSource.getSelectBody());
+
+            if(sVarSource.isEmpty()) {
+
+                Alias aliasTempFlattenSource = new Alias("TEMP_src");
+                tempFlattenSource.setAlias(aliasTempFlattenSource);
+                
+                finalPlainSelect.setFromItem(tempFlattenSource);
+                finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempFlattenSource.getName().concat(".res"))));
+                finalPlainSelect.setValAsTrue();
+                
+                BinaryExpression valTrue = new EqualsTo();
+                valTrue.setLeftExpression(new Column(aliasTempFlattenSource.getName().concat(".val")));
+                valTrue.setRightExpression(new LongValue(1L));
+                finalPlainSelect.setWhere(valTrue);
+                
+                return finalSelect;
+            }
+            else {
+                Alias aliasTempFlattenSource = new Alias("TEMP");
+                tempFlattenSource.setAlias(aliasTempFlattenSource);
+                
+                MyPlainSelect sCollectvB = new MyPlainSelect();
+                sCollectvB.setAllColumn();
+                sCollectvB.setFromItem(tempFlattenSource);
+
+                BinaryExpression valIsOne = new EqualsTo();
+                valIsOne.setLeftExpression(new Column(aliasTempFlattenSource.getName().concat(".val")));
+                valIsOne.setRightExpression(new LongValue(1L));
+                sCollectvB.setWhere(valIsOne);
+
+                SubSelect tempFlat = new SubSelect( sCollectvB, "TEMP_flat" );
+
+//                SubSelect tempFlat = new SubSelect();
+//                tempFlat.setSelectBody(sCollectvB);
+                Alias aliasTempFlat = tempFlat.getAlias();
+//                tempFlat.setAlias(aliasTempFlat);
+                
+                Join join = new Join();
+                join.setLeft(true);
+                join.setRightItem(tempFlat);
+
+                finalPlainSelect.setJoins(Arrays.asList(join));
+                
+                MyPlainSelect s = (MyPlainSelect) tempFlattenSource.getSelectBody();
+                
+                SubSelect tempCollectSource = new SubSelect( s, "TEMP_src" );
+                
+//                SubSelect tempCollectSource = new SubSelect();
+//                tempCollectSource.setSelectBody(s);
+//                Alias aliasTempCollectSource = new Alias("TEMP_src");
+//                tempCollectSource.setAlias(aliasTempCollectSource);
+
+                finalPlainSelect.setFromItem(tempCollectSource);
+                
+                String flattenVar = ((IteratorExp) this.getSource()).getIterator().getName();
+                
+                IsNullExpression isOuterRefNull = new IsNullExpression();
+                isOuterRefNull.setLeftExpression(new Column(aliasTempFlat.getName().concat(".val")));
+
+                CaseExpression caseResVExpression = new CaseExpression();
+                WhenClause whenResClause = new WhenClause();
+                whenResClause.setWhenExpression(isOuterRefNull);
+                whenResClause.setThenExpression(new NullValue());
+                caseResVExpression.setWhenClauses(Arrays.asList(whenResClause));
+                caseResVExpression.setElseExpression(new Column(aliasTempFlat.getName().concat(".res")));
+
+                CaseExpression caseValVExpression = new CaseExpression();
+                WhenClause whenValClause = new WhenClause();
+                whenValClause.setWhenExpression(isOuterRefNull);
+                whenValClause.setThenExpression(new LongValue(0L));
+                caseValVExpression.setWhenClauses(Arrays.asList(whenValClause));
+                caseValVExpression.setElseExpression(new Column(aliasTempFlat.getName().concat(".val")));
+
+                finalPlainSelect.setRes(new ResSelectExpression(caseResVExpression));
+                finalPlainSelect.setVal(new ValSelectExpression(caseValVExpression));
+                
+                List<String> sVarsSource = VariableUtils.SVars(
+                    (MyPlainSelect) tempFlattenSource.getSelectBody(), 
+                    visitor.getVisitorContext());
+                BinaryExpression onCondition = null;
+
+                for(String v : sVarsSource) {
+//                    if(v.equals(flattenVar)) continue;
+                    VarSelectExpression newVar = new VarSelectExpression(v);
+                    newVar.setRefExpression(new Column(aliasTempFlat.getName().concat(".ref_").concat(v)));
+                    finalPlainSelect.addVar(newVar);
+
+                    BinaryExpression holderExp = new EqualsTo();
+                    holderExp.setLeftExpression(new Column(tempCollectSource.getAlias().getName().concat(".ref_").concat(v)));
+                    holderExp.setRightExpression(new Column(aliasTempFlat.getName().concat(".ref_").concat(v)));
+
+                    if(Objects.isNull(onCondition)) {
+                        onCondition = holderExp;
+                    } else {
+                        onCondition = new AndExpression(onCondition, holderExp);
+                    }
+                }
+                join.setOnExpression(onCondition);
+                
+                
+                ((OCL2SQLParser) visitor).decreaseLevelOfSet();
+                        
+                return finalSelect;
+            }
+        }
+        throw new SetOfSetException("The source is not set of set to be flattened");
+    }
+
     private Statement flattenMap(StmVisitor visitor) {
         if(this.getSource() instanceof IteratorExp) {
             Select source = (Select) visitor.visit(this.getSource());
@@ -2113,14 +2245,15 @@ public final class IteratorExp extends LoopExp {
         return finalSelect;  
     }
 
-    
     private Statement sizeMap(StmVisitor visitor) {
         Select source = (Select) visitor.visit(this.getSource());
         
-        SubSelect tempSizeSource = new SubSelect();
-        tempSizeSource.setSelectBody(source.getSelectBody());
-        Alias aliasTempSizeSource = new Alias("TEMP_src");
-        tempSizeSource.setAlias(aliasTempSizeSource);
+        SubSelect tempSizeSource = new SubSelect(source.getSelectBody(), "TEMP_src");
+        
+//        SubSelect tempSizeSource = new SubSelect();
+//        tempSizeSource.setSelectBody(source.getSelectBody());
+//        Alias aliasTempSizeSource = new Alias("TEMP_src");
+//        tempSizeSource.setAlias(aliasTempSizeSource);
         
 //        if(VariableUtils.isSetOfSetAfterCollect(this, visitor)) {
 //            throw new SetOfSetException("Invalid set of sets operation");
@@ -2132,40 +2265,50 @@ public final class IteratorExp extends LoopExp {
         if(VariableUtils.FVars((MyPlainSelect) tempSizeSource.getSelectBody()).isEmpty()) {
             finalPlainSelect.setFromItem(tempSizeSource);
             ResSelectExpression countRes = new ResSelectExpression();
+
             Function count = new Function();
             count.setName("COUNT");
             count.setAllColumns(true);
             countRes.setExpression(count);
+
             finalPlainSelect.setRes(countRes);
             finalPlainSelect.setValAsTrue();
         }
         else {
             finalPlainSelect.setFromItem(tempSizeSource);
+            Alias aliasTempSizeSource = tempSizeSource.getAlias();
             
             Function count = new Function();
             count.setName("COUNT");
             count.setAllColumns(true);
+
             CaseExpression caseResExpression = new CaseExpression();
+
             BinaryExpression isValValid = new EqualsTo();
             isValValid.setLeftExpression(new Column(aliasTempSizeSource.getName().concat(".val")));
             isValValid.setRightExpression(new LongValue(0L));
+
             WhenClause whenResClause = new WhenClause();
             whenResClause.setWhenExpression(isValValid);
             whenResClause.setThenExpression(new LongValue(0L));
+
             caseResExpression.setWhenClauses(Arrays.asList(whenResClause));
             caseResExpression.setElseExpression(count);
+
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
             finalPlainSelect.setValAsTrue();
             
             List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempSizeSource.getSelectBody(), visitor.getVisitorContext());
             
             List<Expression> groupByExpressions = new ArrayList<Expression>();
+
             for(String v : SVarsSource) {
                 groupByExpressions.add(new Column(aliasTempSizeSource.getName().concat(".ref_").concat(v)));
                 VarSelectExpression newVar = new VarSelectExpression(v);
                 newVar.setRefExpression(new Column(aliasTempSizeSource.getName().concat(".ref_").concat(v)));
                 finalPlainSelect.addVar(newVar);
             }
+
             groupByExpressions.add(new Column(aliasTempSizeSource.getName().concat(".val")));
             finalPlainSelect.setGroupByColumnReferences(groupByExpressions);
             
