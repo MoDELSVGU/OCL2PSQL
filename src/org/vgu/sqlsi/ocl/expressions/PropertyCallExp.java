@@ -14,6 +14,7 @@ import java.util.List;
 import org.vgu.sqlsi.ocl.context.OclContext;
 import org.vgu.sqlsi.ocl.exception.OclEvaluationException;
 import org.vgu.sqlsi.ocl.visitor.OCL2SQLParser;
+import org.vgu.sqlsi.sql.statement.select.MyPlainSelect;
 import org.vgu.sqlsi.sql.statement.select.ResSelectExpression;
 import org.vgu.sqlsi.sql.statement.select.ValSelectExpression;
 import org.vgu.sqlsi.sql.statement.select.VarSelectExpression;
@@ -30,7 +31,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.MyPlainSelect;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
@@ -68,7 +69,8 @@ public final class PropertyCallExp extends NavigationCallExp {
         Alias aliasSubSelectCurrentVar = new Alias("TEMP_obj");
         tempVar.setAlias(aliasSubSelectCurrentVar);
         MyPlainSelect finalPlainSelect = new MyPlainSelect();
-        Select finalSelect = new Select(finalPlainSelect);
+        Select finalSelect = new Select();
+        finalSelect.setSelectBody(finalPlainSelect);
         String propertyName = this.name.substring(this.name.indexOf(":") + 1, this.name.length());
         String propertyClass = this.name.substring(0, this.name.indexOf(":"));
 
@@ -87,7 +89,6 @@ public final class PropertyCallExp extends NavigationCallExp {
         resSelectExpression.setExpression(new Column(propertyName));
         
         Table table = new Table();
-        AndExpression andEx = new AndExpression();
         
         Select currentVarSource = null;
         
@@ -117,11 +118,12 @@ public final class PropertyCallExp extends NavigationCallExp {
             bexpr.setLeftExpression(new Column(tableRefColumn));
             bexpr.setRightExpression(
                     new Column(aliasSubSelectCurrentVar.getName().concat(".ref_").concat(currentVariable.getName())));
-            andEx.setLeftExpression(bexpr);
+
             BinaryExpression varEx = new EqualsTo();
             varEx.setLeftExpression(new Column(aliasSubSelectCurrentVar.getName().concat(".val")));
             varEx.setRightExpression(new LongValue(1L));
-            andEx.setRightExpression(varEx);
+
+            AndExpression andEx = new AndExpression(bexpr, varEx);
             
             Join join = new Join();
             join.setLeft(true);
@@ -202,11 +204,12 @@ public final class PropertyCallExp extends NavigationCallExp {
             bexpr.setLeftExpression(new Column(assocClass.concat(".").concat(oppositeEnd)));
             bexpr.setRightExpression(new Column(aliasSubSelectCurrentVar.getName().concat(".ref_")
                     .concat(currentVariable.getName())));
-            andEx.setLeftExpression(bexpr);
+
             BinaryExpression varEx = new EqualsTo();
             varEx.setLeftExpression(new Column(aliasSubSelectCurrentVar.getName().concat(".val")));
             varEx.setRightExpression(new LongValue(1L));
-            andEx.setRightExpression(varEx);
+
+            AndExpression andEx = new AndExpression(bexpr, varEx);
             
             CaseExpression caseValExpression = new CaseExpression();
             IsNullExpression isOppEndNull = new IsNullExpression();

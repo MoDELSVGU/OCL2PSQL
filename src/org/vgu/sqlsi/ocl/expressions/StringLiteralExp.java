@@ -10,11 +10,12 @@ package org.vgu.sqlsi.ocl.expressions;
 
 import org.vgu.sqlsi.ocl.context.OclContext;
 import org.vgu.sqlsi.ocl.exception.OclEvaluationException;
+import org.vgu.sqlsi.sql.statement.select.MyPlainSelect;
 import org.vgu.sqlsi.sql.statement.select.ResSelectExpression;
 
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.MyPlainSelect;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 
 /**
@@ -41,7 +42,8 @@ public class StringLiteralExp extends PrimitiveLiteralExp {
         ResSelectExpression resExpression = new ResSelectExpression(new StringValue(this.stringSymbol));
         finalPlainSelect.setRes(resExpression);
         
-        Select finalSelect = new Select(finalPlainSelect);
+        Select finalSelect = new Select();
+        finalSelect.setSelectBody(finalPlainSelect);
         return finalSelect;
 	}
 

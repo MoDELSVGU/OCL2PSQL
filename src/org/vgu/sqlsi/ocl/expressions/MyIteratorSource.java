@@ -2,6 +2,7 @@ package org.vgu.sqlsi.ocl.expressions;
 
 import java.util.Objects;
 
+import org.vgu.sqlsi.sql.statement.select.MyPlainSelect;
 import org.vgu.sqlsi.sql.statement.select.ResSelectExpression;
 import org.vgu.sqlsi.sql.statement.select.ValSelectExpression;
 import org.vgu.sqlsi.sql.statement.select.VarSelectExpression;
@@ -9,7 +10,7 @@ import org.vgu.sqlsi.sql.statement.select.VarSelectExpression;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.MyPlainSelect;
+import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SubSelect;
@@ -34,12 +35,14 @@ public class MyIteratorSource extends IteratorSource{
                 MyPlainSelect finalPlainSelect = new MyPlainSelect();
                 finalPlainSelect.getSelectItems().clear();
                 for(SelectItem item : selectBody.getSelectItems()) {
-                    finalPlainSelect.addSelectItem(item);
+                    finalPlainSelect.addSelectItems(item);
                 }
                 finalPlainSelect.setFromItem(selectBody.getFromItem());
                 finalPlainSelect.setWhere(selectBody.getWhere());
                 finalPlainSelect.setJoins(selectBody.getJoins());
-                finalPlainSelect.setGroupByColumnReferences(selectBody.getGroupByColumnReferences());
+                
+                finalPlainSelect.setGroupByElement( selectBody.getGroupBy() );
+//                finalPlainSelect.setGroupByColumnReferences(selectBody.getGroupByColumnReferences());
                 
                 VarSelectExpression newVar = new VarSelectExpression(this.getIterator().getName());
                 newVar.setRefExpression(selectBody.getRes().getExpression());

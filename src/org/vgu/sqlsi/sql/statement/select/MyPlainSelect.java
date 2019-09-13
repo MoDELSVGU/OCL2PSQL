@@ -1,17 +1,15 @@
-package net.sf.jsqlparser.statement.select;
+package org.vgu.sqlsi.sql.statement.select;
 
 import java.util.LinkedList;
 import java.util.Objects;
 
-import org.vgu.sqlsi.sql.statement.select.ResSelectExpression;
-import org.vgu.sqlsi.sql.statement.select.ValSelectExpression;
-import org.vgu.sqlsi.sql.statement.select.VarSelectExpression;
-
 import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 
 public class MyPlainSelect extends PlainSelect {
     private LinkedList<VarSelectExpression> vars = new LinkedList<VarSelectExpression>();
-
+    
     public MyPlainSelect() {
         super();
         this.setValAsTrue();
@@ -19,7 +17,7 @@ public class MyPlainSelect extends PlainSelect {
     
     public void setAllColumn() {
         this.getSelectItems().clear();
-        this.addSelectItem(new AllColumns());
+        this.addSelectItems(new AllColumns());
     }
     
     public void setValAsTrue() {
@@ -54,7 +52,7 @@ public class MyPlainSelect extends PlainSelect {
     public void setRes(ResSelectExpression res) {
         ResSelectExpression curRes = this.getRes();
         if(Objects.isNull(curRes)) {
-            super.addSelectItem(res);
+            super.addSelectItems(res);
         } else {
             curRes = res;
         }
@@ -63,7 +61,7 @@ public class MyPlainSelect extends PlainSelect {
     public void setVal(ValSelectExpression val) {
         ValSelectExpression curVal = this.getVal();
         if(Objects.isNull(curVal)) {
-            super.addSelectItem(val);
+            super.addSelectItems(val);
         } else {
             curVal.setExpression(val.getExpression());
         }
@@ -80,4 +78,5 @@ public class MyPlainSelect extends PlainSelect {
     public LinkedList<VarSelectExpression> getVars() {
         return this.vars;
     }
+    
 }

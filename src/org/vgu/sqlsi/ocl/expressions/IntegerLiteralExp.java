@@ -10,11 +10,11 @@ package org.vgu.sqlsi.ocl.expressions;
 
 import org.vgu.sqlsi.ocl.context.OclContext;
 import org.vgu.sqlsi.ocl.exception.OclEvaluationException;
+import org.vgu.sqlsi.sql.statement.select.MyPlainSelect;
 import org.vgu.sqlsi.sql.statement.select.ResSelectExpression;
 
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.MyPlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 
 /**
@@ -41,7 +41,8 @@ public class IntegerLiteralExp extends NumericLiteralExp {
         ResSelectExpression resExpression = new ResSelectExpression(new LongValue(this.integerSymbol));
         finalPlainSelect.setRes(resExpression);
         
-        Select finalSelect = new Select(finalPlainSelect);
+        Select finalSelect = new Select();
+        finalSelect.setSelectBody( finalPlainSelect );
         return finalSelect;
 	}
 
