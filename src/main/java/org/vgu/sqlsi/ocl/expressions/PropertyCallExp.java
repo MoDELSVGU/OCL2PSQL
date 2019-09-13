@@ -99,7 +99,7 @@ public final class PropertyCallExp extends NavigationCallExp {
             }
         }
         
-        if (org.vgu.sqlsi.main.Utilities.isAttribute(visitor.getPlainUMLContext(), propertyClass, propertyName)) {
+        if (Utilities.isAttribute(visitor.getPlainUMLContext(), propertyClass, propertyName)) {
 
             String tableRefColumn = propertyClass.concat(".").concat(propertyClass).concat("_id");
 
@@ -143,10 +143,10 @@ public final class PropertyCallExp extends NavigationCallExp {
             
             return finalSelect;
         } 
-        else if(org.vgu.sqlsi.main.Utilities.isAssociation(visitor.getPlainUMLContext(), propertyClass, propertyName)) {
-            String assocClass = org.vgu.sqlsi.main.Utilities.getAssociation(visitor.getPlainUMLContext(), propertyClass,
+        else if(Utilities.isAssociation(visitor.getPlainUMLContext(), propertyClass, propertyName)) {
+            String assocClass = Utilities.getAssociation(visitor.getPlainUMLContext(), propertyClass,
                     propertyName);
-            String oppositeEnd = org.vgu.sqlsi.main.Utilities.getAssociationOpposite(visitor.getPlainUMLContext(),
+            String oppositeEnd = Utilities.getAssociationOpposite(visitor.getPlainUMLContext(),
                     propertyClass, propertyName);
 
             table.setName(assocClass);
@@ -252,7 +252,7 @@ public final class PropertyCallExp extends NavigationCallExp {
 
             return finalSelect;
         } else {
-            if(!org.vgu.sqlsi.main.Utilities.isClass(visitor.getPlainUMLContext(), propertyClass)) {
+            if(!Utilities.isClass(visitor.getPlainUMLContext(), propertyClass)) {
                 throw new NullPointerException("Invalid class: ".concat(propertyClass));
             }
             throw new NullPointerException("Invalid attribute or association: ".concat(propertyName));

@@ -3,6 +3,9 @@ package org.vgu.sqlsi.ocl.expressions;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
@@ -10,14 +13,106 @@ import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.GroupByElement;
-import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 public class Utilities {
+    
+    public static String getAssociationOpposite(JSONArray context, String className, String endName) {
+        String opposite = null;
+        for(Object object : context) {
+            if (((JSONObject) object).containsKey("association")) {
+               JSONArray classes = (JSONArray) ((JSONObject) object).get("classes");
+               JSONArray ends = (JSONArray) ((JSONObject) object).get("ends");
+                    for (int index_end = 0; index_end < classes.size(); index_end++) {
+                        if (classes.get(index_end).equals(className)
+                                && ends.get(index_end).equals(endName)) {
+
+                           if (index_end == 0) {
+                                opposite =  (String) ends.get(1);
+                            } else {
+                                opposite =  (String) ends.get(0);
+                            }
+                            break;
+                        };
+                    }
+                
+            }
+        }
+
+        return opposite;
+    }
+    
+    public static String getAssociation(JSONArray context, String className, String endName) {
+        String association = null;
+          for(Object object : context) {
+              if (((JSONObject) object).containsKey("association")) {
+                 JSONArray classes = (JSONArray) ((JSONObject) object).get("classes");
+                 JSONArray ends = (JSONArray) ((JSONObject) object).get("ends");
+                      for (int index_end = 0; index_end < classes.size(); index_end++) {
+                          if (classes.get(index_end).equals(className)
+                                  && ends.get(index_end).equals(endName)) {
+                              association = (String) ((JSONObject) object).get("association");
+                              break;
+                          };
+                      }
+                  
+              }
+          }
+
+          return association;
+      }
+    
+    public static boolean isAssociation(JSONArray context, String className,  String endName) {
+        boolean result = false;
+        for(Object object : context) {
+            if (((JSONObject) object).containsKey("association")) {
+                JSONArray ends = (JSONArray) ((JSONObject) object).get("ends");
+                for (int index_end = 0; index_end < ends.size(); index_end++) {
+                    if (ends.get(index_end).equals(endName)) {
+                            result = true;
+                            break;
+                        }
+                }
+            }
+        }
+
+        return result;
+    }
+    
+    public static boolean isAttribute(JSONArray context, String entityName, String attribute) {
+        boolean result = false;
+        for(Object entity : context) {
+            if (((JSONObject) entity).containsKey("class")) {
+                if (((JSONObject) entity).get("class").equals(entityName)) {
+                    if (((JSONObject) entity).containsKey("attributes")) {
+                        for(Object association : (JSONArray) ((JSONObject) entity).get("attributes")) {
+                            if (((JSONObject) association).get("name").equals(attribute)) {
+                                result = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    
+    public static boolean isClass(JSONArray context, String entityName) {
+        boolean result = false;
+        for(Object entity : context) {
+            if (((JSONObject) entity).containsKey("class")) {
+                if (((JSONObject) entity).get("class").equals(entityName)) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 	
 	static public String genAliasName(StmVisitor visitor) {
 		String new_alias = "TEMP_".concat(String.valueOf(visitor.getAlias()));

@@ -252,7 +252,7 @@ public final class OperationCallExp extends FeatureCallExp {
         if("allInstances".equals(this.name)) {
             ((OCL2SQLParser) visitor).increaseLevelOfSet();
             String tableName = ((TypeExp) this.getSource()).getReferredType();
-            if(!org.vgu.sqlsi.main.Utilities.isClass(visitor.getPlainUMLContext(), tableName)) {
+            if(!Utilities.isClass(visitor.getPlainUMLContext(), tableName)) {
                 throw new NullPointerException("Invalid class: ".concat(tableName));
             }
             ResSelectExpression resExpression = new ResSelectExpression(new Column(tableName.concat("_id")));
