@@ -281,8 +281,8 @@ public final class IteratorExp extends LoopExp {
         case select:
             return selectMap(visitor); 
         case reject:
-            throw new NullPointerException("Unsupported reject operation");
-//            return rejectMap(visitor);  
+//            throw new NullPointerException("Unsupported reject operation");
+            return rejectMap(visitor);  
         case forAll:
             return forAllMap(visitor);
         case exists:
@@ -493,59 +493,142 @@ public final class IteratorExp extends LoopExp {
     }
 
     private Statement rejectMap(StmVisitor visitor) {
-        List<IteratorSource> iteratorList = new LinkedList<IteratorSource>();
-        iteratorList.addAll(visitor.getVisitorContext());
-        visitor.setVisitorContext(iteratorList);
-
-        MyIteratorSource iter = new MyIteratorSource();     
-        iter.setIterator(this.getIterator());  
-        iter.setSource((Select) visitor.visit(this.getSource()));
+        MyIteratorSource currentIterator = new MyIteratorSource();     
+        currentIterator.setIterator(this.getIterator());  
+        Select source = (Select) visitor.visit(this.getSource());
+        currentIterator.setSource(source);
+        
+        SubSelect tempSelectSource = new SubSelect();
+        tempSelectSource.setSelectBody(source.getSelectBody());
+        Alias aliasTempSelectSource = new Alias("TEMP_src");
+        tempSelectSource.setAlias(aliasTempSelectSource);
         
         MyPlainSelect finalPlainSelect = new MyPlainSelect();
 
-        SubSelect tempRejectVar = new SubSelect();
-        tempRejectVar.setSelectBody(iter.getSource().getSelectBody());
-        Alias aliasTempRejectVar = new Alias("TEMP_reject_var_"+iter.getIterator().getName());
-        tempRejectVar.setAlias(aliasTempRejectVar);
-        
-        visitor.getVisitorContext().add(iter);
-        SubSelect tempRejectBody = new SubSelect();
-        tempRejectBody.setSelectBody(((Select) visitor.visit(this.getBody())).getSelectBody());
-        Alias aliasTempRejectBody = new Alias("TEMP_reject_body");
-        tempRejectBody.setAlias(aliasTempRejectBody);
-        
-        ResSelectExpression resExpression = new ResSelectExpression();
-        finalPlainSelect.addSelectItems(resExpression);
-        
-        finalPlainSelect.setFromItem(tempRejectBody);
-        
-        resExpression.setExpression(new Column(aliasTempRejectBody.getName().concat(".").concat("ref_").concat(iter.getIterator().getName())));
-        
-        BinaryExpression onCondition = VariableUtils.onMappingCondition(tempRejectBody, tempRejectVar);
-        
-        if(Objects.isNull(onCondition)) {
-            Join join = new Join();
-            join.setRightItem(tempRejectBody);
-            
-            resExpression.setExpression(new Column(aliasTempRejectVar.getName().concat(".").concat("ref_").concat(iter.getIterator().getName())));
-
-            finalPlainSelect.setFromItem(tempRejectVar);
-            finalPlainSelect.setJoins(Arrays.asList(join));
-            
-            VariableUtils.reserveVarsForCollect(finalPlainSelect, tempRejectVar, this.getIterator());
+        if(visitor.getVisitorContext().stream()
+                .map(IteratorSource::getIterator)
+                .map(Variable::getName)
+                .noneMatch(name -> currentIterator.getIterator().getName().equals(name))) {
+            visitor.getVisitorContext().add(currentIterator);
         }
+
+        SubSelect tempSelectBody = new SubSelect();
+        tempSelectBody.setSelectBody(((Select) visitor.visit(this.getBody())).getSelectBody());
+        Alias aliasTempSelectBody = new Alias("TEMP_body");
+        tempSelectBody.setAlias(aliasTempSelectBody);
         
-        BinaryExpression whereExp = new EqualsTo();
-        whereExp.setLeftExpression(new Column(aliasTempRejectBody.getName().concat(".").concat("res")));
-        whereExp.setRightExpression(new LongValue(0L));
-        finalPlainSelect.setWhere(whereExp);
-        
-        VariableUtils.reserveVarsForCollect(finalPlainSelect, tempRejectBody, this.getIterator());
+        String currentIter = this.getIterator().getName();
+        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempSelectSource.getSelectBody());
+        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempSelectBody.getSelectBody());
+        if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
+            if(fVarsSource.isEmpty()) {
+                MyPlainSelect gBody = new MyPlainSelect();
+                gBody.setFromItem(tempSelectBody);
+                gBody.getSelectItems().clear();
+                gBody.addSelectItems(new AllColumns());
+                
+                SubSelect tempGBody = new SubSelect();
+                tempGBody.setSelectBody(gBody);
+                Alias aliasTempGBody = new Alias("TEMP_gbody");
+                tempGBody.setAlias(aliasTempGBody);
+                
+                BinaryExpression bodyWhereExp = new EqualsTo();
+                bodyWhereExp.setLeftExpression(new Column(aliasTempSelectBody.getName().concat(".res")));
+                bodyWhereExp.setRightExpression(new LongValue(0L));
+                
+                IsNullExpression isNullExpr = new IsNullExpression();
+                isNullExpr.setLeftExpression( new Column(aliasTempSelectBody.getName().concat(".res")) );
+                
+                OrExpression orExpr = new OrExpression( bodyWhereExp, isNullExpr );
+
+                gBody.setWhere(orExpr);
+                
+                finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempGBody.getName().concat(".ref_").concat(currentIter))));
+                finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasTempGBody.getName().concat(".val"))));
+
+                List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempSelectSource.getSelectBody(), visitor.getVisitorContext());
+                for(String v : SVarsSource) {
+                    VarSelectExpression newVar = new VarSelectExpression(v);
+                    newVar.setRefExpression(new Column(aliasTempSelectSource.getName().concat(".ref_").concat(v)));
+                    finalPlainSelect.addVar(newVar);
+                }
+                
+                finalPlainSelect.setFromItem(tempGBody);
+            }
+            else {
+                MyPlainSelect gBody = new MyPlainSelect();
+                gBody.setFromItem(tempSelectBody);
+                gBody.getSelectItems().clear();
+                gBody.addSelectItems(new AllColumns());
+                
+                SubSelect tempGBody = new SubSelect();
+                tempGBody.setSelectBody(gBody);
+                Alias aliasTempGBody = new Alias("TEMP_gbody");
+                tempGBody.setAlias(aliasTempGBody);
+                
+                CaseExpression caseResExpression = new CaseExpression();
+                BinaryExpression isValValid = new EqualsTo();
+                isValValid.setLeftExpression(new Column(aliasTempSelectSource.getName().concat(".val")));
+                isValValid.setRightExpression(new LongValue(0L));
+                IsNullExpression isBodyRefNull = new IsNullExpression();
+                isBodyRefNull.setLeftExpression(new Column(aliasTempGBody.getName().concat(".ref_").concat(currentIter)));
+                BinaryExpression caseBinExp = new OrExpression(isValValid, isBodyRefNull);
+                WhenClause whenResClause = new WhenClause();
+                whenResClause.setWhenExpression(caseBinExp);
+                whenResClause.setThenExpression(new NullValue());
+                caseResExpression.setWhenClauses(Arrays.asList(whenResClause));
+                caseResExpression.setElseExpression(new Column(aliasTempSelectSource.getName().concat(".res")));
+                finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
+                
+                CaseExpression caseValExpression = new CaseExpression();
+                WhenClause whenValClause = new WhenClause();
+                whenValClause.setWhenExpression(caseBinExp);
+                whenValClause.setThenExpression(new LongValue(0L));
+                caseValExpression.setWhenClauses(Arrays.asList(whenValClause));
+                caseValExpression.setElseExpression(new LongValue(1L));
+                finalPlainSelect.setVal(new ValSelectExpression(caseValExpression));
+                
+                BinaryExpression onCondition = new EqualsTo();
+                onCondition.setLeftExpression(new Column(aliasTempSelectSource.getName().concat(".res")));
+                onCondition.setRightExpression(new Column(aliasTempGBody.getName().concat(".ref_").concat(currentIter)));
+                
+                List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempSelectSource.getSelectBody(), visitor.getVisitorContext());
+                for(String v : SVarsSource) {
+                    VarSelectExpression newVar = new VarSelectExpression(v);
+                    newVar.setRefExpression(new Column(aliasTempSelectSource.getName().concat(".ref_").concat(v)));
+                    finalPlainSelect.addVar(newVar);
+                    BinaryExpression binExp = new EqualsTo();
+                    binExp.setLeftExpression(new Column(aliasTempSelectSource.getName().concat(".ref_").concat(v)));
+                    binExp.setRightExpression(new Column(aliasTempGBody.getName().concat(".ref_").concat(v)));
+                    onCondition = new AndExpression(onCondition, binExp);
+                }
+                List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempSelectBody.getSelectBody(), visitor.getVisitorContext());
+                for(String v : SVarsBody) {
+                    if(v.equals(currentIter) || SVarsSource.contains(v)) continue;
+                    VarSelectExpression newVar = new VarSelectExpression(v);
+                    newVar.setRefExpression(new Column(aliasTempGBody.getName().concat(".ref_").concat(v)));
+                    finalPlainSelect.addVar(newVar);
+                }
+                BinaryExpression bodyWhereExp = new EqualsTo();
+                bodyWhereExp.setLeftExpression(new Column(aliasTempSelectBody.getName().concat(".res")));
+                bodyWhereExp.setRightExpression(new LongValue(1L));
+                gBody.setWhere(bodyWhereExp);
+                
+                finalPlainSelect.setFromItem(tempSelectSource);
+                Join join = new Join();
+
+                join.setRightItem(tempGBody);
+                finalPlainSelect.setJoins(Arrays.asList(join));
+                
+                join.setOnExpression(onCondition);
+            }
+            
+        }
 
         // create result
         Select finalSelect = new Select();
-        finalSelect.setSelectBody(finalPlainSelect);
-        
+        finalSelect.setSelectBody( finalPlainSelect );
+
         return finalSelect;  
     }
 
