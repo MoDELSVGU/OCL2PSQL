@@ -32,7 +32,7 @@ This table represents a detailed overview of supported Object Constraint Languag
 |||
 |--------------------------|---|
 |`not`  |  `NOT` *bool-expr* |
-|`and`, `or`, `xor`  | *bool-expr* `logic-operator` *bool-expr'*|
+|`and`, `or`| *bool-expr* `logic-operator` *bool-expr'*|
 | =, <>, >, <, &#8805;, &#8804;  |  *bool-expr* `compare-operator` *bool-expr'*|
 
 ##### Iterative operations
