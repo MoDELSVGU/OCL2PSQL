@@ -43,6 +43,7 @@ import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
+import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.AllColumns;
@@ -51,9 +52,6 @@ import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SelectItem;
-//import net.sf.jsqlparser.statement.select.SubSelect;
 
 
 /**
@@ -275,8 +273,7 @@ public final class IteratorExp extends LoopExp {
         case isEmpty:
             return emptyMap(visitor);
         case notEmpty:
-            throw new NullPointerException("Unsupported notEmpty operation");
-//            return notEmptyMap(visitor);
+            return notEmptyMap(visitor);
         case select:
             return selectMap(visitor); 
         case reject:
@@ -1204,48 +1201,74 @@ public final class IteratorExp extends LoopExp {
     }
 
     private Statement notEmptyMap(StmVisitor visitor) {
-        Select sizeSourceSelect = (Select) visitor.visit(this.getSource());
-        MyPlainSelect sizeSourcePlainSelect = (MyPlainSelect) sizeSourceSelect.getSelectBody();
+        Select source = (Select) visitor.visit(this.getSource());
         
-        SubSelect finalSubSelect = new SubSelect();
-        finalSubSelect.setSelectBody(sizeSourcePlainSelect);
-        Alias aliasFinalSubSelect = new Alias("TEMP_size_source");
-        finalSubSelect.setAlias(aliasFinalSubSelect);
+        SubSelect tempSizeSource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
         MyPlainSelect finalPlainSelect = new MyPlainSelect();
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
-        finalPlainSelect.setFromItem(finalSubSelect);
-        ResSelectExpression countRes = new ResSelectExpression();
-        Function count = new Function();
-        count.setName("COUNT");
-        count.setAllColumns(true);
+        if(VariableUtils.FVars((MyPlainSelect) tempSizeSource.getSelectBody()).isEmpty()) {
+            finalPlainSelect.setFromItem(tempSizeSource);
+            ResSelectExpression countRes = new ResSelectExpression();
 
-        BinaryExpression gtEx = new GreaterThan();
-        gtEx.setLeftExpression(count);
-        gtEx.setRightExpression(new LongValue(0));
-        countRes.setExpression(gtEx);
-        finalPlainSelect.setRes(countRes);
-        
-        if(this.getSource() instanceof PropertyCallExp && 
-                ((PropertyCallExp) this.getSource()).getSource() instanceof VariableExp) {
-            List<Expression> groupByExps = new ArrayList<Expression>();
-            Variable currentVar = ((VariableExp)((PropertyCallExp) this.getSource()).getSource()).getReferredVariable();
-            for(IteratorSource iter : visitor.getVisitorContext()) {
-                if(!groupByExps.isEmpty()) {
-                    groupByExps.add(new Column("ref_".concat(iter.getIterator().getName())));
-                }
-                else if(iter.getIterator().getName().equals(currentVar.getName())) {
-                    groupByExps.add(new Column("ref_".concat(iter.getIterator().getName())));
-                }
-            }
-            GroupByElement groupByElement = new GroupByElement();
-            groupByElement.setGroupByExpressions( groupByExps );
-            finalPlainSelect.setGroupByElement(groupByElement);
+            Function count = new Function();
+            count.setName("COUNT");
+            count.setAllColumns(true);
+            
+            BinaryExpression isNotEqualsZero = new NotEqualsTo();
+            isNotEqualsZero.setLeftExpression(count);
+            isNotEqualsZero.setRightExpression(new LongValue(0L));
+            countRes.setExpression(isNotEqualsZero);
 
-            VariableUtils.reserveVars(finalPlainSelect, finalSubSelect);
+            finalPlainSelect.setRes(countRes);
+            finalPlainSelect.setValAsTrue();
         }
+        else {
+            finalPlainSelect.setFromItem(tempSizeSource);
+            Alias aliasTempSizeSource = tempSizeSource.getAlias();
+            
+            Function count = new Function();
+            count.setName("COUNT");
+            count.setAllColumns(true);
+
+            CaseExpression caseResExpression = new CaseExpression();
+
+            BinaryExpression isValValid = new EqualsTo();
+            isValValid.setLeftExpression(new Column(aliasTempSizeSource.getName().concat(".val")));
+            isValValid.setRightExpression(new LongValue(0L));
+
+            WhenClause whenResClause = new WhenClause();
+            whenResClause.setWhenExpression(isValValid);
+            whenResClause.setThenExpression(new LongValue(0L));
+            
+            caseResExpression.setWhenClauses(Arrays.asList(whenResClause));
+            caseResExpression.setElseExpression(new LongValue(1L));
+
+            finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
+            finalPlainSelect.setValAsTrue();
+            
+            List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempSizeSource.getSelectBody(), visitor.getVisitorContext());
+            
+            List<Expression> groupByExpressions = new ArrayList<Expression>();
+
+            for(String v : SVarsSource) {
+                groupByExpressions.add(new Column(aliasTempSizeSource.getName().concat(".ref_").concat(v)));
+                VarSelectExpression newVar = new VarSelectExpression(v);
+                newVar.setRefExpression(new Column(aliasTempSizeSource.getName().concat(".ref_").concat(v)));
+                finalPlainSelect.addVar(newVar);
+            }
+
+            groupByExpressions.add(new Column(aliasTempSizeSource.getName().concat(".val")));
+
+            GroupByElement groupByElement = new GroupByElement();
+            groupByElement.setGroupByExpressions( groupByExpressions );
+            finalPlainSelect.setGroupByElement(groupByElement);
+            
+        }
+        
+        ((OCL2SQLParser) visitor).decreaseLevelOfSet();
         
         return finalSelect;
     }
