@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.SortedSet;
@@ -50,7 +49,6 @@ import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 
 
@@ -277,7 +275,6 @@ public final class IteratorExp extends LoopExp {
         case select:
             return selectMap(visitor); 
         case reject:
-//            throw new NullPointerException("Unsupported reject operation");
             return rejectMap(visitor);  
         case forAll:
             return forAllMap(visitor);
@@ -288,8 +285,7 @@ public final class IteratorExp extends LoopExp {
         case size:
             return sizeMap(visitor);
         case asSet:
-            throw new NullPointerException("Unsupported asSet operation");
-//            return asSetMap(visitor);
+            return asSetMap(visitor);
         case isUnique:
             throw new NullPointerException("Unsupported isUnique operation");
 //            return isUniqueMap(visitor);
@@ -629,16 +625,24 @@ public final class IteratorExp extends LoopExp {
     }
 
     private Statement asSetMap(StmVisitor visitor) {
-        List<IteratorSource> iteratorList = new LinkedList<IteratorSource>();
-        iteratorList.addAll(visitor.getVisitorContext());
-        visitor.setVisitorContext(iteratorList);
+        Select source = (Select) visitor.visit(this.getSource());
         
-        Select finalSelect = (Select) visitor.visit(this.getSource());
-        PlainSelect finalPlainSelect = (PlainSelect) finalSelect.getSelectBody();
+        SubSelect tempAsSetSource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
-        finalPlainSelect.setDistinct(new Distinct());
-       
-       return finalSelect; 
+        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        Select finalSelect = new Select();
+        finalSelect.setSelectBody( finalPlainSelect );
+        
+        finalPlainSelect.setFromItem(tempAsSetSource);
+        
+        Distinct distinct = new Distinct();
+        finalPlainSelect.setDistinct(distinct);
+        
+        VariableUtils.reserveVars(finalPlainSelect, tempAsSetSource);
+        finalPlainSelect.setRes(new ResSelectExpression(new Column("TEMP_src.res")));
+        finalPlainSelect.setVal(new ValSelectExpression(new Column("TEMP_src.val")));
+        
+        return finalSelect;
     }
 
     private Statement existsMap(StmVisitor visitor) {
@@ -1203,14 +1207,14 @@ public final class IteratorExp extends LoopExp {
     private Statement notEmptyMap(StmVisitor visitor) {
         Select source = (Select) visitor.visit(this.getSource());
         
-        SubSelect tempSizeSource = new SubSelect(source.getSelectBody(), "TEMP_src");
+        SubSelect tempNotEmptySource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
         MyPlainSelect finalPlainSelect = new MyPlainSelect();
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
-        if(VariableUtils.FVars((MyPlainSelect) tempSizeSource.getSelectBody()).isEmpty()) {
-            finalPlainSelect.setFromItem(tempSizeSource);
+        if(VariableUtils.FVars((MyPlainSelect) tempNotEmptySource.getSelectBody()).isEmpty()) {
+            finalPlainSelect.setFromItem(tempNotEmptySource);
             ResSelectExpression countRes = new ResSelectExpression();
 
             Function count = new Function();
@@ -1226,8 +1230,8 @@ public final class IteratorExp extends LoopExp {
             finalPlainSelect.setValAsTrue();
         }
         else {
-            finalPlainSelect.setFromItem(tempSizeSource);
-            Alias aliasTempSizeSource = tempSizeSource.getAlias();
+            finalPlainSelect.setFromItem(tempNotEmptySource);
+            Alias aliasTempNotEmptySource = tempNotEmptySource.getAlias();
             
             Function count = new Function();
             count.setName("COUNT");
@@ -1236,7 +1240,7 @@ public final class IteratorExp extends LoopExp {
             CaseExpression caseResExpression = new CaseExpression();
 
             BinaryExpression isValValid = new EqualsTo();
-            isValValid.setLeftExpression(new Column(aliasTempSizeSource.getName().concat(".val")));
+            isValValid.setLeftExpression(new Column(aliasTempNotEmptySource.getName().concat(".val")));
             isValValid.setRightExpression(new LongValue(0L));
 
             WhenClause whenResClause = new WhenClause();
@@ -1249,18 +1253,18 @@ public final class IteratorExp extends LoopExp {
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
             finalPlainSelect.setValAsTrue();
             
-            List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempSizeSource.getSelectBody(), visitor.getVisitorContext());
+            List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempNotEmptySource.getSelectBody(), visitor.getVisitorContext());
             
             List<Expression> groupByExpressions = new ArrayList<Expression>();
 
             for(String v : SVarsSource) {
-                groupByExpressions.add(new Column(aliasTempSizeSource.getName().concat(".ref_").concat(v)));
+                groupByExpressions.add(new Column(aliasTempNotEmptySource.getName().concat(".ref_").concat(v)));
                 VarSelectExpression newVar = new VarSelectExpression(v);
-                newVar.setRefExpression(new Column(aliasTempSizeSource.getName().concat(".ref_").concat(v)));
+                newVar.setRefExpression(new Column(aliasTempNotEmptySource.getName().concat(".ref_").concat(v)));
                 finalPlainSelect.addVar(newVar);
             }
 
-            groupByExpressions.add(new Column(aliasTempSizeSource.getName().concat(".val")));
+            groupByExpressions.add(new Column(aliasTempNotEmptySource.getName().concat(".val")));
 
             GroupByElement groupByElement = new GroupByElement();
             groupByElement.setGroupByExpressions( groupByExpressions );
@@ -1276,14 +1280,14 @@ public final class IteratorExp extends LoopExp {
     private Statement emptyMap(StmVisitor visitor) {
         Select source = (Select) visitor.visit(this.getSource());
         
-        SubSelect tempSizeSource = new SubSelect(source.getSelectBody(), "TEMP_src");
+        SubSelect tempEmptySource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
         MyPlainSelect finalPlainSelect = new MyPlainSelect();
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
-        if(VariableUtils.FVars((MyPlainSelect) tempSizeSource.getSelectBody()).isEmpty()) {
-            finalPlainSelect.setFromItem(tempSizeSource);
+        if(VariableUtils.FVars((MyPlainSelect) tempEmptySource.getSelectBody()).isEmpty()) {
+            finalPlainSelect.setFromItem(tempEmptySource);
             ResSelectExpression countRes = new ResSelectExpression();
 
             Function count = new Function();
@@ -1299,8 +1303,8 @@ public final class IteratorExp extends LoopExp {
             finalPlainSelect.setValAsTrue();
         }
         else {
-            finalPlainSelect.setFromItem(tempSizeSource);
-            Alias aliasTempSizeSource = tempSizeSource.getAlias();
+            finalPlainSelect.setFromItem(tempEmptySource);
+            Alias aliasTempEmptySource = tempEmptySource.getAlias();
             
             Function count = new Function();
             count.setName("COUNT");
@@ -1309,7 +1313,7 @@ public final class IteratorExp extends LoopExp {
             CaseExpression caseResExpression = new CaseExpression();
 
             BinaryExpression isValValid = new EqualsTo();
-            isValValid.setLeftExpression(new Column(aliasTempSizeSource.getName().concat(".val")));
+            isValValid.setLeftExpression(new Column(aliasTempEmptySource.getName().concat(".val")));
             isValValid.setRightExpression(new LongValue(0L));
 
             WhenClause whenResClause = new WhenClause();
@@ -1322,18 +1326,18 @@ public final class IteratorExp extends LoopExp {
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
             finalPlainSelect.setValAsTrue();
             
-            List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempSizeSource.getSelectBody(), visitor.getVisitorContext());
+            List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempEmptySource.getSelectBody(), visitor.getVisitorContext());
             
             List<Expression> groupByExpressions = new ArrayList<Expression>();
 
             for(String v : SVarsSource) {
-                groupByExpressions.add(new Column(aliasTempSizeSource.getName().concat(".ref_").concat(v)));
+                groupByExpressions.add(new Column(aliasTempEmptySource.getName().concat(".ref_").concat(v)));
                 VarSelectExpression newVar = new VarSelectExpression(v);
-                newVar.setRefExpression(new Column(aliasTempSizeSource.getName().concat(".ref_").concat(v)));
+                newVar.setRefExpression(new Column(aliasTempEmptySource.getName().concat(".ref_").concat(v)));
                 finalPlainSelect.addVar(newVar);
             }
 
-            groupByExpressions.add(new Column(aliasTempSizeSource.getName().concat(".val")));
+            groupByExpressions.add(new Column(aliasTempEmptySource.getName().concat(".val")));
 
             GroupByElement groupByElement = new GroupByElement();
             groupByElement.setGroupByExpressions( groupByExpressions );
