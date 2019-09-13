@@ -116,6 +116,12 @@ public class TesterOCL2SQLParser {
         test(ocl2psqlParser, "Car::allInstances()->collect(c|c.Car:owners->isEmpty())");
         test(ocl2psqlParser, "Car::allInstances()->forAll(c|c.Car:owners->isEmpty())");
         test(ocl2psqlParser, "Car::allInstances()->exists(c|c.Car:owners->isEmpty())");
+        
+        test(ocl2psqlParser, "Car::allInstances()->notEmpty()");
+        test(ocl2psqlParser, "Car::allInstances()->collect(c|c.Car:color)->notEmpty()");
+        test(ocl2psqlParser, "Car::allInstances()->collect(c|c.Car:owners->notEmpty())");
+        test(ocl2psqlParser, "Car::allInstances()->forAll(c|c.Car:owners->notEmpty())");
+        test(ocl2psqlParser, "Car::allInstances()->exists(c|c.Car:owners->notEmpty())");
     }
 
     private static void test(OCL2SQLParser ocl2psqlParser, String oclExp) throws OclParseException {
