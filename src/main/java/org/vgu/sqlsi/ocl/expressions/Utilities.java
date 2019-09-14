@@ -130,12 +130,6 @@ public class Utilities {
         return result;
     }
 	
-	static public String genAliasName(StmVisitor visitor) {
-		String new_alias = "TEMP_".concat(String.valueOf(visitor.getAlias()));
-		visitor.setAlias(visitor.getAlias() + 1);
-		return new_alias;
-	}
-	
 	static public List<SelectItem> getVariableAliases(SubSelect selectBody){
 		List<SelectItem> items = new ArrayList<SelectItem>();
 		if (selectBody != null) {

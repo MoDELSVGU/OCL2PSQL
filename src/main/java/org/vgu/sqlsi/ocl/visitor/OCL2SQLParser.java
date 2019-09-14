@@ -52,17 +52,6 @@ public class OCL2SQLParser implements StmVisitor{
     public JSONArray getPlainUMLContext() {
         return plainUMLContext;
     }
-    @Override
-    public int getAlias() {
-        return 0;
-    }
-    @Override
-    public void setAlias(int id) {
-        
-    }
-    @Override
-    public void genAlias() {
-    }
     
     public int getLevelOfSets() {
         return levelOfSets;
