@@ -46,6 +46,7 @@ This table represents a detailed overview of supported Object Constraint Languag
 |`size`  |  *source-expr* -> `size()`|
 |`isEmpty`  |  *source-expr* -> `isEmpty()`|
 |`notEmpty`  |  *source-expr* -> `notEmpty()`|
+|`isUnique`  |  *source-expr* -> `isUnique()`|
 |`flatten`[<sup>1</sup>]  |  *source-expr* -> `flatten()`|
 
 ##### Bag operations
