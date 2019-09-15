@@ -287,8 +287,8 @@ public final class IteratorExp extends LoopExp {
         case asSet:
             return asSetMap(visitor);
         case isUnique:
-            throw new NullPointerException("Unsupported isUnique operation");
-//            return isUniqueMap(visitor);
+//            throw new NullPointerException("Unsupported isUnique operation");
+            return isUniqueMap(visitor);
         case flatten:
             return flattenMap(visitor);
         case sum:
