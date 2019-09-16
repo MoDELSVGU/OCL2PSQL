@@ -199,16 +199,17 @@ public class VariableUtils {
         return vars.stream().anyMatch(s -> var.equals(s));
     }
 
-    public static List<String> SVars(MyPlainSelect selectBody, List<IteratorSource> varList) {
-        List<String> FVars = FVars(selectBody);
+    public static List<String> SVars(OclExpression subExpression, StmVisitor visitor) {
+        List<String> FVars = FVars(subExpression);
         if(FVars.isEmpty()) return new ArrayList<String>();
         List<String> SVars = new ArrayList<String>();
         for(String var : FVars) {
-            if(!SVars.contains(var))
-                SVars.add(var);
-            MyPlainSelect sourceVar = (MyPlainSelect) varList.stream().filter(v -> v.getIterator().getName().equals(var))
-                    .findFirst().map(MyIteratorSource.class::cast).map(myIter -> myIter.getSourceWithoutIter().getSelectBody()).get();
-            SVars.addAll(SVars(sourceVar, varList));
+            OclExpression srcVarExpression = findSourceOfVar(visitor, var);
+            if(SVars.contains(var) || srcVarExpression == null) {
+                continue;
+            }
+            SVars.add(var);
+            SVars.addAll(SVars(srcVarExpression, visitor));
         }
         return SVars;
     }
@@ -222,4 +223,25 @@ public class VariableUtils {
 //        }
 //        return null;
 //    }
+
+    private static OclExpression findSourceOfVar(StmVisitor visitor, String var) {
+        List<IteratorSource> vars = visitor.getVisitorContext();
+        for(IteratorSource i : vars) {
+            String iName = i.getIterator().getName();
+            if(var.equals(iName)) {
+                if(i instanceof MyIteratorSource) {
+                    MyIteratorSource myI = (MyIteratorSource) i;
+                    return myI.getSourceExpression();
+                }
+            }
+        }
+        return null;
+//        return visitor.getVisitorContext()
+//                .stream()
+//                .filter(i -> var.equals(i.getIterator().getName()))
+//                .findFirst()
+//                .map(MyIteratorSource.class::cast)
+//                .map(target -> target.getSourceExpression())
+//                .orElse(null);
+    }
 }
