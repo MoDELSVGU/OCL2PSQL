@@ -191,6 +191,15 @@ public class VariableUtils {
         return false;
     }
     
+    /**
+     * <p>This is an implementation of FVars function in the manuscript
+     * <b>OCL2PSQL: An OCL-to-SQL Code-Generator for Model Driven Engineering</b>. 
+     * Assuming ? is the valid OCL expression.
+     * </p>
+     * @param ? the valid OCL sub-expression
+     * @return the set of variables that occurs free in ?
+     * @since 1.0
+     */
     public static List<String> FVars(MyPlainSelect selectBody) {
         return selectBody.getVars().stream().map(var -> var.getVar()).collect(Collectors.toList());
     }
@@ -198,9 +207,19 @@ public class VariableUtils {
     public static boolean isVariableOf (List<String> vars, String var) {
         return vars.stream().anyMatch(s -> var.equals(s));
     }
-
-    public static List<String> SVars(OclExpression subExpression, StmVisitor visitor) {
-        List<String> FVars = FVars(subExpression);
+    
+    /**
+     * <p>This is an implementation of SVars function in the manuscript
+     * <b>OCL2PSQL: An OCL-to-SQL Code-Generator for Model Driven Engineering</b>. 
+     * Assuming e is the whole OCL expression.
+     * </p>
+     * @param ePrime (e') the sub-expression of e
+     * @param visitor the context of OCL expression
+     * @return the set of variables which e' depends on
+     * @since 1.0
+     */
+    public static List<String> SVars(OclExpression ePrime, StmVisitor visitor) {
+        List<String> FVars = FVars(ePrime);
         if(FVars.isEmpty()) return new ArrayList<String>();
         List<String> SVars = new ArrayList<String>();
         for(String var : FVars) {
