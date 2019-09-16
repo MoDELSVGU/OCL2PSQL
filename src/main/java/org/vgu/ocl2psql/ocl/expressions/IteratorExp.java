@@ -353,7 +353,7 @@ public final class IteratorExp extends LoopExp {
             SubSelect tempFlattenSource = new SubSelect();
             tempFlattenSource.setSelectBody( source.getSelectBody() );
             
-            List<String> sVarSource = VariableUtils.FVars((MyPlainSelect) tempFlattenSource.getSelectBody());
+            List<String> sVarSource = VariableUtils.FVars(this.getSource());
 
             if(sVarSource.isEmpty()) {
 
@@ -509,8 +509,12 @@ public final class IteratorExp extends LoopExp {
         tempSelectBody.setAlias(aliasTempSelectBody);
         
         String currentIter = this.getIterator().getName();
-        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempSelectSource.getSelectBody());
-        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempSelectBody.getSelectBody());
+
+//        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempSelectSource.getSelectBody());
+//        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempSelectBody.getSelectBody());
+        List<String> fVarsSource = VariableUtils.FVars(this.getSource());
+        List<String> fVarsBody = VariableUtils.FVars(this.getBody());
+
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty()) {
                 MyPlainSelect gBody = new MyPlainSelect();
@@ -670,8 +674,8 @@ public final class IteratorExp extends LoopExp {
         tempExistsBody.setAlias(aliasTempExistsBody);
         
         String currentIter = this.getIterator().getName();
-        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempExistsSource.getSelectBody());
-        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempExistsBody.getSelectBody());
+        List<String> fVarsSource = VariableUtils.FVars(this.getSource());
+        List<String> fVarsBody = VariableUtils.FVars(this.getBody());
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty() && fVarsBody.size() == 1) {
@@ -882,8 +886,8 @@ public final class IteratorExp extends LoopExp {
         tempForAllBody.setAlias(aliasTempForAllBody);
         
         String currentIter = this.getIterator().getName();
-        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempForAllSource.getSelectBody());
-        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempForAllBody.getSelectBody());
+        List<String> fVarsSource = VariableUtils.FVars(this.getSource());
+        List<String> fVarsBody = VariableUtils.FVars( this.getBody() );
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty() && fVarsBody.size() == 1) {
@@ -1098,8 +1102,8 @@ public final class IteratorExp extends LoopExp {
         tempSelectBody.setAlias(aliasTempSelectBody);
         
         String currentIter = this.getIterator().getName();
-        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempSelectSource.getSelectBody());
-        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempSelectBody.getSelectBody());
+        List<String> fVarsSource = VariableUtils.FVars(this.getSource());
+        List<String> fVarsBody = VariableUtils.FVars(this.getBody());
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty()) {
                 MyPlainSelect gBody = new MyPlainSelect();
@@ -1215,7 +1219,7 @@ public final class IteratorExp extends LoopExp {
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
-        if(VariableUtils.FVars((MyPlainSelect) tempNotEmptySource.getSelectBody()).isEmpty()) {
+        if(VariableUtils.FVars(this.getSource()).isEmpty()) {
             finalPlainSelect.setFromItem(tempNotEmptySource);
             ResSelectExpression countRes = new ResSelectExpression();
 
@@ -1288,7 +1292,7 @@ public final class IteratorExp extends LoopExp {
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
-        if(VariableUtils.FVars((MyPlainSelect) tempEmptySource.getSelectBody()).isEmpty()) {
+        if(VariableUtils.FVars(this.getSource()).isEmpty()) {
             finalPlainSelect.setFromItem(tempEmptySource);
             ResSelectExpression countRes = new ResSelectExpression();
 
@@ -1378,8 +1382,10 @@ public final class IteratorExp extends LoopExp {
         tempCollectBody.setAlias(aliasTempCollectBody);
         
         String currentIter = this.getIterator().getName();
-        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempCollectSource.getSelectBody());
-        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempCollectBody.getSelectBody());
+//        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempCollectSource.getSelectBody());
+//        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempCollectBody.getSelectBody());
+        List<String> fVarsSource = VariableUtils.FVars(this.getSource());
+        List<String> fVarsBody = VariableUtils.FVars(this.getBody());
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempCollectBody.getName().concat(".").concat("res"))));
@@ -1445,7 +1451,7 @@ public final class IteratorExp extends LoopExp {
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
-        if(VariableUtils.FVars((MyPlainSelect) tempSizeSource.getSelectBody()).isEmpty()) {
+        if(VariableUtils.FVars(this.getSource()).isEmpty()) {
             finalPlainSelect.setFromItem(tempSizeSource);
             ResSelectExpression countRes = new ResSelectExpression();
 

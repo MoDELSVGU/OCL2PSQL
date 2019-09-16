@@ -313,8 +313,8 @@ public final class OperationCallExp extends FeatureCallExp {
             Alias alias_Right = new Alias("TEMP_RIGHT");
             tempRight.setAlias(alias_Right);
             
-            List<String> fVarsLeft = VariableUtils.FVars((MyPlainSelect) tempLeft.getSelectBody());
-            List<String> fVarsRight = VariableUtils.FVars((MyPlainSelect) tempRight.getSelectBody());
+            List<String> fVarsLeft = VariableUtils.FVars(this.getSource());
+            List<String> fVarsRight = VariableUtils.FVars(this.getArguments().get( 0 ));
             List<String> sVarsLeft = VariableUtils.SVars(this.getSource(), visitor);
             List<String> sVarsRight = VariableUtils.SVars(this.getArguments().get(0), visitor);
             

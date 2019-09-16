@@ -298,8 +298,8 @@ public class FVarsTest {
 
     @Test
     public void test_body_var_assoc_select() throws OclParseException {
-        OclExpression exp = OclExpression.parse("Car::allInstances()->collect(c|c.Car:owners->select(p|p = p))->flatten()", new DefaultOclContext());
-        OclExpression subExp = ((IteratorExp) exp).getBody();
+        OclExpression exp = OclExpression.parse("Car::allInstances()->collect(c|c.Car:owners->select(p|p=p))->flatten()", new DefaultOclContext());
+        OclExpression subExp = ((IteratorExp) ((IteratorExp) exp).getSource()).getBody();
         List<String> actualFVars = VariableUtils.FVars(subExp);
         List<String> expectedFVars = Arrays.asList("c");
         boolean isValid = actualFVars.size() == expectedFVars.size();
@@ -325,7 +325,7 @@ public class FVarsTest {
     @Test
     public void test_body_var_assoc_reject() throws OclParseException {
         OclExpression exp = OclExpression.parse("Car::allInstances()->collect(c|c.Car:owners->reject(p|p = p))->flatten()", new DefaultOclContext());
-        OclExpression subExp = ((IteratorExp) exp).getBody();
+        OclExpression subExp = ((IteratorExp) ((IteratorExp) exp).getSource()).getBody();
         List<String> actualFVars = VariableUtils.FVars(subExp);
         List<String> expectedFVars = Arrays.asList("c");
         boolean isValid = actualFVars.size() == expectedFVars.size();
@@ -363,7 +363,7 @@ public class FVarsTest {
     
     @Test
     public void test_body_second_level_body() throws OclParseException {
-        OclExpression exp = OclExpression.parse("Car::allInstances()->collect(c|c.Car:owners->forAll(p|p = p))", new DefaultOclContext());
+        OclExpression exp = OclExpression.parse("Car::allInstances()->collect(c|c.Car:owners->forAll(p|p=p))", new DefaultOclContext());
         OclExpression subExp = ((IteratorExp)((IteratorExp) exp).getBody()).getBody();
         List<String> actualFVars = VariableUtils.FVars(subExp);
         List<String> expectedFVars = Arrays.asList("p");
@@ -376,7 +376,7 @@ public class FVarsTest {
     
     @Test
     public void test_body_second_level_body_2() throws OclParseException {
-        OclExpression exp = OclExpression.parse("Car::allInstances()->collect(c|c.Car:owners->forAll(p|p.Person:name = c.Car:color))", new DefaultOclContext());
+        OclExpression exp = OclExpression.parse("Car::allInstances()->collect(c|c.Car:owners->forAll(p|p.Person:name=c.Car:color))", new DefaultOclContext());
         OclExpression subExp = ((IteratorExp)((IteratorExp) exp).getBody()).getBody();
         List<String> actualFVars = VariableUtils.FVars(subExp);
         List<String> expectedFVars = Arrays.asList("p","c");
@@ -389,7 +389,7 @@ public class FVarsTest {
     
     @Test
     public void test_body_three_levels() throws OclParseException {
-        OclExpression exp = OclExpression.parse("Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1 = c))", new DefaultOclContext());
+        OclExpression exp = OclExpression.parse("Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1=c)))", new DefaultOclContext());
         List<String> actualFVars = VariableUtils.FVars(exp);
         List<String> expectedFVars = new ArrayList<String>();
         boolean isValid = actualFVars.size() == expectedFVars.size();
@@ -401,7 +401,7 @@ public class FVarsTest {
     
     @Test
     public void test_body_three_levels_1() throws OclParseException {
-        OclExpression exp = OclExpression.parse("Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1 = c))", new DefaultOclContext());
+        OclExpression exp = OclExpression.parse("Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1=c)))", new DefaultOclContext());
         OclExpression subExp = ((IteratorExp) exp).getSource();
         List<String> actualFVars = VariableUtils.FVars(subExp);
         List<String> expectedFVars = new ArrayList<String>();
@@ -414,7 +414,7 @@ public class FVarsTest {
     
     @Test
     public void test_body_three_levels_2() throws OclParseException {
-        OclExpression exp = OclExpression.parse("Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1 = c))", new DefaultOclContext());
+        OclExpression exp = OclExpression.parse("Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1=c)))", new DefaultOclContext());
         OclExpression subExp = ((IteratorExp) exp).getBody();
         List<String> actualFVars = VariableUtils.FVars(subExp);
         List<String> expectedFVars = Arrays.asList("c");
@@ -427,7 +427,7 @@ public class FVarsTest {
     
     @Test
     public void test_body_three_levels_3() throws OclParseException {
-        OclExpression exp = OclExpression.parse("Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1 = c))", new DefaultOclContext());
+        OclExpression exp = OclExpression.parse("Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1=c)))", new DefaultOclContext());
         OclExpression subExp = ((IteratorExp)((IteratorExp) exp).getBody()).getSource();
         List<String> actualFVars = VariableUtils.FVars(subExp);
         List<String> expectedFVars = Arrays.asList("c");
@@ -440,7 +440,7 @@ public class FVarsTest {
     
     @Test
     public void test_body_three_levels_4() throws OclParseException {
-        OclExpression exp = OclExpression.parse("Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1 = c))", new DefaultOclContext());
+        OclExpression exp = OclExpression.parse("Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1=c)))", new DefaultOclContext());
         OclExpression subExp = ((IteratorExp)((IteratorExp) exp).getBody()).getBody();
         List<String> actualFVars = VariableUtils.FVars(subExp);
         List<String> expectedFVars = Arrays.asList("p");
@@ -453,7 +453,7 @@ public class FVarsTest {
     
     @Test
     public void test_body_three_levels_5() throws OclParseException {
-        OclExpression exp = OclExpression.parse("Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1 = c))", new DefaultOclContext());
+        OclExpression exp = OclExpression.parse("Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1=c)))", new DefaultOclContext());
         OclExpression subExp = ((IteratorExp)((IteratorExp)((IteratorExp) exp).getBody()).getBody()).getSource();
         List<String> actualFVars = VariableUtils.FVars(subExp);
         List<String> expectedFVars = Arrays.asList("p");
@@ -466,7 +466,7 @@ public class FVarsTest {
     
     @Test
     public void test_body_three_levels_6() throws OclParseException {
-        OclExpression exp = OclExpression.parse("Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1 = c))", new DefaultOclContext());
+        OclExpression exp = OclExpression.parse("Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1=c)))", new DefaultOclContext());
         OclExpression subExp = ((IteratorExp)((IteratorExp)((IteratorExp) exp).getBody()).getBody()).getBody();
         List<String> actualFVars = VariableUtils.FVars(subExp);
         List<String> expectedFVars = Arrays.asList("c1", "c");
