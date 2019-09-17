@@ -218,6 +218,13 @@ public class VariableUtils {
                 case "oclIsUndefined":
                     return FVarsAux( opCallExpSrc.getSource(), fVars );
                 case "=":
+                case "<>":
+                case "<=":
+                case "<":
+                case ">=":
+                case ">":
+                case "and":
+                case "or":
                     FVarsAux( opCallExpSrc.getArguments().get( 0 ), fVars);
                     return FVarsAux( opCallExpSrc.getSource(), fVars );
                 case "allInstances":
