@@ -10,7 +10,6 @@ import org.vgu.ocl2psql.sql.statement.select.VarSelectExpression;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SubSelect;
@@ -18,6 +17,7 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 public class MyIteratorSource extends IteratorSource{
     
     private Select sourceWithoutIter;
+    private OclExpression sourceExpression;
     
     public Select getSourceWithoutIter() {
         return sourceWithoutIter;
@@ -80,5 +80,13 @@ public class MyIteratorSource extends IteratorSource{
         }
         super.setSource(statement);
         this.setSourceWithoutIter(statement);
+    }
+
+    public OclExpression getSourceExpression() {
+        return sourceExpression;
+    }
+
+    public void setSourceExpression(OclExpression sourceExpression) {
+        this.sourceExpression = sourceExpression;
     }
 }

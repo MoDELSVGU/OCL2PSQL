@@ -31,7 +31,6 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
@@ -134,7 +133,7 @@ public final class PropertyCallExp extends NavigationCallExp {
             finalPlainSelect.setFromItem(tempVar);
             finalPlainSelect.setJoins(Arrays.asList(join));
             
-            List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempVar.getSelectBody(), visitor.getVisitorContext());
+            List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             for(String v : SVarsSource) {
                 VarSelectExpression newVar = new VarSelectExpression(v);
                 newVar.setRefExpression(new Column(aliasSubSelectCurrentVar.getName().concat(".ref_").concat(v)));
@@ -229,7 +228,7 @@ public final class PropertyCallExp extends NavigationCallExp {
             finalPlainSelect.setFromItem(tempVar);
             finalPlainSelect.setJoins(Arrays.asList(join));
             
-            List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempVar.getSelectBody(), visitor.getVisitorContext());
+            List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             for(String v : SVarsSource) {
                 VarSelectExpression newVar = new VarSelectExpression(v);
                 newVar.setRefExpression(new Column(aliasSubSelectCurrentVar.getName().concat(".ref_").concat(v)));

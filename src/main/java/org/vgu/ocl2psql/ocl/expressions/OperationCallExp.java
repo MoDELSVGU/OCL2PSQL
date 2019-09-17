@@ -295,7 +295,7 @@ public final class OperationCallExp extends FeatureCallExp {
             
             finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasSource.getName().concat(".val"))));
             
-            List<String> sVarsSource = VariableUtils.SVars((MyPlainSelect) tempSource.getSelectBody(), visitor.getVisitorContext());
+            List<String> sVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             for(String s : sVarsSource) {
                 VarSelectExpression varExp = new VarSelectExpression(s);
                 varExp.setRefExpression(new Column(aliasSource.getName().concat(".ref_").concat(s)));
@@ -313,10 +313,10 @@ public final class OperationCallExp extends FeatureCallExp {
             Alias alias_Right = new Alias("TEMP_RIGHT");
             tempRight.setAlias(alias_Right);
             
-            List<String> fVarsLeft = VariableUtils.FVars((MyPlainSelect) tempLeft.getSelectBody());
-            List<String> fVarsRight = VariableUtils.FVars((MyPlainSelect) tempRight.getSelectBody());
-            List<String> sVarsLeft = VariableUtils.SVars((MyPlainSelect) tempLeft.getSelectBody(), visitor.getVisitorContext());
-            List<String> sVarsRight = VariableUtils.SVars((MyPlainSelect) tempRight.getSelectBody(), visitor.getVisitorContext());
+            List<String> fVarsLeft = VariableUtils.FVars(this.getSource());
+            List<String> fVarsRight = VariableUtils.FVars(this.getArguments().get( 0 ));
+            List<String> sVarsLeft = VariableUtils.SVars(this.getSource(), visitor);
+            List<String> sVarsRight = VariableUtils.SVars(this.getArguments().get(0), visitor);
             
             if(fVarsLeft.isEmpty() && fVarsRight.isEmpty()) {
                 ResSelectExpression resExp = new ResSelectExpression();

@@ -17,6 +17,7 @@ limitations under the License.
 package org.vgu.ocl2psql.ocl.expressions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -191,24 +192,85 @@ public class VariableUtils {
         return false;
     }
     
-    public static List<String> FVars(MyPlainSelect selectBody) {
-        return selectBody.getVars().stream().map(var -> var.getVar()).collect(Collectors.toList());
+    /**
+     * <p>This is an implementation of FVars function in the manuscript
+     * <b>OCL2PSQL: An OCL-to-SQL Code-Generator for Model Driven Engineering</b>. 
+     * Assuming <code>c</code> is the valid OCL expression.
+     * </p>
+     * @param ? the valid OCL sub-expression
+     * @return the set of variables that occurs free in ?
+     * @since 1.0
+     */
+    public static List<String> FVars(OclExpression src) {
+        ArrayList<String> fVars = new ArrayList<String>();
+        
+        return FVarsAux(src, fVars);
+    }
+    
+    private static List<String> FVarsAux(OclExpression src, List<String> fVars ) {
+        
+        if( src instanceof IteratorExp ) {
+            return FVarsAux( ((IteratorExp) src).getSource(), fVars );
+        }
+
+        if ( src instanceof OperationCallExp ) {
+            OperationCallExp opCallExpSrc = (OperationCallExp) src;
+            
+            switch( opCallExpSrc.getName() ) {
+                case "oclIsUndefined":
+                    return FVarsAux( opCallExpSrc.getSource(), fVars );
+                case "=":
+                    FVarsAux( opCallExpSrc.getArguments().get( 0 ), fVars);
+                    return FVarsAux( opCallExpSrc.getSource(), fVars );
+                case "allInstances":
+                    return fVars;
+                default:
+            }
+            
+        } 
+        
+        if ( src instanceof PropertyCallExp ) {
+            return FVarsAux( ((PropertyCallExp) src).getSource(), fVars);
+        }
+
+        if ( src instanceof VariableExp ) {
+            VariableExp varExpSrc = (VariableExp) src;
+            String v = varExpSrc.getReferredVariable().getName() ;
+            if ( !fVars.contains( v ) ) {
+                fVars.add( v );
+            }
+            return fVars;
+        } 
+
+        // ELSE
+        return fVars;
     }
     
     public static boolean isVariableOf (List<String> vars, String var) {
         return vars.stream().anyMatch(s -> var.equals(s));
     }
-
-    public static List<String> SVars(MyPlainSelect selectBody, List<IteratorSource> varList) {
-        List<String> FVars = FVars(selectBody);
+    
+    /**
+     * <p>This is an implementation of SVars function in the manuscript
+     * <b>OCL2PSQL: An OCL-to-SQL Code-Generator for Model Driven Engineering</b>. 
+     * Assuming e is the whole OCL expression.
+     * </p>
+     * @param ePrime (e') the sub-expression of e
+     * @param visitor the context of OCL expression
+     * @return the set of variables which e' depends on
+     * @since 1.0
+     */
+    public static List<String> SVars(OclExpression ePrime, StmVisitor visitor) {
+        List<String> FVars = FVars(ePrime);
         if(FVars.isEmpty()) return new ArrayList<String>();
         List<String> SVars = new ArrayList<String>();
         for(String var : FVars) {
-            if(!SVars.contains(var))
-                SVars.add(var);
-            MyPlainSelect sourceVar = (MyPlainSelect) varList.stream().filter(v -> v.getIterator().getName().equals(var))
-                    .findFirst().map(MyIteratorSource.class::cast).map(myIter -> myIter.getSourceWithoutIter().getSelectBody()).get();
-            SVars.addAll(SVars(sourceVar, varList));
+            OclExpression srcVarExpression = findSourceOfVar(visitor, var);
+            if(SVars.contains(var) || srcVarExpression == null) {
+                continue;
+            }
+            SVars.add(var);
+            SVars.addAll(SVars(srcVarExpression, visitor));
         }
         return SVars;
     }
@@ -222,4 +284,25 @@ public class VariableUtils {
 //        }
 //        return null;
 //    }
+
+    private static OclExpression findSourceOfVar(StmVisitor visitor, String var) {
+        List<IteratorSource> vars = visitor.getVisitorContext();
+        for(IteratorSource i : vars) {
+            String iName = i.getIterator().getName();
+            if(var.equals(iName)) {
+                if(i instanceof MyIteratorSource) {
+                    MyIteratorSource myI = (MyIteratorSource) i;
+                    return myI.getSourceExpression();
+                }
+            }
+        }
+        return null;
+//        return visitor.getVisitorContext()
+//                .stream()
+//                .filter(i -> var.equals(i.getIterator().getName()))
+//                .findFirst()
+//                .map(MyIteratorSource.class::cast)
+//                .map(target -> target.getSourceExpression())
+//                .orElse(null);
+    }
 }

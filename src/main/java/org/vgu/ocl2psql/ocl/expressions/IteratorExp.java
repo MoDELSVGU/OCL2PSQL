@@ -353,7 +353,7 @@ public final class IteratorExp extends LoopExp {
             SubSelect tempFlattenSource = new SubSelect();
             tempFlattenSource.setSelectBody( source.getSelectBody() );
             
-            List<String> sVarSource = VariableUtils.FVars((MyPlainSelect) tempFlattenSource.getSelectBody());
+            List<String> sVarSource = VariableUtils.FVars(this.getSource());
 
             if(sVarSource.isEmpty()) {
 
@@ -422,9 +422,7 @@ public final class IteratorExp extends LoopExp {
                 finalPlainSelect.setRes(new ResSelectExpression(caseResVExpression));
                 finalPlainSelect.setVal(new ValSelectExpression(caseValVExpression));
                 
-                List<String> sVarsSource = VariableUtils.SVars(
-                    (MyPlainSelect) tempFlattenSource.getSelectBody(), 
-                    visitor.getVisitorContext());
+                List<String> sVarsSource = VariableUtils.SVars(this.getSource(), visitor);
                 BinaryExpression onCondition = null;
 
                 for(String v : sVarsSource) {
@@ -485,7 +483,8 @@ public final class IteratorExp extends LoopExp {
     }
 
     private Statement rejectMap(StmVisitor visitor) {
-        MyIteratorSource currentIterator = new MyIteratorSource();     
+        MyIteratorSource currentIterator = new MyIteratorSource();
+        currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
         Select source = (Select) visitor.visit(this.getSource());
         currentIterator.setSource(source);
@@ -510,8 +509,12 @@ public final class IteratorExp extends LoopExp {
         tempSelectBody.setAlias(aliasTempSelectBody);
         
         String currentIter = this.getIterator().getName();
-        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempSelectSource.getSelectBody());
-        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempSelectBody.getSelectBody());
+
+//        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempSelectSource.getSelectBody());
+//        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempSelectBody.getSelectBody());
+        List<String> fVarsSource = VariableUtils.FVars(this.getSource());
+        List<String> fVarsBody = VariableUtils.FVars(this.getBody());
+
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty()) {
                 MyPlainSelect gBody = new MyPlainSelect();
@@ -538,7 +541,7 @@ public final class IteratorExp extends LoopExp {
                 finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempGBody.getName().concat(".ref_").concat(currentIter))));
                 finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasTempGBody.getName().concat(".val"))));
 
-                List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempSelectSource.getSelectBody(), visitor.getVisitorContext());
+                List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
                 for(String v : SVarsSource) {
                     VarSelectExpression newVar = new VarSelectExpression(v);
                     newVar.setRefExpression(new Column(aliasTempSelectSource.getName().concat(".ref_").concat(v)));
@@ -584,7 +587,7 @@ public final class IteratorExp extends LoopExp {
                 onCondition.setLeftExpression(new Column(aliasTempSelectSource.getName().concat(".res")));
                 onCondition.setRightExpression(new Column(aliasTempGBody.getName().concat(".ref_").concat(currentIter)));
                 
-                List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempSelectSource.getSelectBody(), visitor.getVisitorContext());
+                List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
                 for(String v : SVarsSource) {
                     VarSelectExpression newVar = new VarSelectExpression(v);
                     newVar.setRefExpression(new Column(aliasTempSelectSource.getName().concat(".ref_").concat(v)));
@@ -594,7 +597,7 @@ public final class IteratorExp extends LoopExp {
                     binExp.setRightExpression(new Column(aliasTempGBody.getName().concat(".ref_").concat(v)));
                     onCondition = new AndExpression(onCondition, binExp);
                 }
-                List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempSelectBody.getSelectBody(), visitor.getVisitorContext());
+                List<String> SVarsBody = VariableUtils.SVars(this.getBody(), visitor);
                 for(String v : SVarsBody) {
                     if(v.equals(currentIter) || SVarsSource.contains(v)) continue;
                     VarSelectExpression newVar = new VarSelectExpression(v);
@@ -646,7 +649,8 @@ public final class IteratorExp extends LoopExp {
     }
 
     private Statement existsMap(StmVisitor visitor) {
-        MyIteratorSource currentIterator = new MyIteratorSource();     
+        MyIteratorSource currentIterator = new MyIteratorSource();
+        currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
         Select source = (Select) visitor.visit(this.getSource());
         currentIterator.setSource(source);
@@ -670,8 +674,8 @@ public final class IteratorExp extends LoopExp {
         tempExistsBody.setAlias(aliasTempExistsBody);
         
         String currentIter = this.getIterator().getName();
-        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempExistsSource.getSelectBody());
-        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempExistsBody.getSelectBody());
+        List<String> fVarsSource = VariableUtils.FVars(this.getSource());
+        List<String> fVarsBody = VariableUtils.FVars(this.getBody());
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty() && fVarsBody.size() == 1) {
@@ -730,7 +734,7 @@ public final class IteratorExp extends LoopExp {
                 greaterThanZero.setRightExpression(new LongValue(0L));
                 gBody.setRes(new ResSelectExpression(greaterThanZero));
                 
-                List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempExistsSource.getSelectBody(), visitor.getVisitorContext());
+                List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
                 List<Expression> groupByExpressions = new ArrayList<Expression>();
                 for(String v : SVarsSource) {
                     VarSelectExpression newVar = new VarSelectExpression(v);
@@ -743,7 +747,7 @@ public final class IteratorExp extends LoopExp {
                 groupByElement.setGroupByExpressions( groupByExpressions );
                 gBody.setGroupByElement( groupByElement );
                 
-                List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempExistsBody.getSelectBody(), visitor.getVisitorContext());
+                List<String> SVarsBody = VariableUtils.SVars(this.getBody(), visitor);
 
                 finalPlainSelect.setFromItem(tempVar);
                 Join join = new Join();
@@ -794,13 +798,13 @@ public final class IteratorExp extends LoopExp {
         else {
             finalPlainSelect.setValAsTrue();
             
-            List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempExistsSource.getSelectBody(), visitor.getVisitorContext());
+            List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             for(String v : SVarsSource) {
                 VarSelectExpression newVar = new VarSelectExpression(v);
                 newVar.setRefExpression(new Column(aliasTempExistsSource.getName().concat(".ref_").concat(v)));
                 finalPlainSelect.addVar(newVar);
             }
-            List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempExistsBody.getSelectBody(), visitor.getVisitorContext());
+            List<String> SVarsBody = VariableUtils.SVars(this.getBody(), visitor);
 
             BinaryExpression bodyWhereExp = new EqualsTo();
             bodyWhereExp.setLeftExpression(new Column(aliasTempExistsBody.getName().concat(".res")));
@@ -857,7 +861,8 @@ public final class IteratorExp extends LoopExp {
     }
 
     private Statement forAllMap(StmVisitor visitor) {
-        MyIteratorSource currentIterator = new MyIteratorSource();     
+        MyIteratorSource currentIterator = new MyIteratorSource();
+        currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
         Select source = (Select) visitor.visit(this.getSource());
         currentIterator.setSource(source);
@@ -881,8 +886,8 @@ public final class IteratorExp extends LoopExp {
         tempForAllBody.setAlias(aliasTempForAllBody);
         
         String currentIter = this.getIterator().getName();
-        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempForAllSource.getSelectBody());
-        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempForAllBody.getSelectBody());
+        List<String> fVarsSource = VariableUtils.FVars(this.getSource());
+        List<String> fVarsBody = VariableUtils.FVars( this.getBody() );
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty() && fVarsBody.size() == 1) {
@@ -945,7 +950,7 @@ public final class IteratorExp extends LoopExp {
                 eqZero.setRightExpression(new LongValue(0L));
                 gBody.setRes(new ResSelectExpression(eqZero));
                 
-                List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempForAllSource.getSelectBody(), visitor.getVisitorContext());
+                List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
                 List<Expression> groupByExpressions = new ArrayList<Expression>();
                 for(String v : SVarsSource) {
                     VarSelectExpression newVar = new VarSelectExpression(v);
@@ -958,7 +963,7 @@ public final class IteratorExp extends LoopExp {
                 gBody.setGroupByElement( groupByElement );
                 
                 
-                List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempForAllBody.getSelectBody(), visitor.getVisitorContext());
+                List<String> SVarsBody = VariableUtils.SVars(this.getBody(), visitor);
 
                 finalPlainSelect.setFromItem(tempVar);
                 Join join = new Join();
@@ -1009,13 +1014,13 @@ public final class IteratorExp extends LoopExp {
         else {
             finalPlainSelect.setValAsTrue();
             
-            List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempForAllSource.getSelectBody(), visitor.getVisitorContext());
+            List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             for(String v : SVarsSource) {
                 VarSelectExpression newVar = new VarSelectExpression(v);
                 newVar.setRefExpression(new Column(aliasTempForAllSource.getName().concat(".ref_").concat(v)));
                 finalPlainSelect.addVar(newVar);
             }
-            List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempForAllBody.getSelectBody(), visitor.getVisitorContext());
+            List<String> SVarsBody = VariableUtils.SVars(this.getBody(), visitor);
 
             BinaryExpression bodyWhereExp = new EqualsTo();
             bodyWhereExp.setLeftExpression(new Column(aliasTempForAllBody.getName().concat(".res")));
@@ -1073,6 +1078,7 @@ public final class IteratorExp extends LoopExp {
 
     private Statement selectMap(StmVisitor visitor) {
         MyIteratorSource currentIterator = new MyIteratorSource();     
+        currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
         Select source = (Select) visitor.visit(this.getSource());
         currentIterator.setSource(source);
@@ -1096,8 +1102,8 @@ public final class IteratorExp extends LoopExp {
         tempSelectBody.setAlias(aliasTempSelectBody);
         
         String currentIter = this.getIterator().getName();
-        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempSelectSource.getSelectBody());
-        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempSelectBody.getSelectBody());
+        List<String> fVarsSource = VariableUtils.FVars(this.getSource());
+        List<String> fVarsBody = VariableUtils.FVars(this.getBody());
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty()) {
                 MyPlainSelect gBody = new MyPlainSelect();
@@ -1118,7 +1124,7 @@ public final class IteratorExp extends LoopExp {
                 finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempGBody.getName().concat(".ref_").concat(currentIter))));
                 finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasTempGBody.getName().concat(".val"))));
 
-                List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempSelectSource.getSelectBody(), visitor.getVisitorContext());
+                List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
                 for(String v : SVarsSource) {
                     VarSelectExpression newVar = new VarSelectExpression(v);
                     newVar.setRefExpression(new Column(aliasTempSelectSource.getName().concat(".ref_").concat(v)));
@@ -1164,7 +1170,7 @@ public final class IteratorExp extends LoopExp {
                 onCondition.setLeftExpression(new Column(aliasTempSelectSource.getName().concat(".res")));
                 onCondition.setRightExpression(new Column(aliasTempGBody.getName().concat(".ref_").concat(currentIter)));
                 
-                List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempSelectSource.getSelectBody(), visitor.getVisitorContext());
+                List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
                 for(String v : SVarsSource) {
                     VarSelectExpression newVar = new VarSelectExpression(v);
                     newVar.setRefExpression(new Column(aliasTempSelectSource.getName().concat(".ref_").concat(v)));
@@ -1174,7 +1180,7 @@ public final class IteratorExp extends LoopExp {
                     binExp.setRightExpression(new Column(aliasTempGBody.getName().concat(".ref_").concat(v)));
                     onCondition = new AndExpression(onCondition, binExp);
                 }
-                List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempSelectBody.getSelectBody(), visitor.getVisitorContext());
+                List<String> SVarsBody = VariableUtils.SVars(this.getBody(), visitor);
                 for(String v : SVarsBody) {
                     if(v.equals(currentIter) || SVarsSource.contains(v)) continue;
                     VarSelectExpression newVar = new VarSelectExpression(v);
@@ -1213,7 +1219,7 @@ public final class IteratorExp extends LoopExp {
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
-        if(VariableUtils.FVars((MyPlainSelect) tempNotEmptySource.getSelectBody()).isEmpty()) {
+        if(VariableUtils.FVars(this.getSource()).isEmpty()) {
             finalPlainSelect.setFromItem(tempNotEmptySource);
             ResSelectExpression countRes = new ResSelectExpression();
 
@@ -1253,7 +1259,7 @@ public final class IteratorExp extends LoopExp {
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
             finalPlainSelect.setValAsTrue();
             
-            List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempNotEmptySource.getSelectBody(), visitor.getVisitorContext());
+            List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             
             List<Expression> groupByExpressions = new ArrayList<Expression>();
 
@@ -1286,7 +1292,7 @@ public final class IteratorExp extends LoopExp {
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
-        if(VariableUtils.FVars((MyPlainSelect) tempEmptySource.getSelectBody()).isEmpty()) {
+        if(VariableUtils.FVars(this.getSource()).isEmpty()) {
             finalPlainSelect.setFromItem(tempEmptySource);
             ResSelectExpression countRes = new ResSelectExpression();
 
@@ -1326,7 +1332,7 @@ public final class IteratorExp extends LoopExp {
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
             finalPlainSelect.setValAsTrue();
             
-            List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempEmptySource.getSelectBody(), visitor.getVisitorContext());
+            List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             
             List<Expression> groupByExpressions = new ArrayList<Expression>();
 
@@ -1351,7 +1357,8 @@ public final class IteratorExp extends LoopExp {
     }
 
     private Statement collectMap(StmVisitor visitor) {
-        MyIteratorSource currentIterator = new MyIteratorSource();     
+        MyIteratorSource currentIterator = new MyIteratorSource(); 
+        currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
         Select source = (Select) visitor.visit(this.getSource());
         currentIterator.setSource(source);
@@ -1375,15 +1382,17 @@ public final class IteratorExp extends LoopExp {
         tempCollectBody.setAlias(aliasTempCollectBody);
         
         String currentIter = this.getIterator().getName();
-        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempCollectSource.getSelectBody());
-        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempCollectBody.getSelectBody());
+//        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempCollectSource.getSelectBody());
+//        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempCollectBody.getSelectBody());
+        List<String> fVarsSource = VariableUtils.FVars(this.getSource());
+        List<String> fVarsBody = VariableUtils.FVars(this.getBody());
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempCollectBody.getName().concat(".").concat("res"))));
             finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasTempCollectBody.getName().concat(".val"))));
             finalPlainSelect.setFromItem(tempCollectBody);
             
-            List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempCollectBody.getSelectBody(), visitor.getVisitorContext());
+            List<String> SVarsBody = VariableUtils.SVars(this.getBody(), visitor);
             for(String v : SVarsBody) {
                 if(v.equals(currentIter)) continue;
                 VarSelectExpression newVar = new VarSelectExpression(v);
@@ -1399,8 +1408,8 @@ public final class IteratorExp extends LoopExp {
             join.setRightItem(tempCollectBody);
             finalPlainSelect.setJoins(Arrays.asList(join));
             
-            List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempCollectSource.getSelectBody(), visitor.getVisitorContext());
-            List<String> SVarsBody = VariableUtils.SVars((MyPlainSelect) tempCollectBody.getSelectBody(), visitor.getVisitorContext());
+            List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
+            List<String> SVarsBody = VariableUtils.SVars(this.getBody(), visitor);
 
             List<String> sVarsIntercept = new ArrayList<String>();
             for(String sr : SVarsBody) {
@@ -1442,7 +1451,7 @@ public final class IteratorExp extends LoopExp {
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
-        if(VariableUtils.FVars((MyPlainSelect) tempSizeSource.getSelectBody()).isEmpty()) {
+        if(VariableUtils.FVars(this.getSource()).isEmpty()) {
             finalPlainSelect.setFromItem(tempSizeSource);
             ResSelectExpression countRes = new ResSelectExpression();
 
@@ -1478,7 +1487,7 @@ public final class IteratorExp extends LoopExp {
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
             finalPlainSelect.setValAsTrue();
             
-            List<String> SVarsSource = VariableUtils.SVars((MyPlainSelect) tempSizeSource.getSelectBody(), visitor.getVisitorContext());
+            List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             
             List<Expression> groupByExpressions = new ArrayList<Expression>();
 
