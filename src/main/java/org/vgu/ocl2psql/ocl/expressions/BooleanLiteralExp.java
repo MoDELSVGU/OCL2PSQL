@@ -10,12 +10,12 @@ package org.vgu.ocl2psql.ocl.expressions;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
-import org.vgu.ocl2psql.sql.statement.select.MyPlainSelect;
+import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
+import org.vgu.ocl2psql.sql.statement.select.Select;
 
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.Select;
 /**
  * Class BooleanLiteralExp
  */
@@ -36,7 +36,7 @@ public final class BooleanLiteralExp extends PrimitiveLiteralExp {
 
 	@Override
 	public Statement map(StmVisitor visitor) {
-		MyPlainSelect finalPlainSelect = new MyPlainSelect();
+		PlainSelect finalPlainSelect = new PlainSelect();
 		ResSelectExpression resExpression = new ResSelectExpression(new LongValue(((this.booleanSymbol) == true)? "TRUE" : "FALSE"));
 		finalPlainSelect.setRes(resExpression);
 		Select finalSelect = new Select();

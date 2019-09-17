@@ -23,8 +23,10 @@ import org.vgu.ocl2psql.ocl.impl.OclCollectionSupport;
 import org.vgu.ocl2psql.ocl.impl.OclNumberSupport;
 import org.vgu.ocl2psql.ocl.impl.OclStringSupport;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
-import org.vgu.ocl2psql.sql.statement.select.MyPlainSelect;
+import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
+import org.vgu.ocl2psql.sql.statement.select.Select;
+import org.vgu.ocl2psql.sql.statement.select.SubSelect;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.VarSelectExpression;
 
@@ -49,8 +51,6 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SubSelect;
 
 
 
@@ -246,7 +246,7 @@ public final class OperationCallExp extends FeatureCallExp {
 
     @Override
     public Statement map(StmVisitor visitor) {
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
         
         if("allInstances".equals(this.name)) {
             ((OCL2SQLParser) visitor).increaseLevelOfSet();
@@ -261,7 +261,7 @@ public final class OperationCallExp extends FeatureCallExp {
         }
         else if("not".equals(this.name)) {
             Select select = (Select) visitor.visit(this.getArguments().get(0));
-            MyPlainSelect selectBody = (MyPlainSelect) select.getSelectBody();
+            PlainSelect selectBody = (PlainSelect) select.getSelectBody();
             ResSelectExpression curRes = selectBody.getRes();
             curRes.setExpression(new NotExpression(curRes.getExpression()));
             return select;

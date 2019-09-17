@@ -11,7 +11,7 @@ import net.sf.jsqlparser.statement.select.Join;
 
 public class PlainSelect extends net.sf.jsqlparser.statement.select.PlainSelect {
     private LinkedList<VarSelectExpression> vars = new LinkedList<VarSelectExpression>();
-    private String correspondOCLExpression = "Hello world";
+    private String correspondOCLExpression;
     
     public PlainSelect() {
         super();

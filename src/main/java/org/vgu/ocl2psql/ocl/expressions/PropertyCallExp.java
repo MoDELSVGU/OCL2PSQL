@@ -14,8 +14,10 @@ import java.util.List;
 import org.vgu.ocl2psql.ocl.context.OclContext;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
-import org.vgu.ocl2psql.sql.statement.select.MyPlainSelect;
+import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
+import org.vgu.ocl2psql.sql.statement.select.Select;
+import org.vgu.ocl2psql.sql.statement.select.SubSelect;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.VarSelectExpression;
 
@@ -31,8 +33,6 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SubSelect;
 
 /**
  * Class PropertyCallExp
@@ -67,7 +67,7 @@ public final class PropertyCallExp extends NavigationCallExp {
 //        Alias aliasSubSelectCurrentVar = new Alias("TEMP_".concat(currentVariable.getName()));
         Alias aliasSubSelectCurrentVar = new Alias("TEMP_obj");
         tempVar.setAlias(aliasSubSelectCurrentVar);
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
         Select finalSelect = new Select();
         finalSelect.setSelectBody(finalPlainSelect);
         String propertyName = this.name.substring(this.name.indexOf(":") + 1, this.name.length());
@@ -169,7 +169,7 @@ public final class PropertyCallExp extends NavigationCallExp {
 //                return finalSelect;
 //            }
             if(VariableUtils.isSourceAClassAllInstances(currentVarSource.getSelectBody(), propertyClass)) {
-                String tableName = ((Table) ((MyPlainSelect) currentVarSource.getSelectBody()).getFromItem()).getName();
+                String tableName = ((Table) ((PlainSelect) currentVarSource.getSelectBody()).getFromItem()).getName();
                 finalPlainSelect.setRes(resSelectExpression);
                 finalPlainSelect.setFromItem(new Table(tableName));
                 

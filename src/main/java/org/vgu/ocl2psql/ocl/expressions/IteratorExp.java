@@ -22,8 +22,9 @@ import org.vgu.ocl2psql.ocl.exception.SetOfSetException;
 import org.vgu.ocl2psql.ocl.impl.OclCollectionSupport;
 import org.vgu.ocl2psql.ocl.impl.OclIteratorSupport;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
-import org.vgu.ocl2psql.sql.statement.select.MyPlainSelect;
+import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
+import org.vgu.ocl2psql.sql.statement.select.Select;
 import org.vgu.ocl2psql.sql.statement.select.SubSelect;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.VarSelectExpression;
@@ -49,7 +50,6 @@ import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.Select;
 
 
 /**
@@ -349,7 +349,7 @@ public final class IteratorExp extends LoopExp {
         if(this.getSource() instanceof IteratorExp) {
             Select source = (Select) visitor.visit(this.getSource());
             
-            MyPlainSelect finalPlainSelect = new MyPlainSelect();
+            PlainSelect finalPlainSelect = new PlainSelect();
             Select finalSelect = new Select();
             finalSelect.setSelectBody(finalPlainSelect);
             
@@ -378,7 +378,7 @@ public final class IteratorExp extends LoopExp {
                 Alias aliasTempFlattenSource = new Alias("TEMP");
                 tempFlattenSource.setAlias(aliasTempFlattenSource);
                 
-                MyPlainSelect sCollectvB = new MyPlainSelect();
+                PlainSelect sCollectvB = new PlainSelect();
                 sCollectvB.setAllColumn();
                 sCollectvB.setFromItem(tempFlattenSource);
 
@@ -397,7 +397,7 @@ public final class IteratorExp extends LoopExp {
 
                 finalPlainSelect.setJoins(Arrays.asList(join));
                 
-                MyPlainSelect s = (MyPlainSelect) tempFlattenSource.getSelectBody();
+                PlainSelect s = (PlainSelect) tempFlattenSource.getSelectBody();
                 
                 SubSelect tempCollectSource = new SubSelect( s, "TEMP_src" );
 
@@ -457,14 +457,14 @@ public final class IteratorExp extends LoopExp {
 
     private Statement isUniqueMap(StmVisitor visitor) {
         Select sizeSourceSelect = (Select) visitor.visit(this.getSource());
-        MyPlainSelect sizeSourcePlainSelect = (MyPlainSelect) sizeSourceSelect.getSelectBody();
+        PlainSelect sizeSourcePlainSelect = (PlainSelect) sizeSourceSelect.getSelectBody();
         
         SubSelect finalSubSelect = new SubSelect();
         finalSubSelect.setSelectBody(sizeSourcePlainSelect);
         Alias aliasFinalSubSelect = new Alias("TEMP_unique_source");
         finalSubSelect.setAlias(aliasFinalSubSelect);
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
         Select finalSelect = new Select();
         finalSelect.setSelectBody(finalPlainSelect);
         
@@ -497,7 +497,7 @@ public final class IteratorExp extends LoopExp {
         Alias aliasTempSelectSource = new Alias("TEMP_src");
         tempSelectSource.setAlias(aliasTempSelectSource);
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
 
         if(visitor.getVisitorContext().stream()
                 .map(IteratorSource::getIterator)
@@ -513,14 +513,14 @@ public final class IteratorExp extends LoopExp {
         
         String currentIter = this.getIterator().getName();
 
-//        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempSelectSource.getSelectBody());
-//        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempSelectBody.getSelectBody());
+//        List<String> fVarsSource = VariableUtils.FVars((PlainSelect) tempSelectSource.getSelectBody());
+//        List<String> fVarsBody = VariableUtils.FVars((PlainSelect) tempSelectBody.getSelectBody());
         List<String> fVarsSource = VariableUtils.FVars(this.getSource());
         List<String> fVarsBody = VariableUtils.FVars(this.getBody());
 
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty()) {
-                MyPlainSelect gBody = new MyPlainSelect();
+                PlainSelect gBody = new PlainSelect();
                 gBody.setFromItem(tempSelectBody);
                 gBody.getSelectItems().clear();
                 gBody.addSelectItems(new AllColumns());
@@ -554,7 +554,7 @@ public final class IteratorExp extends LoopExp {
                 finalPlainSelect.setFromItem(tempGBody);
             }
             else {
-                MyPlainSelect gBody = new MyPlainSelect();
+                PlainSelect gBody = new PlainSelect();
                 gBody.setFromItem(tempSelectBody);
                 gBody.getSelectItems().clear();
                 gBody.addSelectItems(new AllColumns());
@@ -635,7 +635,7 @@ public final class IteratorExp extends LoopExp {
         
         SubSelect tempAsSetSource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
@@ -663,7 +663,7 @@ public final class IteratorExp extends LoopExp {
         Alias aliasTempExistsSource = new Alias("TEMP_src");
         tempExistsSource.setAlias(aliasTempExistsSource);
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
 
         if(visitor.getVisitorContext().stream()
                 .map(IteratorSource::getIterator)
@@ -715,7 +715,7 @@ public final class IteratorExp extends LoopExp {
                 Alias aliasTempVar = new Alias("TEMP_src");
                 tempVar.setAlias(aliasTempVar);
                 
-                MyPlainSelect gBody = new MyPlainSelect();
+                PlainSelect gBody = new PlainSelect();
                 gBody.setFromItem(tempExistsBody);
                 gBody.getSelectItems().clear();
                 
@@ -875,7 +875,7 @@ public final class IteratorExp extends LoopExp {
         Alias aliasTempForAllSource = new Alias("TEMP_src");
         tempForAllSource.setAlias(aliasTempForAllSource);
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
 
         if(visitor.getVisitorContext().stream()
                 .map(IteratorSource::getIterator)
@@ -926,7 +926,7 @@ public final class IteratorExp extends LoopExp {
                 Alias aliasTempVar = new Alias("TEMP_src");
                 tempVar.setAlias(aliasTempVar);
                 
-                MyPlainSelect gBody = new MyPlainSelect();
+                PlainSelect gBody = new PlainSelect();
                 gBody.setFromItem(tempForAllBody);
                 
                 SubSelect tempGBody = new SubSelect();
@@ -1091,7 +1091,7 @@ public final class IteratorExp extends LoopExp {
         Alias aliasTempSelectSource = new Alias("TEMP_src");
         tempSelectSource.setAlias(aliasTempSelectSource);
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
 
         if(visitor.getVisitorContext().stream()
                 .map(IteratorSource::getIterator)
@@ -1109,7 +1109,7 @@ public final class IteratorExp extends LoopExp {
         List<String> fVarsBody = VariableUtils.FVars(this.getBody());
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty()) {
-                MyPlainSelect gBody = new MyPlainSelect();
+                PlainSelect gBody = new PlainSelect();
                 gBody.setFromItem(tempSelectBody);
                 gBody.getSelectItems().clear();
                 gBody.addSelectItems(new AllColumns());
@@ -1137,7 +1137,7 @@ public final class IteratorExp extends LoopExp {
                 finalPlainSelect.setFromItem(tempGBody);
             }
             else {
-                MyPlainSelect gBody = new MyPlainSelect();
+                PlainSelect gBody = new PlainSelect();
                 gBody.setFromItem(tempSelectBody);
                 gBody.getSelectItems().clear();
                 gBody.addSelectItems(new AllColumns());
@@ -1218,7 +1218,7 @@ public final class IteratorExp extends LoopExp {
         
         SubSelect tempNotEmptySource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
@@ -1291,7 +1291,7 @@ public final class IteratorExp extends LoopExp {
         
         SubSelect tempEmptySource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
@@ -1371,7 +1371,7 @@ public final class IteratorExp extends LoopExp {
         Alias aliasTempCollectSource = new Alias("TEMP_src");
         tempCollectSource.setAlias(aliasTempCollectSource);
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
 
         if(visitor.getVisitorContext().stream()
                 .map(IteratorSource::getIterator)
@@ -1448,7 +1448,7 @@ public final class IteratorExp extends LoopExp {
         
         SubSelect tempSizeSource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         

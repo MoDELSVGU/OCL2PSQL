@@ -23,8 +23,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
-import org.vgu.ocl2psql.sql.statement.select.MyPlainSelect;
+import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.RefSelectExpression;
+import org.vgu.ocl2psql.sql.statement.select.Select;
+import org.vgu.ocl2psql.sql.statement.select.SubSelect;
 import org.vgu.ocl2psql.sql.statement.select.VarSelectExpression;
 
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -33,16 +35,13 @@ import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.SubSelect;
 
 public class VariableUtils {
     public static BinaryExpression onMappingCondition(SubSelect mainSubSelect, SubSelect joinSubSelect) {
-        MyPlainSelect selectBodyLeft = (MyPlainSelect) mainSubSelect.getSelectBody();
-        MyPlainSelect selectBodyRight = (MyPlainSelect) joinSubSelect.getSelectBody();
+        PlainSelect selectBodyLeft = (PlainSelect) mainSubSelect.getSelectBody();
+        PlainSelect selectBodyRight = (PlainSelect) joinSubSelect.getSelectBody();
         BinaryExpression onCondition = null;
         
         for(VarSelectExpression selectItemLeft : selectBodyLeft.getVars()) {
@@ -62,8 +61,8 @@ public class VariableUtils {
         return onCondition;
     }
     
-    public static void reserveVars(MyPlainSelect target, SubSelect source){
-        MyPlainSelect selectBody = (MyPlainSelect) source.getSelectBody();
+    public static void reserveVars(PlainSelect target, SubSelect source){
+        PlainSelect selectBody = (PlainSelect) source.getSelectBody();
         List<VarSelectExpression> targetRefList = target.getVars();
         for(VarSelectExpression var : selectBody.getVars()) {
                 if(!targetRefList.contains(var)) {
@@ -84,8 +83,8 @@ public class VariableUtils {
         return null;
     }
 
-    public static void reserveVarsForCollect(MyPlainSelect target, SubSelect source, Variable iterator) {
-        MyPlainSelect selectBody = (MyPlainSelect) source.getSelectBody();
+    public static void reserveVarsForCollect(PlainSelect target, SubSelect source, Variable iterator) {
+        PlainSelect selectBody = (PlainSelect) source.getSelectBody();
         LinkedList<VarSelectExpression> targetRefList = target.getVars();
         for(VarSelectExpression var : selectBody.getVars()) {
             if(!targetRefList.contains(var)) {
@@ -98,8 +97,8 @@ public class VariableUtils {
         }
     }
     
-    public static void reserveVarsExcludeOne(MyPlainSelect target, SubSelect source, Variable iterator) {
-        MyPlainSelect selectBody = (MyPlainSelect) source.getSelectBody();
+    public static void reserveVarsExcludeOne(PlainSelect target, SubSelect source, Variable iterator) {
+        PlainSelect selectBody = (PlainSelect) source.getSelectBody();
         LinkedList<VarSelectExpression> targetRefList = target.getVars();
         for(VarSelectExpression var : selectBody.getVars()) {
             if(!targetRefList.contains(var)) {
@@ -146,7 +145,7 @@ public class VariableUtils {
         return variableExp.getReferredVariable().getName();
     }
     
-    public static List<Expression> getGroupingVariablesExcludeOne(MyPlainSelect bodyBooleanExp, Variable excludeVariable) {
+    public static List<Expression> getGroupingVariablesExcludeOne(PlainSelect bodyBooleanExp, Variable excludeVariable) {
         List<Expression> groupByExps = new ArrayList<Expression>();
         
         for(VarSelectExpression var : bodyBooleanExp.getVars()) {
@@ -169,7 +168,7 @@ public class VariableUtils {
     }
 
     public static boolean isSourceAClassAllInstances(SelectBody selectBody, String className) {
-        MyPlainSelect plainSelectVar = (MyPlainSelect) selectBody;
+        PlainSelect plainSelectVar = (PlainSelect) selectBody;
         return (plainSelectVar.getFromItem() instanceof Table) && ((Table) plainSelectVar.getFromItem()).getName().equals(className);
     }
 

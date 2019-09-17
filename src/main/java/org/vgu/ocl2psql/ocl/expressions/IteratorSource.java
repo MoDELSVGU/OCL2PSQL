@@ -1,6 +1,6 @@
 package org.vgu.ocl2psql.ocl.expressions;
 
-import net.sf.jsqlparser.statement.select.Select;
+import org.vgu.ocl2psql.sql.statement.select.Select;
 
 public class IteratorSource {
 	private Variable iterator;
