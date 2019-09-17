@@ -65,18 +65,19 @@ public final class IteratorExp extends LoopExp {
 	this.kind = kind;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object eval(OclContext context) throws OclEvaluationException {
 	Object source = this.source.eval(context);
-	Collection<?> collection;
+	Collection<Object> collection;
 	if (source == null) {
 	    collection = Collections.emptyList();
 	} else if (source.getClass().isArray()) {
 	    collection = Arrays.asList((Object[])source);
-	} else if (!(source instanceof Collection<?>)) {
+	} else if (!(source instanceof Collection)) {
 	    collection = Collections.singletonList(source);
 	} else {
-	    collection = (Collection<?>) source;
+	    collection = (Collection<Object>) source;
 	}
 	switch (kind) {
 	case isEmpty:
@@ -101,8 +102,8 @@ public final class IteratorExp extends LoopExp {
 		if (!(body instanceof Number))
 		    throw new OclEvaluationException(
 			    "argument for at must be an instance of Integer or Real!");
-		if (collection instanceof List<?>) {
-		    return OclCollectionSupport.at((List<?>) collection,
+		if (collection instanceof List) {
+		    return OclCollectionSupport.at((List<Object>) collection,
 			    (Number) body);
 		} else {
 		    throw new OclEvaluationException("at cannot be applied to "
@@ -112,8 +113,8 @@ public final class IteratorExp extends LoopExp {
 	case indexOf:
 	    if (this.getBody() != null) {
 		Object body = this.getBody().eval(context);
-		if (collection instanceof List<?>) {
-		    return OclCollectionSupport.indexOf((List<?>) collection,
+		if (collection instanceof List) {
+		    return OclCollectionSupport.indexOf((List<Object>) collection,
 			    body);
 		} else {
 		    throw new OclEvaluationException(
@@ -124,23 +125,23 @@ public final class IteratorExp extends LoopExp {
 	case count:
 	    if (this.getBody() != null) {
 		Object body = this.getBody().eval(context);
-		return OclCollectionSupport.count((Collection<?>) collection,
+		return OclCollectionSupport.count((Collection<Object>) collection,
 			body);
 	    }
 	case first:
-	    if (collection instanceof List<?>) {
-		return OclCollectionSupport.first((List<?>) collection);
-	    } else if (collection instanceof SortedSet<?>) {
-		return OclCollectionSupport.first((SortedSet<?>) collection);
+	    if (collection instanceof List) {
+		return OclCollectionSupport.first((List<Object>) collection);
+	    } else if (collection instanceof SortedSet) {
+		return OclCollectionSupport.first((SortedSet<Object>) collection);
 	    } else {
 		throw new OclEvaluationException("first cannot be applied to "
 			+ collection.getClass().getName());
 	    }
 	case last:
-	    if (collection instanceof List<?>) {
-		return OclCollectionSupport.last((List<?>) collection);
-	    } else if (collection instanceof SortedSet<?>) {
-		return OclCollectionSupport.last((SortedSet<?>) collection);
+	    if (collection instanceof List) {
+		return OclCollectionSupport.last((List<Object>) collection);
+	    } else if (collection instanceof SortedSet) {
+		return OclCollectionSupport.last((SortedSet<Object>) collection);
 	    } else {
 		throw new OclEvaluationException("last cannot be applied to "
 			+ collection.getClass().getName());
@@ -168,26 +169,26 @@ public final class IteratorExp extends LoopExp {
 	case union:
 	    if (this.getBody() != null) {
 		Object body = this.getBody().eval(context);
-		Collection<?> bodyCollection;
+		Collection<Object> bodyCollection;
 		if (body == null) {
 		    bodyCollection = Collections.emptyList();
-		} else if (!(body instanceof Collection<?>)) {
+		} else if (!(body instanceof Collection)) {
 		    bodyCollection = Collections.singletonList(body);
 		} else {
-		    bodyCollection = (Collection<?>) body;
+		    bodyCollection = (Collection<Object>) body;
 		}
 		return OclCollectionSupport.union(collection, bodyCollection);
 	    }
 	case includesAll:
 	    if (this.getBody() != null) {
 		Object body = this.getBody().eval(context);
-		Collection<?> bodyCollection;
+		Collection<Object> bodyCollection;
 		if (body == null) {
 		    bodyCollection = Collections.emptyList();
-		} else if (!(body instanceof Collection<?>)) {
+		} else if (!(body instanceof Collection)) {
 		    bodyCollection = Collections.singletonList(body);
 		} else {
-		    bodyCollection = (Collection<?>) body;
+		    bodyCollection = (Collection<Object>) body;
 		}
 		return OclCollectionSupport.includesAll(collection,
 			bodyCollection);
@@ -195,13 +196,13 @@ public final class IteratorExp extends LoopExp {
 	case excludesAll:
 	    if (this.getBody() != null) {
 		Object body = this.getBody().eval(context);
-		Collection<?> bodyCollection;
+		Collection<Object> bodyCollection;
 		if (body == null) {
 		    bodyCollection = Collections.emptyList();
 		} else if (!(body instanceof Collection<?>)) {
 		    bodyCollection = Collections.singletonList(body);
 		} else {
-		    bodyCollection = (Collection<?>) body;
+		    bodyCollection = (Collection<Object>) body;
 		}
 		return OclCollectionSupport.excludesAll(collection,
 			bodyCollection);
@@ -260,6 +261,8 @@ public final class IteratorExp extends LoopExp {
 		return OclIteratorSupport.sortedBy(collection, context,
 			iteratorName, this.getBody());
 	    }
+    default:
+        break;
 	}
 	throw new OclEvaluationException("cannot evaluate: '->" + kind.name()
 		+ "(" + getIterator().getName() + "|" + getBody() + ")");
@@ -400,7 +403,7 @@ public final class IteratorExp extends LoopExp {
 
                 finalPlainSelect.setFromItem(tempCollectSource);
                 
-                String flattenVar = ((IteratorExp) this.getSource()).getIterator().getName();
+//                String flattenVar = ((IteratorExp) this.getSource()).getIterator().getName();
                 
                 IsNullExpression isOuterRefNull = new IsNullExpression();
                 isOuterRefNull.setLeftExpression(new Column(aliasTempFlat.getName().concat(".val")));
@@ -1382,9 +1385,7 @@ public final class IteratorExp extends LoopExp {
         tempCollectBody.setAlias(aliasTempCollectBody);
         
         String currentIter = this.getIterator().getName();
-//        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempCollectSource.getSelectBody());
-//        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempCollectBody.getSelectBody());
-        List<String> fVarsSource = VariableUtils.FVars(this.getSource());
+//        List<String> fVarsSource = VariableUtils.FVars(this.getSource());
         List<String> fVarsBody = VariableUtils.FVars(this.getBody());
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {

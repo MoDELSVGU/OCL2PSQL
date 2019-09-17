@@ -15,7 +15,6 @@ import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 
 /**

@@ -29,10 +29,9 @@ public final class TupleLiteralExp extends LiteralExp {
 	this.parts = Arrays.asList(parts);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Object eval(OclContext context) throws OclEvaluationException {
-	Map map = new HashMap();
+	Map<OclExpression, OclExpression> map = new HashMap<OclExpression, OclExpression>();
 	for (TupleLiteralPart part : parts) {
 	    map.put(part.key, part.item);
 	}

@@ -16,7 +16,7 @@ import org.vgu.ocl2psql.ocl.expressions.OclExpression;
 
 public class OclIteratorSupport {
 
-    public static Boolean exists(Collection<?> source, OclContext context,
+    public static Boolean exists(Collection<Object> source, OclContext context,
 	    String iteratorName, OclExpression body)
 	    throws OclEvaluationException {
 	CascadingOclContext innerContext = new CascadingOclContext(context);
@@ -28,7 +28,7 @@ public class OclIteratorSupport {
 	return false;
     }
 
-    public static Boolean forAll(Collection<?> source, OclContext context,
+    public static Boolean forAll(Collection<Object> source, OclContext context,
 	    String iteratorName, OclExpression body)
     throws OclEvaluationException {
 	CascadingOclContext innerContext = new CascadingOclContext(context);
@@ -40,11 +40,10 @@ public class OclIteratorSupport {
 	return true;
     }
     
-    @SuppressWarnings("unchecked")
-    public static Collection collect(Collection source, OclContext context,
+    public static Collection<Object> collect(Collection<Object> source, OclContext context,
 	    String iteratorName, OclExpression body)
 	    throws OclEvaluationException {
-	List list = new ArrayList();
+	List<Object> list = new ArrayList<Object>();
 	CascadingOclContext innerContext = new CascadingOclContext(context);
 
 	for (Object object : source) {
@@ -54,14 +53,13 @@ public class OclIteratorSupport {
 	return list;
     }
 
-    @SuppressWarnings("unchecked")
-    public static Collection select(Collection source, OclContext context,
+    public static Collection<Object> select(Collection<Object> source, OclContext context,
 	    String iteratorName, OclExpression body)
 	    throws OclEvaluationException {
 
 	CascadingOclContext innerContext = new CascadingOclContext(context);
 	if (source instanceof Set) {
-	    Set set = new HashSet();
+	    Set<Object> set = new HashSet<Object>();
 	    for (Object object : source) {
 		innerContext.setVariable(iteratorName, object);
 		if ((Boolean) body.eval(innerContext))
@@ -69,7 +67,7 @@ public class OclIteratorSupport {
 	    }
 	    return set;
 	} else if (source instanceof SortedSet) {
-	    SortedSet set = new TreeSet();
+	    SortedSet<Object> set = new TreeSet<Object>();
 	    for (Object object : source) {
 		innerContext.setVariable(iteratorName, object);
 		if ((Boolean) body.eval(innerContext))
@@ -77,7 +75,7 @@ public class OclIteratorSupport {
 	    }
 	    return set;
 	} else {
-	    List list = new ArrayList();
+	    List<Object> list = new ArrayList<Object>();
 	    for (Object object : source) {
 		innerContext.setVariable(iteratorName, object);
 		if ((Boolean) body.eval(innerContext))
@@ -87,14 +85,14 @@ public class OclIteratorSupport {
 	}
     }
 
-    @SuppressWarnings("unchecked")
-    public static Collection reject(Collection source, OclContext context,
+    
+    public static Collection<Object> reject(Collection<Object> source, OclContext context,
 	    String iteratorName, OclExpression body)
 	    throws OclEvaluationException {
 	CascadingOclContext innerContext = new CascadingOclContext(context);
 
 	if (source instanceof Set) {
-	    Set set = new HashSet();
+	    Set<Object> set = new HashSet<Object>();
 	    for (Object object : source) {
 		innerContext.setVariable(iteratorName, object);
 		if (!(Boolean) body.eval(innerContext))
@@ -102,7 +100,7 @@ public class OclIteratorSupport {
 	    }
 	    return set;
 	} else if (source instanceof SortedSet) {
-	    SortedSet set = new TreeSet();
+	    SortedSet<Object> set = new TreeSet<Object>();
 	    for (Object object : source) {
 		innerContext.setVariable(iteratorName, object);
 		if (!(Boolean) body.eval(innerContext))
@@ -110,7 +108,7 @@ public class OclIteratorSupport {
 	    }
 	    return set;
 	} else {
-	    List list = new ArrayList();
+	    List<Object> list = new ArrayList<Object>();
 	    for (Object object : source) {
 		innerContext.setVariable(iteratorName, object);
 		if (!(Boolean) body.eval(innerContext))
@@ -120,14 +118,15 @@ public class OclIteratorSupport {
 	}
     }
 
-    @SuppressWarnings("unchecked")
-    public static Collection sortedBy(Collection source,
+    
+    public static Collection<Object> sortedBy(Collection<Object> source,
 	    final OclContext context, final String iteratorName,
 	    final OclExpression body) throws OclEvaluationException {
 	try {
-	    SortedSet set = new TreeSet(new Comparator() {
+	    SortedSet<Object> set = new TreeSet<Object>(new Comparator<Object>() {
 
-		public int compare(Object o1, Object o2) {
+		@SuppressWarnings("unchecked")
+        public int compare(Object o1, Object o2) {
 		    try {
 			CascadingOclContext innerContext = new CascadingOclContext(
 				context);
@@ -137,7 +136,7 @@ public class OclIteratorSupport {
 			innerContext.setVariable(iteratorName, o2);
 			Object r2 = body.eval(innerContext);
 			if (r1 instanceof Comparable) {
-			    return ((Comparable) r1).compareTo(r2);
+			    return ((Comparable<Object>) r1).compareTo(r2);
 			} else {
 			    return 0;
 			}
@@ -156,28 +155,28 @@ public class OclIteratorSupport {
 	}
     }
 
-    public static Object any(Collection<?> source, OclContext context,
+    public static Object any(Collection<Object> source, OclContext context,
 	    String iteratorName, OclExpression body)
 	    throws OclEvaluationException {
-	Collection<?> anys = select(source, context, iteratorName, body);
+	Collection<Object> anys = select(source, context, iteratorName, body);
 	if (anys.isEmpty())
 	    return null;
 	else
 	    return anys.iterator().next();
     }
 
-    public static Boolean one(Collection<?> source, OclContext context,
+    public static Boolean one(Collection<Object> source, OclContext context,
 	    String iteratorName, OclExpression body)
 	    throws OclEvaluationException {
 	return select(source, context, iteratorName, body).size() == 1;
     }
 
-    @SuppressWarnings("unchecked")
-    public static Boolean isUnique(Collection source, OclContext context,
+    
+    public static Boolean isUnique(Collection<Object> source, OclContext context,
 	    String iteratorName, OclExpression body)
 	    throws OclEvaluationException {
 	CascadingOclContext innerContext = new CascadingOclContext(context);
-	Set set = new HashSet();
+	Set<Object> set = new HashSet<Object>();
 	for (Object object : source) {
 	    innerContext.setVariable(iteratorName, object);
 	    if (!set.add(body.eval(innerContext)))
