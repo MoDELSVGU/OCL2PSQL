@@ -131,7 +131,7 @@ public class TesterOCL2SQLParser {
             test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->asSet()");
             test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners->asSet())->flatten()");
 
-            test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1.color=c.color)))");
+            test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1.Car:color=c.Car:color)))");
             test(ocl2psql, "Car::allInstances()->forAll(c|'blue'=c.Car:color)");
         }
     }
