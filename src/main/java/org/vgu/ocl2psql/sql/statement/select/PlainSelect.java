@@ -95,9 +95,9 @@ public class PlainSelect extends net.sf.jsqlparser.statement.select.PlainSelect 
         StringBuilder sql = new StringBuilder();
         if (super.isUseBrackets()) {
             sql.append("(");
-            sql.append(String.format("\n//*** BEGIN: %s ***//\n", this.correspondOCLExpression));
+            sql.append(String.format("\n/*** BEGIN: %s ***/\n", this.correspondOCLExpression));
         } else {
-            sql.append(String.format("\n//*** BEGIN: %s ***//\n", this.correspondOCLExpression));
+            sql.append(String.format("\n/*** BEGIN: %s ***/\n", this.correspondOCLExpression));
         }
         sql.append("SELECT ");
 
@@ -139,18 +139,24 @@ public class PlainSelect extends net.sf.jsqlparser.statement.select.PlainSelect 
 
         if (super.getFromItem() != null) {
             if(super.getFromItem() instanceof SubSelect) {
-                sql.append(" FROM ").append(((SubSelect) super.getFromItem()).toStringWithDescription());
+                sql.append("\nFROM ").append(((SubSelect) super.getFromItem()).toStringWithDescription());
             } else {
-                sql.append(" FROM ").append(super.getFromItem());
+                sql.append("\nFROM ").append(super.getFromItem());
             }
             if (super.getJoins() != null) {
                 Iterator<Join> it = super.getJoins().iterator();
                 while (it.hasNext()) {
                     Join join = it.next();
-                    if (join.isSimple()) {
-                        sql.append(", ").append(join);
+                    String joinText;
+                    if(join instanceof org.vgu.ocl2psql.sql.statement.select.Join) {
+                        joinText = ((org.vgu.ocl2psql.sql.statement.select.Join) join).toStringWithDescription(); 
                     } else {
-                        sql.append(" ").append(join);
+                        joinText = join.toString();
+                    }
+                    if (join.isSimple()) {
+                        sql.append(",\n").append(joinText);
+                    } else {
+                        sql.append("\n").append(joinText);
                     }
                 }
             }
@@ -159,16 +165,16 @@ public class PlainSelect extends net.sf.jsqlparser.statement.select.PlainSelect 
                 sql.append(" WINDOW ").append(super.getKsqlWindow().toString());
             }
             if (super.getWhere() != null) {
-                sql.append(" WHERE ").append(super.getWhere());
+                sql.append("\nWHERE ").append(super.getWhere());
             }
             if (super.getOracleHierarchical() != null) {
                 sql.append(super.getOracleHierarchical().toString());
             }
             if (super.getGroupBy() != null) {
-                sql.append(" ").append(super.getGroupBy().toString());
+                sql.append("\n").append(super.getGroupBy().toString());
             }
             if (super.getHaving() != null) {
-                sql.append(" HAVING ").append(super.getHaving());
+                sql.append("\nHAVING ").append(super.getHaving());
             }
             sql.append(orderByToString(super.isOracleSiblings(), super.getOrderByElements()));
             if (super.getLimit() != null) {
@@ -205,10 +211,10 @@ public class PlainSelect extends net.sf.jsqlparser.statement.select.PlainSelect 
             sql.append(" FOR XML PATH(").append(super.getForXmlPath()).append(")");
         }
         if (super.isUseBrackets()) {
-            sql.append(String.format("\n//*** END: %s ***//\n", this.correspondOCLExpression));
+            sql.append(String.format("\n/*** END: %s ***/\n", this.correspondOCLExpression));
             sql.append(")");
         } else {
-            sql.append(String.format("\n//*** END: %s ***//\n", this.correspondOCLExpression));
+            sql.append(String.format("\n/*** END: %s ***/\n", this.correspondOCLExpression));
         }
         return sql.toString();
     }

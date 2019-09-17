@@ -22,6 +22,7 @@ import org.vgu.ocl2psql.ocl.exception.SetOfSetException;
 import org.vgu.ocl2psql.ocl.impl.OclCollectionSupport;
 import org.vgu.ocl2psql.ocl.impl.OclIteratorSupport;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
+import org.vgu.ocl2psql.sql.statement.select.Join;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
@@ -49,7 +50,6 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.GroupByElement;
-import net.sf.jsqlparser.statement.select.Join;
 
 
 /**

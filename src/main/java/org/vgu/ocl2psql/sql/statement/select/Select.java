@@ -46,5 +46,4 @@ public class Select extends net.sf.jsqlparser.statement.select.Select{
         }
         return retval.toString();
     }
-
 }

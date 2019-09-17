@@ -23,6 +23,7 @@ import org.vgu.ocl2psql.ocl.impl.OclCollectionSupport;
 import org.vgu.ocl2psql.ocl.impl.OclNumberSupport;
 import org.vgu.ocl2psql.ocl.impl.OclStringSupport;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
+import org.vgu.ocl2psql.sql.statement.select.Join;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
@@ -50,7 +51,6 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.Join;
 
 
 
