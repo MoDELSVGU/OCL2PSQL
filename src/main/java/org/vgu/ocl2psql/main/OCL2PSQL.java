@@ -40,6 +40,10 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 public class OCL2PSQL {
     private OCL2SQLParser ocl2sqlParser;
     
+    public OCL2SQLParser getOcl2sqlParser() {
+        return ocl2sqlParser;
+    }
+
     public OCL2PSQL() {
         ocl2sqlParser = new OCL2SQLParser();
     }

@@ -270,7 +270,12 @@ public class VariableUtils {
                 continue;
             }
             SVars.add(var);
-            SVars.addAll(SVars(srcVarExpression, visitor));
+            for(String srcVar : SVars(srcVarExpression, visitor)) {
+                if(SVars.contains( srcVar )) {
+                    continue;
+                }
+                SVars.add( srcVar );
+            }
         }
         return SVars;
     }
