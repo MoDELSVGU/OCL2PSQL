@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.SortedSet;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
+import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.ocl.exception.SetOfSetException;
 import org.vgu.ocl2psql.ocl.impl.OclCollectionSupport;
@@ -63,6 +64,11 @@ public final class IteratorExp extends LoopExp {
 	    Variable iterator, OclExpression body) {
 	super(source, iterator, body);
 	this.kind = kind;
+    }
+    
+    @Override
+    public void accept( DeparserVisitor visitor ) {
+        visitor.visit( this );
     }
 
     @SuppressWarnings("unchecked")

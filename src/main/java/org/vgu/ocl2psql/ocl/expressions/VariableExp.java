@@ -9,6 +9,7 @@
 package org.vgu.ocl2psql.ocl.expressions;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
+import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
 
 import net.sf.jsqlparser.statement.Statement;
 
@@ -32,6 +33,11 @@ public class VariableExp extends OclExpression {
 
 	public Variable getReferredVariable() {
 		return referredVariable;
+	}
+	
+	@Overrid
+	public void accpet( DeparserVisitor visitor ) {
+	    visitor.visit( this );
 	}
 
     @Override
