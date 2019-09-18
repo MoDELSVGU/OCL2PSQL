@@ -144,9 +144,10 @@ public class TesterOCL2SQLParser {
 //            test(ocl2psql, "Car::allInstances()->forAll(c|not (c.Car:color = 'blue'))");
 //            test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:color = 'blue')");
 
-            String test = "Car::allInstances()->exists(c|not (c.Car:color = 'blue'))";
+//            String test = "Car::allInstances()->exists(c|not (c.Car:color = 'blue'))";
 //            String test = "Car::allInstances()->asSet()";
-//            String test = "Car::allInstances()->forAll(c|c.color = 'blue')";
+            String test = "Person::allInstances()->forAll(p|p.name = true)";
+//            String test = "Person::allInstances()->forAll(p|p.name = 1)";
 //            String test = "Car::allInstances()->collect(c|c.color)";
             System.out.println( test );
             System.out.println( "\n==============~ Result ~==============\n" );

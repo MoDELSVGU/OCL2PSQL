@@ -19,6 +19,8 @@ limitations under the License.
 
 package org.vgu.ocl2psql.ocl.deparser;
 
+import org.vgu.ocl2psql.ocl.expressions.BooleanLiteralExp;
+import org.vgu.ocl2psql.ocl.expressions.IntegerLiteralExp;
 import org.vgu.ocl2psql.ocl.expressions.IteratorExp;
 import org.vgu.ocl2psql.ocl.expressions.OclExpression;
 import org.vgu.ocl2psql.ocl.expressions.OperationCallExp;
@@ -66,6 +68,14 @@ public class OclExpressionDeParser implements DeparserVisitor {
         else if ( oclExp instanceof StringLiteralExp ) {
             visit( (StringLiteralExp) oclExp );
         }
+        else if ( oclExp instanceof BooleanLiteralExp ) {
+            visit( (BooleanLiteralExp) oclExp );
+        }
+        else if ( oclExp instanceof IntegerLiteralExp ) {
+            visit( (IntegerLiteralExp) oclExp );
+        }
+
+
 
     }
     
@@ -102,6 +112,18 @@ public class OclExpressionDeParser implements DeparserVisitor {
     public void visit(StringLiteralExp strLiteralExp) {
         StringLiteralExpDeParser deParser = new StringLiteralExpDeParser();
         strLiteralExp.accept( deParser );
+        this.deParsedStr = this.deParsedStr.concat( deParser.getDeParsedStr() );
+    }
+    
+    public void visit(BooleanLiteralExp booleanLiteralExp) {
+        BooleanLiteralExpDeParser deParser = new BooleanLiteralExpDeParser();
+        booleanLiteralExp.accept( deParser );
+        this.deParsedStr = this.deParsedStr.concat( deParser.getDeParsedStr() );
+    }
+    
+    public void visit(IntegerLiteralExp integerLiteralExp) {
+        IntegerLiteralExpDeParser deParser = new IntegerLiteralExpDeParser();
+        integerLiteralExp.accept( deParser );
         this.deParsedStr = this.deParsedStr.concat( deParser.getDeParsedStr() );
     }
     
