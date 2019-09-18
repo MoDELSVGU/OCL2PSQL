@@ -81,15 +81,6 @@ public class PlainSelect extends net.sf.jsqlparser.statement.select.PlainSelect 
     public LinkedList<VarSelectExpression> getVars() {
         return this.vars;
     }
-
-//    public String toStringWithDescription() {
-//        if(this.correspondOCLExpression == null || this.correspondOCLExpression.isEmpty()) {
-//            return this.toString();
-//        } else {
-//            String descriptionSchema = "\n//*** BEGIN: %1$s ***//\n%2$s\n//*** END: %1$s ***//\n";
-//            return String.format(descriptionSchema, this.correspondOCLExpression, this.toString());
-//        }
-//    }
     
     public String toStringWithDescription() {
         StringBuilder sql = new StringBuilder();
