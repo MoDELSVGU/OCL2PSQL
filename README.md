@@ -80,10 +80,12 @@ An easy way to use `OCL2PSQL` library is
 OCL2PSQL ocl2psql = new OCL2PSQL();
 String filePath = "/absolute/path/of/contextual/data/model";
 ocl2psql.setPlainUMLContextFromFile(filePath);
+ocl2psql.setDescriptionMode(true);
 
 String oclExpression = "Car::allInstances()->collect(c.Car:owners->isUnique())";
 String finalStatement = ocl2psql.mapToString(oclExpression);
 ```
 ###### The contextual data model definition can be found in the manuscript above.
+###### Description mode add OCL sub-expressions as comments to generated SQL statements. Its default value is false.
 
 For the interested individuals, we provide one sample scenario where the *contextual model* of the OCL expressions can be translated by the model `CarOwnership` [(See here)](http://researcher-paper.ap-southeast-1.elasticbeanstalk.com/model.html) and the generated SQL expressions are *solely* intended for the database schema CarDB [(See here)](http://researcher-paper.ap-southeast-1.elasticbeanstalk.com/schema.html). 
