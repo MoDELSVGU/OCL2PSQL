@@ -19,11 +19,7 @@ limitations under the License.
 
 package org.vgu.ocl2psql.ocl.deparser;
 
-import org.vgu.ocl2psql.ocl.expressions.IteratorExp;
 import org.vgu.ocl2psql.ocl.expressions.OclExpression;
-import org.vgu.ocl2psql.ocl.expressions.OperationCallExp;
-import org.vgu.ocl2psql.ocl.expressions.PropertyCallExp;
-import org.vgu.ocl2psql.ocl.expressions.TypeExp;
 
 public interface DeparserVisitor {
     

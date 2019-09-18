@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
+import org.vgu.ocl2psql.ocl.deparser.OclExpressionDeParser;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.ocl.impl.OclAnySupport;
 import org.vgu.ocl2psql.ocl.impl.OclBooleanSupport;
@@ -247,6 +248,9 @@ public final class OperationCallExp extends FeatureCallExp {
     @Override
     public Statement map(StmVisitor visitor) {
         PlainSelect finalPlainSelect = new PlainSelect();
+        OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
+        this.accept(oclExpressionDeParser);
+        finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
         
         if("allInstances".equals(this.name)) {
             ((OCL2SQLParser) visitor).increaseLevelOfSet();

@@ -9,6 +9,7 @@
 package org.vgu.ocl2psql.ocl.expressions;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
+import org.vgu.ocl2psql.ocl.deparser.OclExpressionDeParser;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
@@ -38,6 +39,9 @@ public class StringLiteralExp extends PrimitiveLiteralExp {
 	@Override
 	public Statement map(StmVisitor visitor) {
 	    PlainSelect finalPlainSelect = new PlainSelect();
+	    OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
+	    this.accept(oclExpressionDeParser);
+	    finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
         ResSelectExpression resExpression = new ResSelectExpression(new StringValue(this.stringSymbol));
         finalPlainSelect.setRes(resExpression);
         

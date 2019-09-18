@@ -95,9 +95,11 @@ public class PlainSelect extends net.sf.jsqlparser.statement.select.PlainSelect 
         StringBuilder sql = new StringBuilder();
         if (super.isUseBrackets()) {
             sql.append("(");
-            sql.append(String.format("\n/*** BEGIN: %s ***/\n", this.correspondOCLExpression));
+            if(this.correspondOCLExpression != null && !this.correspondOCLExpression.isEmpty())
+                sql.append(String.format("\n/*** BEGIN: %s ***/\n", this.correspondOCLExpression));
         } else {
-            sql.append(String.format("\n/*** BEGIN: %s ***/\n", this.correspondOCLExpression));
+            if(this.correspondOCLExpression != null && !this.correspondOCLExpression.isEmpty())
+                sql.append(String.format("\n/*** BEGIN: %s ***/\n", this.correspondOCLExpression));
         }
         sql.append("SELECT ");
 
@@ -211,10 +213,12 @@ public class PlainSelect extends net.sf.jsqlparser.statement.select.PlainSelect 
             sql.append(" FOR XML PATH(").append(super.getForXmlPath()).append(")");
         }
         if (super.isUseBrackets()) {
-            sql.append(String.format("\n/*** END: %s ***/\n", this.correspondOCLExpression));
+            if(this.correspondOCLExpression != null && !this.correspondOCLExpression.isEmpty())
+                sql.append(String.format("\n/*** END: %s ***/\n", this.correspondOCLExpression));
             sql.append(")");
         } else {
-            sql.append(String.format("\n/*** END: %s ***/\n", this.correspondOCLExpression));
+            if(this.correspondOCLExpression != null && !this.correspondOCLExpression.isEmpty())
+                sql.append(String.format("\n/*** END: %s ***/\n", this.correspondOCLExpression));
         }
         return sql.toString();
     }

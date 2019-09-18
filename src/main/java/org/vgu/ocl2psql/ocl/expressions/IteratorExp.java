@@ -18,6 +18,7 @@ import java.util.SortedSet;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
 import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
+import org.vgu.ocl2psql.ocl.deparser.OclExpressionDeParser;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.ocl.exception.SetOfSetException;
 import org.vgu.ocl2psql.ocl.impl.OclCollectionSupport;
@@ -276,30 +277,32 @@ public final class IteratorExp extends LoopExp {
 
     @Override
     public Statement map(StmVisitor visitor) {
+        OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
+        this.accept(oclExpressionDeParser);
+        String oclExpression = oclExpressionDeParser.getDeParsedStr();
         switch (this.kind) {
         case isEmpty:
-            return emptyMap(visitor);
+            return emptyMap(visitor,oclExpression);
         case notEmpty:
-            return notEmptyMap(visitor);
+            return notEmptyMap(visitor,oclExpression);
         case select:
-            return selectMap(visitor); 
+            return selectMap(visitor,oclExpression); 
         case reject:
-            return rejectMap(visitor);  
+            return rejectMap(visitor,oclExpression);  
         case forAll:
-            return forAllMap(visitor);
+            return forAllMap(visitor,oclExpression);
         case exists:
-            return existsMap(visitor);  
+            return existsMap(visitor,oclExpression);  
         case collect:
-            return collectMap(visitor);  
+            return collectMap(visitor,oclExpression);  
         case size:
-            return sizeMap(visitor);
+            return sizeMap(visitor,oclExpression);
         case asSet:
-            return asSetMap(visitor);
+            return asSetMap(visitor,oclExpression);
         case isUnique:
-//            throw new NullPointerException("Unsupported isUnique operation");
-            return isUniqueMap(visitor);
+            return isUniqueMap(visitor,oclExpression);
         case flatten:
-            return flattenMap(visitor);
+            return flattenMap(visitor,oclExpression);
         case sum:
             throw new NullPointerException("Unsupported sum operation");
         case asBag:
@@ -350,12 +353,12 @@ public final class IteratorExp extends LoopExp {
      * 
      * s->collect(v|b)->flatten()
      */
-    private Statement flattenMap(StmVisitor visitor) {
-
+    private Statement flattenMap(StmVisitor visitor, String oclExpression) {
         if(this.getSource() instanceof IteratorExp) {
             Select source = (Select) visitor.visit(this.getSource());
             
             PlainSelect finalPlainSelect = new PlainSelect();
+            finalPlainSelect.setCorrespondOCLExpression(oclExpression);
             Select finalSelect = new Select();
             finalSelect.setSelectBody(finalPlainSelect);
             
@@ -461,7 +464,7 @@ public final class IteratorExp extends LoopExp {
         throw new SetOfSetException("The source is not set of set to be flattened");
     }
 
-    private Statement isUniqueMap(StmVisitor visitor) {
+    private Statement isUniqueMap(StmVisitor visitor, String oclExpression) {
         Select sizeSourceSelect = (Select) visitor.visit(this.getSource());
         PlainSelect sizeSourcePlainSelect = (PlainSelect) sizeSourceSelect.getSelectBody();
         
@@ -471,6 +474,7 @@ public final class IteratorExp extends LoopExp {
         finalSubSelect.setAlias(aliasFinalSubSelect);
         
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
         Select finalSelect = new Select();
         finalSelect.setSelectBody(finalPlainSelect);
         
@@ -491,7 +495,7 @@ public final class IteratorExp extends LoopExp {
         return finalSelect;
     }
 
-    private Statement rejectMap(StmVisitor visitor) {
+    private Statement rejectMap(StmVisitor visitor, String oclExpression) {
         MyIteratorSource currentIterator = new MyIteratorSource();
         currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
@@ -504,6 +508,7 @@ public final class IteratorExp extends LoopExp {
         tempSelectSource.setAlias(aliasTempSelectSource);
         
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
         if(visitor.getVisitorContext().stream()
                 .map(IteratorSource::getIterator)
@@ -636,12 +641,13 @@ public final class IteratorExp extends LoopExp {
         return finalSelect;  
     }
 
-    private Statement asSetMap(StmVisitor visitor) {
+    private Statement asSetMap(StmVisitor visitor, String oclExpression) {
         Select source = (Select) visitor.visit(this.getSource());
         
         SubSelect tempAsSetSource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
@@ -657,7 +663,7 @@ public final class IteratorExp extends LoopExp {
         return finalSelect;
     }
 
-    private Statement existsMap(StmVisitor visitor) {
+    private Statement existsMap(StmVisitor visitor, String oclExpression) {
         MyIteratorSource currentIterator = new MyIteratorSource();
         currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
@@ -670,6 +676,7 @@ public final class IteratorExp extends LoopExp {
         tempExistsSource.setAlias(aliasTempExistsSource);
         
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
         if(visitor.getVisitorContext().stream()
                 .map(IteratorSource::getIterator)
@@ -869,7 +876,7 @@ public final class IteratorExp extends LoopExp {
         }
     }
 
-    private Statement forAllMap(StmVisitor visitor) {
+    private Statement forAllMap(StmVisitor visitor, String oclExpression) {
         MyIteratorSource currentIterator = new MyIteratorSource();
         currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
@@ -882,6 +889,7 @@ public final class IteratorExp extends LoopExp {
         tempForAllSource.setAlias(aliasTempForAllSource);
         
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
         if(visitor.getVisitorContext().stream()
                 .map(IteratorSource::getIterator)
@@ -1085,7 +1093,7 @@ public final class IteratorExp extends LoopExp {
         }
     }
 
-    private Statement selectMap(StmVisitor visitor) {
+    private Statement selectMap(StmVisitor visitor, String oclExpression) {
         MyIteratorSource currentIterator = new MyIteratorSource();     
         currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
@@ -1098,6 +1106,7 @@ public final class IteratorExp extends LoopExp {
         tempSelectSource.setAlias(aliasTempSelectSource);
         
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
         if(visitor.getVisitorContext().stream()
                 .map(IteratorSource::getIterator)
@@ -1219,12 +1228,13 @@ public final class IteratorExp extends LoopExp {
         return finalSelect;  
     }
 
-    private Statement notEmptyMap(StmVisitor visitor) {
+    private Statement notEmptyMap(StmVisitor visitor, String oclExpression) {
         Select source = (Select) visitor.visit(this.getSource());
         
         SubSelect tempNotEmptySource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
@@ -1292,12 +1302,13 @@ public final class IteratorExp extends LoopExp {
         return finalSelect;
     }
 
-    private Statement emptyMap(StmVisitor visitor) {
+    private Statement emptyMap(StmVisitor visitor, String oclExpression) {
         Select source = (Select) visitor.visit(this.getSource());
         
         SubSelect tempEmptySource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
@@ -1365,7 +1376,7 @@ public final class IteratorExp extends LoopExp {
         return finalSelect;
     }
 
-    private Statement collectMap(StmVisitor visitor) {
+    private Statement collectMap(StmVisitor visitor, String oclExpression) {
         MyIteratorSource currentIterator = new MyIteratorSource(); 
         currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
@@ -1378,6 +1389,7 @@ public final class IteratorExp extends LoopExp {
         tempCollectSource.setAlias(aliasTempCollectSource);
         
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
         if(visitor.getVisitorContext().stream()
                 .map(IteratorSource::getIterator)
@@ -1449,12 +1461,13 @@ public final class IteratorExp extends LoopExp {
         return finalSelect;  
     }
 
-    private Statement sizeMap(StmVisitor visitor) {
+    private Statement sizeMap(StmVisitor visitor, String oclExpression) {
         Select source = (Select) visitor.visit(this.getSource());
         
         SubSelect tempSizeSource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         

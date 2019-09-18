@@ -9,7 +9,6 @@
 package org.vgu.ocl2psql.ocl.expressions;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
-import org.vgu.ocl2psql.ocl.deparser.DeparserVisitable;
 import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 

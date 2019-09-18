@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
 import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
+import org.vgu.ocl2psql.ocl.deparser.OclExpressionDeParser;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
 import org.vgu.ocl2psql.sql.statement.select.Join;
@@ -74,6 +75,9 @@ public final class PropertyCallExp extends NavigationCallExp {
         Alias aliasSubSelectCurrentVar = new Alias("TEMP_obj");
         tempVar.setAlias(aliasSubSelectCurrentVar);
         PlainSelect finalPlainSelect = new PlainSelect();
+        OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
+        this.accept(oclExpressionDeParser);
+        finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
         Select finalSelect = new Select();
         finalSelect.setSelectBody(finalPlainSelect);
         String propertyName = this.name.substring(this.name.indexOf(":") + 1, this.name.length());

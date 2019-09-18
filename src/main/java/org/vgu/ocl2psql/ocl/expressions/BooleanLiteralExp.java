@@ -10,6 +10,7 @@ package org.vgu.ocl2psql.ocl.expressions;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
 import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
+import org.vgu.ocl2psql.ocl.deparser.OclExpressionDeParser;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
@@ -43,6 +44,9 @@ public final class BooleanLiteralExp extends PrimitiveLiteralExp {
 	@Override
 	public Statement map(StmVisitor visitor) {
 		PlainSelect finalPlainSelect = new PlainSelect();
+		OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
+		this.accept(oclExpressionDeParser);
+		finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
 		ResSelectExpression resExpression = new ResSelectExpression(new LongValue(((this.booleanSymbol) == true)? "TRUE" : "FALSE"));
 		finalPlainSelect.setRes(resExpression);
 		Select finalSelect = new Select();
