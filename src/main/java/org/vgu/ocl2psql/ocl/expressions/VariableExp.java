@@ -9,6 +9,10 @@
 package org.vgu.ocl2psql.ocl.expressions;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
+import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
+import org.vgu.ocl2psql.ocl.deparser.OclExpressionDeParser;
+import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
+import org.vgu.ocl2psql.sql.statement.select.Select;
 
 import net.sf.jsqlparser.statement.Statement;
 
@@ -33,13 +37,15 @@ public class VariableExp extends OclExpression {
 	public Variable getReferredVariable() {
 		return referredVariable;
 	}
+	
+	@Override
+	public void accept( DeparserVisitor visitor ) {
+	    visitor.visit( this );
+	}
 
     @Override
     public Statement map(StmVisitor visitor) {
-//        PlainSelect pselect = new PlainSelect();
         String var_name = this.getReferredVariable().getName();
-        // if the variable is an iterator-variable, save the
-        // corresponding iteratore-source in iter
         IteratorSource iter = null;
         for(IteratorSource iter_item : visitor.getVisitorContext()) {
             if(iter_item.getIterator().getName().equals(var_name)) {
@@ -47,23 +53,11 @@ public class VariableExp extends OclExpression {
                 break;
             }
         }
-        // if is an iterationVariable ...
-        // otherwise, ...
-//        if (iter != null) {
-            return iter.getSource();
-//        } 
-//        else {
-//            //System.out.println("HERE!!!");
-//            SelectExpressionItem item = new SelectExpressionItem();
-//            item.setExpression(new Column(var_name));
-//            item.setAlias(new Alias("item"));
-//            pselect.addSelectItems(item);           
-//        }   
-//        ///
-//        
-//        Select select = new Select();
-//        select.setSelectBody(pselect);
-//        
-//        return select;  
+        Select finalSelect = (Select) ((MyIteratorSource) iter).getSource();
+        PlainSelect finalPlainSelect = (PlainSelect) finalSelect.getSelectBody();
+        OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
+        this.accept(oclExpressionDeParser);
+        finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
+        return finalSelect;
     }
 }

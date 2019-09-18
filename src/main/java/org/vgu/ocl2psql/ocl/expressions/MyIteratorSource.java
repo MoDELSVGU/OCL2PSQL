@@ -2,22 +2,22 @@ package org.vgu.ocl2psql.ocl.expressions;
 
 import java.util.Objects;
 
-import org.vgu.ocl2psql.sql.statement.select.MyPlainSelect;
+import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
+import org.vgu.ocl2psql.sql.statement.select.Select;
+import org.vgu.ocl2psql.sql.statement.select.SubSelect;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.VarSelectExpression;
 
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.GroupByElement;
-import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.SubSelect;
 
 public class MyIteratorSource extends IteratorSource{
     
     private Select sourceWithoutIter;
+    private OclExpression sourceExpression;
     
     public Select getSourceWithoutIter() {
         return sourceWithoutIter;
@@ -30,9 +30,9 @@ public class MyIteratorSource extends IteratorSource{
     @Override
     public void setSource(Select statement) {
         if(Objects.nonNull(this.getIterator())) {
-            MyPlainSelect selectBody = (MyPlainSelect) statement.getSelectBody();
+            PlainSelect selectBody = (PlainSelect) statement.getSelectBody();
             if(selectBody.getFromItem() instanceof Table) {
-                MyPlainSelect finalPlainSelect = new MyPlainSelect();
+                PlainSelect finalPlainSelect = new PlainSelect();
                 finalPlainSelect.getSelectItems().clear();
                 for(SelectItem item : selectBody.getSelectItems()) {
                     finalPlainSelect.addSelectItems(item);
@@ -59,7 +59,7 @@ public class MyIteratorSource extends IteratorSource{
                 dmn.setSelectBody(selectBody);
                 Alias temp_dmn = new Alias("TEMP_dmn");
                 dmn.setAlias(temp_dmn);
-                MyPlainSelect finalPlainSelect = new MyPlainSelect();
+                PlainSelect finalPlainSelect = new PlainSelect();
                 
                 VarSelectExpression varSelectExpression = new VarSelectExpression(this.getIterator().getName());
                 varSelectExpression.setRefExpression(new Column(temp_dmn.getName().concat(".res")));
@@ -80,5 +80,13 @@ public class MyIteratorSource extends IteratorSource{
         }
         super.setSource(statement);
         this.setSourceWithoutIter(statement);
+    }
+
+    public OclExpression getSourceExpression() {
+        return sourceExpression;
+    }
+
+    public void setSourceExpression(OclExpression sourceExpression) {
+        this.sourceExpression = sourceExpression;
     }
 }

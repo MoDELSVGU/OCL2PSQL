@@ -14,6 +14,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
+import org.vgu.ocl2psql.ocl.deparser.DeparserVisitable;
+import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.ocl.exception.OclException;
 import org.vgu.ocl2psql.ocl.exception.OclParseException;
@@ -22,7 +24,7 @@ import org.vgu.ocl2psql.ocl.expressions.StmVisitable;
 /**
  * Class OclExpression
  */
-public abstract class OclExpression implements StmVisitable {
+public abstract class OclExpression implements StmVisitable, DeparserVisitable {
 
     public abstract Object eval(OclContext context)
 	    throws OclEvaluationException;
@@ -36,6 +38,11 @@ public abstract class OclExpression implements StmVisitable {
 	while (input.startsWith(" "))
 	    input = input.substring(1);
 	return input.trim();
+    }
+    
+    @Override
+    public void accept( DeparserVisitor visitor ) {
+        visitor.visit( this );
     }
 
     private final static Pattern[] operators = new Pattern[] {

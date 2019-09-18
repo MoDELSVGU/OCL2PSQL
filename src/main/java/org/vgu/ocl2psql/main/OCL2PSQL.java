@@ -30,18 +30,25 @@ import org.vgu.ocl2psql.ocl.exception.OclParseException;
 import org.vgu.ocl2psql.ocl.expressions.IteratorSource;
 import org.vgu.ocl2psql.ocl.expressions.OclExpression;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
+import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
+import org.vgu.ocl2psql.sql.statement.select.Select;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
+import org.vgu.ocl2psql.sql.utils.SQLAsStringUtils;
 
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
 public class OCL2PSQL {
     private OCL2SQLParser ocl2sqlParser;
+    private Boolean descriptionMode;
     
+    public OCL2SQLParser getOcl2sqlParser() {
+        return ocl2sqlParser;
+    }
+
     public OCL2PSQL() {
         ocl2sqlParser = new OCL2SQLParser();
+        this.setDescriptionMode(false);
     }
     
     public void setPlainUMLContextFromFile(String filePath) throws FileNotFoundException, IOException, ParseException {
@@ -54,7 +61,12 @@ public class OCL2PSQL {
     
     public String mapToString(String oclExpression) throws OclParseException {
         Select finalStatement = this.mapToSQL(oclExpression);
-        return finalStatement.toString();
+        if(this.descriptionMode) {
+            String finalStatementString = finalStatement.toStringWithDescription();
+            return SQLAsStringUtils.applyIndent(finalStatementString);
+        } else {
+            return finalStatement.toString();
+        }
     }
     
     public Select mapToSQL(String oclExpression) throws OclParseException {
@@ -76,5 +88,13 @@ public class OCL2PSQL {
         }
         finalPlainSelect.getSelectItems().clear();
         finalPlainSelect.getSelectItems().addAll(newSelectItems);
+    }
+
+    public Boolean getDescriptionMode() {
+        return descriptionMode;
+    }
+
+    public void setDescriptionMode(Boolean descriptionMode) {
+        this.descriptionMode = descriptionMode;
     }
 }

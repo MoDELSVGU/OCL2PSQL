@@ -43,7 +43,6 @@ public class DefaultOclContext implements OclContext {
 	this.variables.putAll(variables);
     }
 
-    @SuppressWarnings("unchecked")
     public Object callMethod(Object source, String operationName,
 	    Object... argumentValues) throws Exception {
 	try {
@@ -52,7 +51,7 @@ public class DefaultOclContext implements OclContext {
 		argumentTypes[i] = argumentValues[i].getClass();
 	    }
 	    if (source instanceof Class) {
-		Method method = ((Class) source).getDeclaredMethod(
+		Method method = ((Class<?>) source).getDeclaredMethod(
 			operationName, argumentTypes);
 		return method.invoke(source, argumentValues);
 	    } else {
@@ -69,7 +68,6 @@ public class DefaultOclContext implements OclContext {
 	}
     }
 
-    @SuppressWarnings("unchecked")
     public Object getFieldValue(Object source, String propertyName)
 	    throws Exception {
 	if ("type".equals(propertyName)) {
@@ -91,8 +89,8 @@ public class DefaultOclContext implements OclContext {
 		return null;
 	    }
 	    if (source instanceof Collection) {
-		List list = new ArrayList();
-		for (Object o : (Collection) source) {
+		List<Object> list = new ArrayList<Object>();
+		for (Object o : (Collection<?>) source) {
 		    for (PropertyDescriptor pd : Introspector.getBeanInfo(
 			    o.getClass()).getPropertyDescriptors()) {
 			if (pd.getName().equals(propertyName))
@@ -102,9 +100,9 @@ public class DefaultOclContext implements OclContext {
 		return list;
 	    } else {
 		if (source instanceof Class) {
-		    Field field = ((Class) source)
+		    Field field = ((Class<?>) source)
 			    .getDeclaredField(propertyName);
-		    return field.get(((Class) source));
+		    return field.get(((Class<?>) source));
 
 		} else {
 		    for (PropertyDescriptor pd : Introspector.getBeanInfo(

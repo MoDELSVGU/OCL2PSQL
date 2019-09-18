@@ -9,6 +9,7 @@
 package org.vgu.ocl2psql.ocl.expressions;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
+import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 
 import net.sf.jsqlparser.statement.Statement;
@@ -24,8 +25,13 @@ public final class TypeExp extends OclExpression {
 	}
 
 	public TypeExp(String referredType) {
-	this.referredType = referredType;
+        this.referredType = referredType;
     }
+	
+	@Override
+	public void accept(DeparserVisitor visitor) {
+	    visitor.visit( this );
+	}
 
     @Override
     public Object eval(OclContext context) throws OclEvaluationException {

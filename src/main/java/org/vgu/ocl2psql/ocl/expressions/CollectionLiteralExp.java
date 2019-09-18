@@ -33,21 +33,20 @@ public final class CollectionLiteralExp extends LiteralExp {
 	this.parts = Arrays.asList(parts);
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public Object eval(OclContext context) throws OclEvaluationException {
-	Collection collection;
+	Collection<Object> collection;
 	switch (kind) {
 	case Set:
-	    collection = new HashSet();
+	    collection = new HashSet<Object>();
 	    break;
 	case OrderedSet:
-	    collection = new TreeSet();
+	    collection = new TreeSet<Object>();
 	    break;
 	case Bag:
 	case Sequence:
 	default:
-	    collection = new ArrayList();
+	    collection = new ArrayList<Object>();
 	    break;
 	}
 	for (CollectionLiteralPart part : parts) {

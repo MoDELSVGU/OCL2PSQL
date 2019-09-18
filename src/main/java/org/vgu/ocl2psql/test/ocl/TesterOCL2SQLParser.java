@@ -21,10 +21,13 @@ import java.util.Properties;
 import org.vgu.ocl2psql.main.OCL2PSQL;
 import org.vgu.ocl2psql.ocl.exception.OclParseException;
 
-import net.sf.jsqlparser.statement.select.Select;
 
 public class TesterOCL2SQLParser {
 
+    /**
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args)
             throws Exception {
         String resourceName = "config.properties"; // could also be a constant
@@ -35,7 +38,9 @@ public class TesterOCL2SQLParser {
 
             OCL2PSQL ocl2psql = new OCL2PSQL();
             ocl2psql.setPlainUMLContextFromFile(props.getProperty("cardb.filePath"));
+            ocl2psql.setDescriptionMode(true);
             
+            test(ocl2psql, "Car::allInstances()->collect(c|c)");
             test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->collect(p|p.Person:ownedCars)->flatten()->size()=1)");
             test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->select(p|p.Person:name.oclIsUndefined())->size()=0)");
             test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)");
@@ -130,13 +135,16 @@ public class TesterOCL2SQLParser {
             test(ocl2psql, "Car::allInstances()->asSet()");
             test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->asSet()");
             test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners->asSet())->flatten()");
+
+            test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1.Car:color=c.Car:color)))");
+            test(ocl2psql, "Car::allInstances()->forAll(c|'blue'=c.Car:color)");
         }
     }
 
     private static void test(OCL2PSQL ocl2psql, String oclExp) throws OclParseException {
         System.out.println(oclExp);
-        Select finalStatement = ocl2psql.mapToSQL(oclExp);
-        System.out.println(finalStatement);
+        String finalStatementWithDescription = ocl2psql.mapToString(oclExp);
+        System.out.println(finalStatementWithDescription);
         System.out.println();
     }
 }
