@@ -9,6 +9,8 @@
 package org.vgu.ocl2psql.ocl.expressions;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
+import org.vgu.ocl2psql.ocl.deparser.DeparserVisitable;
+import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
@@ -28,6 +30,11 @@ public class IntegerLiteralExp extends NumericLiteralExp {
 
     public IntegerLiteralExp(int newintegerSymbol) {
 	this.integerSymbol = newintegerSymbol;
+    }
+    
+    @Override
+    public void accept( DeparserVisitor visitor ) {
+        visitor.visit( this );
     }
 
     @Override

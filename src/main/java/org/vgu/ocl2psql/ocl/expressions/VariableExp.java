@@ -35,8 +35,8 @@ public class VariableExp extends OclExpression {
 		return referredVariable;
 	}
 	
-	@Overrid
-	public void accpet( DeparserVisitor visitor ) {
+	@Override
+	public void accept( DeparserVisitor visitor ) {
 	    visitor.visit( this );
 	}
 
