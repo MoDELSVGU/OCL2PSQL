@@ -34,6 +34,7 @@ import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
+import org.vgu.ocl2psql.sql.utils.SQLAsStringUtils;
 
 import net.sf.jsqlparser.statement.select.SelectItem;
 
@@ -61,7 +62,8 @@ public class OCL2PSQL {
     public String mapToString(String oclExpression) throws OclParseException {
         Select finalStatement = this.mapToSQL(oclExpression);
         if(this.descriptionMode) {
-            return finalStatement.toStringWithDescription();
+            String finalStatementString = finalStatement.toStringWithDescription();
+            return SQLAsStringUtils.applyIndent(finalStatementString);
         } else {
             return finalStatement.toString();
         }
