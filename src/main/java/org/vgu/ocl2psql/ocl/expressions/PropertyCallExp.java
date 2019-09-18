@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
+import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
 import org.vgu.ocl2psql.sql.statement.select.Join;
@@ -48,6 +49,11 @@ public final class PropertyCallExp extends NavigationCallExp {
     public PropertyCallExp(OclExpression newsource, String name, OclExpression... qualifier) {
         super(newsource, qualifier);
         this.name = name;
+    }
+    
+    @Override
+    public void accept( DeparserVisitor visitor ) {
+        visitor.visit( this );
     }
 
     @Override

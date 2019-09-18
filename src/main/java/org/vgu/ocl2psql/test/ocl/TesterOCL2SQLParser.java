@@ -19,11 +19,18 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.vgu.ocl2psql.main.OCL2PSQL;
+import org.vgu.ocl2psql.ocl.context.DefaultOclContext;
+import org.vgu.ocl2psql.ocl.deparser.OclExpressionDeParser;
 import org.vgu.ocl2psql.ocl.exception.OclParseException;
+import org.vgu.ocl2psql.ocl.expressions.OclExpression;
 
 
 public class TesterOCL2SQLParser {
 
+    /**
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args)
             throws Exception {
         String resourceName = "config.properties"; // could also be a constant
@@ -36,7 +43,7 @@ public class TesterOCL2SQLParser {
             ocl2psql.setPlainUMLContextFromFile(props.getProperty("cardb.filePath"));
             ocl2psql.setDescriptionMode(true);
             
-            test(ocl2psql, "Car::allInstances()->select(c|c.Car:color='no-color')->size()");
+//            test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->collect(p|p.Person:ownedCars)->flatten()->size()=1)");
 //            test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->select(p|p.Person:name.oclIsUndefined())->size()=0)");
 //            test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)");
 //            test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)");
