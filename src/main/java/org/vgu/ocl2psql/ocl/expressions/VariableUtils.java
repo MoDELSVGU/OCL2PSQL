@@ -217,6 +217,8 @@ public class VariableUtils {
             OperationCallExp opCallExpSrc = (OperationCallExp) src;
             
             switch( opCallExpSrc.getName() ) {
+                case "not":
+                    return FVarsAux( opCallExpSrc.getArguments().get( 0 ), fVars );
                 case "oclIsUndefined":
                     return FVarsAux( opCallExpSrc.getSource(), fVars );
                 case "=":
