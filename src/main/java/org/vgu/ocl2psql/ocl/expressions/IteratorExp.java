@@ -17,13 +17,17 @@ import java.util.Objects;
 import java.util.SortedSet;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
+import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
+import org.vgu.ocl2psql.ocl.deparser.OclExpressionDeParser;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.ocl.exception.SetOfSetException;
 import org.vgu.ocl2psql.ocl.impl.OclCollectionSupport;
 import org.vgu.ocl2psql.ocl.impl.OclIteratorSupport;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
-import org.vgu.ocl2psql.sql.statement.select.MyPlainSelect;
+import org.vgu.ocl2psql.sql.statement.select.Join;
+import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
+import org.vgu.ocl2psql.sql.statement.select.Select;
 import org.vgu.ocl2psql.sql.statement.select.SubSelect;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.VarSelectExpression;
@@ -48,8 +52,6 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.GroupByElement;
-import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.Select;
 
 
 /**
@@ -64,19 +66,25 @@ public final class IteratorExp extends LoopExp {
 	super(source, iterator, body);
 	this.kind = kind;
     }
+    
+    @Override
+    public void accept( DeparserVisitor visitor ) {
+        visitor.visit( this );
+    }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object eval(OclContext context) throws OclEvaluationException {
 	Object source = this.source.eval(context);
-	Collection<?> collection;
+	Collection<Object> collection;
 	if (source == null) {
 	    collection = Collections.emptyList();
 	} else if (source.getClass().isArray()) {
 	    collection = Arrays.asList((Object[])source);
-	} else if (!(source instanceof Collection<?>)) {
+	} else if (!(source instanceof Collection)) {
 	    collection = Collections.singletonList(source);
 	} else {
-	    collection = (Collection<?>) source;
+	    collection = (Collection<Object>) source;
 	}
 	switch (kind) {
 	case isEmpty:
@@ -101,8 +109,8 @@ public final class IteratorExp extends LoopExp {
 		if (!(body instanceof Number))
 		    throw new OclEvaluationException(
 			    "argument for at must be an instance of Integer or Real!");
-		if (collection instanceof List<?>) {
-		    return OclCollectionSupport.at((List<?>) collection,
+		if (collection instanceof List) {
+		    return OclCollectionSupport.at((List<Object>) collection,
 			    (Number) body);
 		} else {
 		    throw new OclEvaluationException("at cannot be applied to "
@@ -112,8 +120,8 @@ public final class IteratorExp extends LoopExp {
 	case indexOf:
 	    if (this.getBody() != null) {
 		Object body = this.getBody().eval(context);
-		if (collection instanceof List<?>) {
-		    return OclCollectionSupport.indexOf((List<?>) collection,
+		if (collection instanceof List) {
+		    return OclCollectionSupport.indexOf((List<Object>) collection,
 			    body);
 		} else {
 		    throw new OclEvaluationException(
@@ -124,23 +132,23 @@ public final class IteratorExp extends LoopExp {
 	case count:
 	    if (this.getBody() != null) {
 		Object body = this.getBody().eval(context);
-		return OclCollectionSupport.count((Collection<?>) collection,
+		return OclCollectionSupport.count((Collection<Object>) collection,
 			body);
 	    }
 	case first:
-	    if (collection instanceof List<?>) {
-		return OclCollectionSupport.first((List<?>) collection);
-	    } else if (collection instanceof SortedSet<?>) {
-		return OclCollectionSupport.first((SortedSet<?>) collection);
+	    if (collection instanceof List) {
+		return OclCollectionSupport.first((List<Object>) collection);
+	    } else if (collection instanceof SortedSet) {
+		return OclCollectionSupport.first((SortedSet<Object>) collection);
 	    } else {
 		throw new OclEvaluationException("first cannot be applied to "
 			+ collection.getClass().getName());
 	    }
 	case last:
-	    if (collection instanceof List<?>) {
-		return OclCollectionSupport.last((List<?>) collection);
-	    } else if (collection instanceof SortedSet<?>) {
-		return OclCollectionSupport.last((SortedSet<?>) collection);
+	    if (collection instanceof List) {
+		return OclCollectionSupport.last((List<Object>) collection);
+	    } else if (collection instanceof SortedSet) {
+		return OclCollectionSupport.last((SortedSet<Object>) collection);
 	    } else {
 		throw new OclEvaluationException("last cannot be applied to "
 			+ collection.getClass().getName());
@@ -168,26 +176,26 @@ public final class IteratorExp extends LoopExp {
 	case union:
 	    if (this.getBody() != null) {
 		Object body = this.getBody().eval(context);
-		Collection<?> bodyCollection;
+		Collection<Object> bodyCollection;
 		if (body == null) {
 		    bodyCollection = Collections.emptyList();
-		} else if (!(body instanceof Collection<?>)) {
+		} else if (!(body instanceof Collection)) {
 		    bodyCollection = Collections.singletonList(body);
 		} else {
-		    bodyCollection = (Collection<?>) body;
+		    bodyCollection = (Collection<Object>) body;
 		}
 		return OclCollectionSupport.union(collection, bodyCollection);
 	    }
 	case includesAll:
 	    if (this.getBody() != null) {
 		Object body = this.getBody().eval(context);
-		Collection<?> bodyCollection;
+		Collection<Object> bodyCollection;
 		if (body == null) {
 		    bodyCollection = Collections.emptyList();
-		} else if (!(body instanceof Collection<?>)) {
+		} else if (!(body instanceof Collection)) {
 		    bodyCollection = Collections.singletonList(body);
 		} else {
-		    bodyCollection = (Collection<?>) body;
+		    bodyCollection = (Collection<Object>) body;
 		}
 		return OclCollectionSupport.includesAll(collection,
 			bodyCollection);
@@ -195,13 +203,13 @@ public final class IteratorExp extends LoopExp {
 	case excludesAll:
 	    if (this.getBody() != null) {
 		Object body = this.getBody().eval(context);
-		Collection<?> bodyCollection;
+		Collection<Object> bodyCollection;
 		if (body == null) {
 		    bodyCollection = Collections.emptyList();
 		} else if (!(body instanceof Collection<?>)) {
 		    bodyCollection = Collections.singletonList(body);
 		} else {
-		    bodyCollection = (Collection<?>) body;
+		    bodyCollection = (Collection<Object>) body;
 		}
 		return OclCollectionSupport.excludesAll(collection,
 			bodyCollection);
@@ -260,6 +268,8 @@ public final class IteratorExp extends LoopExp {
 		return OclIteratorSupport.sortedBy(collection, context,
 			iteratorName, this.getBody());
 	    }
+    default:
+        break;
 	}
 	throw new OclEvaluationException("cannot evaluate: '->" + kind.name()
 		+ "(" + getIterator().getName() + "|" + getBody() + ")");
@@ -267,30 +277,32 @@ public final class IteratorExp extends LoopExp {
 
     @Override
     public Statement map(StmVisitor visitor) {
+        OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
+        this.accept(oclExpressionDeParser);
+        String oclExpression = oclExpressionDeParser.getDeParsedStr();
         switch (this.kind) {
         case isEmpty:
-            return emptyMap(visitor);
+            return emptyMap(visitor,oclExpression);
         case notEmpty:
-            return notEmptyMap(visitor);
+            return notEmptyMap(visitor,oclExpression);
         case select:
-            return selectMap(visitor); 
+            return selectMap(visitor,oclExpression); 
         case reject:
-            return rejectMap(visitor);  
+            return rejectMap(visitor,oclExpression);  
         case forAll:
-            return forAllMap(visitor);
+            return forAllMap(visitor,oclExpression);
         case exists:
-            return existsMap(visitor);  
+            return existsMap(visitor,oclExpression);  
         case collect:
-            return collectMap(visitor);  
+            return collectMap(visitor,oclExpression);  
         case size:
-            return sizeMap(visitor);
+            return sizeMap(visitor,oclExpression);
         case asSet:
-            return asSetMap(visitor);
+            return asSetMap(visitor,oclExpression);
         case isUnique:
-//            throw new NullPointerException("Unsupported isUnique operation");
-            return isUniqueMap(visitor);
+            return isUniqueMap(visitor,oclExpression);
         case flatten:
-            return flattenMap(visitor);
+            return flattenMap(visitor,oclExpression);
         case sum:
             throw new NullPointerException("Unsupported sum operation");
         case asBag:
@@ -341,12 +353,12 @@ public final class IteratorExp extends LoopExp {
      * 
      * s->collect(v|b)->flatten()
      */
-    private Statement flattenMap(StmVisitor visitor) {
-
+    private Statement flattenMap(StmVisitor visitor, String oclExpression) {
         if(this.getSource() instanceof IteratorExp) {
             Select source = (Select) visitor.visit(this.getSource());
             
-            MyPlainSelect finalPlainSelect = new MyPlainSelect();
+            PlainSelect finalPlainSelect = new PlainSelect();
+            finalPlainSelect.setCorrespondOCLExpression(oclExpression);
             Select finalSelect = new Select();
             finalSelect.setSelectBody(finalPlainSelect);
             
@@ -375,7 +387,7 @@ public final class IteratorExp extends LoopExp {
                 Alias aliasTempFlattenSource = new Alias("TEMP");
                 tempFlattenSource.setAlias(aliasTempFlattenSource);
                 
-                MyPlainSelect sCollectvB = new MyPlainSelect();
+                PlainSelect sCollectvB = new PlainSelect();
                 sCollectvB.setAllColumn();
                 sCollectvB.setFromItem(tempFlattenSource);
 
@@ -394,13 +406,13 @@ public final class IteratorExp extends LoopExp {
 
                 finalPlainSelect.setJoins(Arrays.asList(join));
                 
-                MyPlainSelect s = (MyPlainSelect) tempFlattenSource.getSelectBody();
+                PlainSelect s = (PlainSelect) tempFlattenSource.getSelectBody();
                 
                 SubSelect tempCollectSource = new SubSelect( s, "TEMP_src" );
 
                 finalPlainSelect.setFromItem(tempCollectSource);
                 
-                String flattenVar = ((IteratorExp) this.getSource()).getIterator().getName();
+//                String flattenVar = ((IteratorExp) this.getSource()).getIterator().getName();
                 
                 IsNullExpression isOuterRefNull = new IsNullExpression();
                 isOuterRefNull.setLeftExpression(new Column(aliasTempFlat.getName().concat(".val")));
@@ -452,16 +464,17 @@ public final class IteratorExp extends LoopExp {
         throw new SetOfSetException("The source is not set of set to be flattened");
     }
 
-    private Statement isUniqueMap(StmVisitor visitor) {
+    private Statement isUniqueMap(StmVisitor visitor, String oclExpression) {
         Select sizeSourceSelect = (Select) visitor.visit(this.getSource());
-        MyPlainSelect sizeSourcePlainSelect = (MyPlainSelect) sizeSourceSelect.getSelectBody();
+        PlainSelect sizeSourcePlainSelect = (PlainSelect) sizeSourceSelect.getSelectBody();
         
         SubSelect finalSubSelect = new SubSelect();
         finalSubSelect.setSelectBody(sizeSourcePlainSelect);
         Alias aliasFinalSubSelect = new Alias("TEMP_unique_source");
         finalSubSelect.setAlias(aliasFinalSubSelect);
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
         Select finalSelect = new Select();
         finalSelect.setSelectBody(finalPlainSelect);
         
@@ -482,7 +495,7 @@ public final class IteratorExp extends LoopExp {
         return finalSelect;
     }
 
-    private Statement rejectMap(StmVisitor visitor) {
+    private Statement rejectMap(StmVisitor visitor, String oclExpression) {
         MyIteratorSource currentIterator = new MyIteratorSource();
         currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
@@ -494,7 +507,8 @@ public final class IteratorExp extends LoopExp {
         Alias aliasTempSelectSource = new Alias("TEMP_src");
         tempSelectSource.setAlias(aliasTempSelectSource);
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
         if(visitor.getVisitorContext().stream()
                 .map(IteratorSource::getIterator)
@@ -510,14 +524,14 @@ public final class IteratorExp extends LoopExp {
         
         String currentIter = this.getIterator().getName();
 
-//        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempSelectSource.getSelectBody());
-//        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempSelectBody.getSelectBody());
+//        List<String> fVarsSource = VariableUtils.FVars((PlainSelect) tempSelectSource.getSelectBody());
+//        List<String> fVarsBody = VariableUtils.FVars((PlainSelect) tempSelectBody.getSelectBody());
         List<String> fVarsSource = VariableUtils.FVars(this.getSource());
         List<String> fVarsBody = VariableUtils.FVars(this.getBody());
 
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty()) {
-                MyPlainSelect gBody = new MyPlainSelect();
+                PlainSelect gBody = new PlainSelect();
                 gBody.setFromItem(tempSelectBody);
                 gBody.getSelectItems().clear();
                 gBody.addSelectItems(new AllColumns());
@@ -551,7 +565,7 @@ public final class IteratorExp extends LoopExp {
                 finalPlainSelect.setFromItem(tempGBody);
             }
             else {
-                MyPlainSelect gBody = new MyPlainSelect();
+                PlainSelect gBody = new PlainSelect();
                 gBody.setFromItem(tempSelectBody);
                 gBody.getSelectItems().clear();
                 gBody.addSelectItems(new AllColumns());
@@ -627,12 +641,13 @@ public final class IteratorExp extends LoopExp {
         return finalSelect;  
     }
 
-    private Statement asSetMap(StmVisitor visitor) {
+    private Statement asSetMap(StmVisitor visitor, String oclExpression) {
         Select source = (Select) visitor.visit(this.getSource());
         
         SubSelect tempAsSetSource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
@@ -648,7 +663,7 @@ public final class IteratorExp extends LoopExp {
         return finalSelect;
     }
 
-    private Statement existsMap(StmVisitor visitor) {
+    private Statement existsMap(StmVisitor visitor, String oclExpression) {
         MyIteratorSource currentIterator = new MyIteratorSource();
         currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
@@ -660,7 +675,8 @@ public final class IteratorExp extends LoopExp {
         Alias aliasTempExistsSource = new Alias("TEMP_src");
         tempExistsSource.setAlias(aliasTempExistsSource);
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
         if(visitor.getVisitorContext().stream()
                 .map(IteratorSource::getIterator)
@@ -712,7 +728,7 @@ public final class IteratorExp extends LoopExp {
                 Alias aliasTempVar = new Alias("TEMP_src");
                 tempVar.setAlias(aliasTempVar);
                 
-                MyPlainSelect gBody = new MyPlainSelect();
+                PlainSelect gBody = new PlainSelect();
                 gBody.setFromItem(tempExistsBody);
                 gBody.getSelectItems().clear();
                 
@@ -860,7 +876,7 @@ public final class IteratorExp extends LoopExp {
         }
     }
 
-    private Statement forAllMap(StmVisitor visitor) {
+    private Statement forAllMap(StmVisitor visitor, String oclExpression) {
         MyIteratorSource currentIterator = new MyIteratorSource();
         currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
@@ -872,7 +888,8 @@ public final class IteratorExp extends LoopExp {
         Alias aliasTempForAllSource = new Alias("TEMP_src");
         tempForAllSource.setAlias(aliasTempForAllSource);
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
         if(visitor.getVisitorContext().stream()
                 .map(IteratorSource::getIterator)
@@ -923,7 +940,7 @@ public final class IteratorExp extends LoopExp {
                 Alias aliasTempVar = new Alias("TEMP_src");
                 tempVar.setAlias(aliasTempVar);
                 
-                MyPlainSelect gBody = new MyPlainSelect();
+                PlainSelect gBody = new PlainSelect();
                 gBody.setFromItem(tempForAllBody);
                 
                 SubSelect tempGBody = new SubSelect();
@@ -1076,7 +1093,7 @@ public final class IteratorExp extends LoopExp {
         }
     }
 
-    private Statement selectMap(StmVisitor visitor) {
+    private Statement selectMap(StmVisitor visitor, String oclExpression) {
         MyIteratorSource currentIterator = new MyIteratorSource();     
         currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
@@ -1088,7 +1105,8 @@ public final class IteratorExp extends LoopExp {
         Alias aliasTempSelectSource = new Alias("TEMP_src");
         tempSelectSource.setAlias(aliasTempSelectSource);
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
         if(visitor.getVisitorContext().stream()
                 .map(IteratorSource::getIterator)
@@ -1106,7 +1124,7 @@ public final class IteratorExp extends LoopExp {
         List<String> fVarsBody = VariableUtils.FVars(this.getBody());
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty()) {
-                MyPlainSelect gBody = new MyPlainSelect();
+                PlainSelect gBody = new PlainSelect();
                 gBody.setFromItem(tempSelectBody);
                 gBody.getSelectItems().clear();
                 gBody.addSelectItems(new AllColumns());
@@ -1134,7 +1152,7 @@ public final class IteratorExp extends LoopExp {
                 finalPlainSelect.setFromItem(tempGBody);
             }
             else {
-                MyPlainSelect gBody = new MyPlainSelect();
+                PlainSelect gBody = new PlainSelect();
                 gBody.setFromItem(tempSelectBody);
                 gBody.getSelectItems().clear();
                 gBody.addSelectItems(new AllColumns());
@@ -1210,12 +1228,13 @@ public final class IteratorExp extends LoopExp {
         return finalSelect;  
     }
 
-    private Statement notEmptyMap(StmVisitor visitor) {
+    private Statement notEmptyMap(StmVisitor visitor, String oclExpression) {
         Select source = (Select) visitor.visit(this.getSource());
         
         SubSelect tempNotEmptySource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
@@ -1283,12 +1302,13 @@ public final class IteratorExp extends LoopExp {
         return finalSelect;
     }
 
-    private Statement emptyMap(StmVisitor visitor) {
+    private Statement emptyMap(StmVisitor visitor, String oclExpression) {
         Select source = (Select) visitor.visit(this.getSource());
         
         SubSelect tempEmptySource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         
@@ -1356,7 +1376,7 @@ public final class IteratorExp extends LoopExp {
         return finalSelect;
     }
 
-    private Statement collectMap(StmVisitor visitor) {
+    private Statement collectMap(StmVisitor visitor, String oclExpression) {
         MyIteratorSource currentIterator = new MyIteratorSource(); 
         currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
@@ -1368,7 +1388,8 @@ public final class IteratorExp extends LoopExp {
         Alias aliasTempCollectSource = new Alias("TEMP_src");
         tempCollectSource.setAlias(aliasTempCollectSource);
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
         if(visitor.getVisitorContext().stream()
                 .map(IteratorSource::getIterator)
@@ -1382,9 +1403,7 @@ public final class IteratorExp extends LoopExp {
         tempCollectBody.setAlias(aliasTempCollectBody);
         
         String currentIter = this.getIterator().getName();
-//        List<String> fVarsSource = VariableUtils.FVars((MyPlainSelect) tempCollectSource.getSelectBody());
-//        List<String> fVarsBody = VariableUtils.FVars((MyPlainSelect) tempCollectBody.getSelectBody());
-        List<String> fVarsSource = VariableUtils.FVars(this.getSource());
+//        List<String> fVarsSource = VariableUtils.FVars(this.getSource());
         List<String> fVarsBody = VariableUtils.FVars(this.getBody());
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
@@ -1442,12 +1461,13 @@ public final class IteratorExp extends LoopExp {
         return finalSelect;  
     }
 
-    private Statement sizeMap(StmVisitor visitor) {
+    private Statement sizeMap(StmVisitor visitor, String oclExpression) {
         Select source = (Select) visitor.visit(this.getSource());
         
         SubSelect tempSizeSource = new SubSelect(source.getSelectBody(), "TEMP_src");
         
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
         

@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
+import org.vgu.ocl2psql.ocl.deparser.OclExpressionDeParser;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.ocl.impl.OclAnySupport;
 import org.vgu.ocl2psql.ocl.impl.OclBooleanSupport;
@@ -23,8 +24,11 @@ import org.vgu.ocl2psql.ocl.impl.OclCollectionSupport;
 import org.vgu.ocl2psql.ocl.impl.OclNumberSupport;
 import org.vgu.ocl2psql.ocl.impl.OclStringSupport;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
-import org.vgu.ocl2psql.sql.statement.select.MyPlainSelect;
+import org.vgu.ocl2psql.sql.statement.select.Join;
+import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
+import org.vgu.ocl2psql.sql.statement.select.Select;
+import org.vgu.ocl2psql.sql.statement.select.SubSelect;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.VarSelectExpression;
 
@@ -35,7 +39,6 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NotExpression;
 import net.sf.jsqlparser.expression.NullValue;
-import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
@@ -49,9 +52,6 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SubSelect;
 
 
 
@@ -122,15 +122,15 @@ public final class OperationCallExp extends FeatureCallExp {
                 return OclNumberSupport.subtract((Number) source, (Number) argumentValues[0]);
             else if (source instanceof Collection) {
                 Object body = argumentValues[0];
-                Collection<?> bodyCollection;
+                Collection<Object> bodyCollection;
                 if (body == null) {
                     bodyCollection = Collections.emptyList();
-                } else if (!(body instanceof Collection<?>)) {
+                } else if (!(body instanceof Collection)) {
                     bodyCollection = Collections.singletonList(body);
                 } else {
-                    bodyCollection = (Collection<?>) body;
+                    bodyCollection = (Collection<Object>) body;
                 }
-                return OclCollectionSupport.subtract((Collection<?>) source, bodyCollection);
+                return OclCollectionSupport.subtract((Collection<Object>) source, bodyCollection);
             } else
                 throw new OclEvaluationException("Operation - is not defined for " + source.getClass().getName()
                         + " and " + argumentValues[0].getClass().getName() + " arguments!");
@@ -163,7 +163,7 @@ public final class OperationCallExp extends FeatureCallExp {
             return OclStringSupport.equals((String) source, (String) argumentValues[0]);
         } else if ("=".equals(this.name) && source instanceof Collection && argumentValues.length == 1
                 && argumentValues[0] instanceof Collection) {
-            return OclCollectionSupport.equals((Collection<?>) source, (Collection<?>) argumentValues[0]);
+            return OclCollectionSupport.equals((Collection<Object>) source, (Collection<Object>) argumentValues[0]);
         } else if ("=".equals(this.name) && argumentValues.length == 1) {
             return OclAnySupport.equals(source, argumentValues[0]);
         } else if ("<>".equals(this.name) && source instanceof Number && argumentValues.length == 1
@@ -234,7 +234,7 @@ public final class OperationCallExp extends FeatureCallExp {
             return OclBooleanSupport.implies((Boolean) source, (Boolean) argumentValues[0]);
         } else if ("oclIsKindOf".equals(this.name) && argumentValues.length == 1
                 && argumentValues[0] instanceof Class) {
-            return OclAnySupport.oclIsKindOf(source, (Class<?>) argumentValues[0]);
+            return OclAnySupport.oclIsKindOf(source, (Class<Object>) argumentValues[0]);
         } else {
             try {
                 return context.callMethod(source, this.name, argumentValues);
@@ -247,7 +247,10 @@ public final class OperationCallExp extends FeatureCallExp {
 
     @Override
     public Statement map(StmVisitor visitor) {
-        MyPlainSelect finalPlainSelect = new MyPlainSelect();
+        PlainSelect finalPlainSelect = new PlainSelect();
+        OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
+        this.accept(oclExpressionDeParser);
+        finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
         
         if("allInstances".equals(this.name)) {
             ((OCL2SQLParser) visitor).increaseLevelOfSet();
@@ -262,7 +265,7 @@ public final class OperationCallExp extends FeatureCallExp {
         }
         else if("not".equals(this.name)) {
             Select select = (Select) visitor.visit(this.getArguments().get(0));
-            MyPlainSelect selectBody = (MyPlainSelect) select.getSelectBody();
+            PlainSelect selectBody = (PlainSelect) select.getSelectBody();
             ResSelectExpression curRes = selectBody.getRes();
             curRes.setExpression(new NotExpression(curRes.getExpression()));
             return select;
@@ -493,15 +496,6 @@ public final class OperationCallExp extends FeatureCallExp {
         finalSelect.setSelectBody(finalPlainSelect);
 
         return finalSelect;
-    }
-
-    private Expression getExpression(OclExpression oclExpression) {
-        if(oclExpression instanceof BooleanLiteralExp)
-            return new LongValue(((BooleanLiteralExp) oclExpression).isBooleanSymbol() ? "TRUE" : "FALSE");
-        if(oclExpression instanceof StringLiteralExp)
-            return new StringValue(((StringLiteralExp) oclExpression).getStringSymbol());
-        else
-            return new LongValue(((IntegerLiteralExp) oclExpression).getIntegerSymbol());
     }
 
     private BinaryExpression generateBinaryExpression(

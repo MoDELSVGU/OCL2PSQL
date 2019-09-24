@@ -29,7 +29,8 @@ public final class EnumLiteralExp extends LiteralExp {
     @SuppressWarnings("unchecked")
     @Override
     public Object eval(OclContext context) throws OclEvaluationException {
-	Class type = (Class) this.type.eval(context);
+	@SuppressWarnings("rawtypes")
+    Class type = (Class) this.type.eval(context);
 	if (type == null)
 	    return null;
 	if (type.isEnum()) {
