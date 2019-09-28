@@ -81,6 +81,21 @@ public class Utilities {
           return association;
       }
     
+    public static String getAssociationAttribute(JSONArray context, String assocName, String className) {
+          for(Object object : context) {
+              if (((JSONObject) object).containsKey("association") 
+                      && ((JSONObject) object).get("association").equals(assocName)) {
+                 JSONArray classes = (JSONArray) ((JSONObject) object).get("classes");
+                 JSONArray ends = (JSONArray) ((JSONObject) object).get("ends");
+                 if(classes.get(0).equals(className))
+                     return (String) ends.get(1);
+                 else
+                     return (String) ends.get(0);
+              }
+          }
+          return null;
+      }
+    
     public static boolean isAssociation(JSONArray context, String className,  String endName) {
         boolean result = false;
         for(Object object : context) {
@@ -155,9 +170,6 @@ public class Utilities {
 		}
 		return items;
 	}
-
-	
-
 	
 	public static void groupingVariables (PlainSelect pselect, String var_iter, SubSelect subselect_Iter, SubSelect subselect_Body) {
 		List<SelectItem> vars_Iter = Utilities.getVariableAliases(subselect_Iter);
