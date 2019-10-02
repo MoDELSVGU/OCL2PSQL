@@ -22,7 +22,7 @@ import org.vgu.ocl2psql.main.OCL2PSQL;
 import org.vgu.ocl2psql.ocl.exception.OclParseException;
 
 
-public class TesterOCL2SQLParser {
+public class ExampleTest {
 
     /**
      * @param args
