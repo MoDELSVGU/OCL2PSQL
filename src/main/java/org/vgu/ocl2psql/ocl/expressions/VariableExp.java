@@ -12,8 +12,11 @@ import org.vgu.ocl2psql.ocl.context.OclContext;
 import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.deparser.OclExpressionDeParser;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
+import org.vgu.ocl2psql.sql.statement.select.RefSelectExpression;
+import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
 
 /**
@@ -52,6 +55,23 @@ public class VariableExp extends OclExpression {
                 iter = iter_item;
                 break;
             }
+        }
+        if(iter == null) {
+            Select finalSelect = new Select();
+            PlainSelect finalPlainSelect = new PlainSelect();
+            ResSelectExpression item = new ResSelectExpression();
+            item.setExpression(new Column(this.getReferredVariable().getName()));
+            finalPlainSelect.setRes(item);
+            RefSelectExpression ref = new RefSelectExpression(this.referredVariable.getName());
+            ref.setExpression(new Column(this.getReferredVariable().getName()));
+            finalPlainSelect.addSelectItems(ref);
+            finalSelect.setSelectBody(finalPlainSelect);
+            //Create and add new iterator into visitor context.
+            MyIteratorSource newFreeIteratorSource = new MyIteratorSource();
+            newFreeIteratorSource.setIterator(new Variable(var_name));
+            newFreeIteratorSource.setSource(finalSelect);
+            visitor.getVisitorContext().add(newFreeIteratorSource);
+            return finalSelect;
         }
         Select finalSelect = (Select) ((MyIteratorSource) iter).getSource();
         PlainSelect finalPlainSelect = (PlainSelect) finalSelect.getSelectBody();

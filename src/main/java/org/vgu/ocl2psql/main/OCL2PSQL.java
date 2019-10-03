@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
 import org.vgu.ocl2psql.ocl.context.DefaultOclContext;
 import org.vgu.ocl2psql.ocl.exception.OclParseException;
@@ -88,6 +89,10 @@ public class OCL2PSQL {
         }
         finalPlainSelect.getSelectItems().clear();
         finalPlainSelect.getSelectItems().addAll(newSelectItems);
+    }
+    
+    public void setContext(JSONArray context) {
+        this.ocl2sqlParser.setPlainUMLContext(context);
     }
 
     public Boolean getDescriptionMode() {

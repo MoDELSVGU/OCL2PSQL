@@ -71,7 +71,6 @@ public final class PropertyCallExp extends NavigationCallExp {
         Variable currentVariable = VariableUtils.getCurrentVariable(this);
         SubSelect tempVar = new SubSelect();
         tempVar.setSelectBody(((Select) visitor.visit(this.getSource())).getSelectBody());
-//        Alias aliasSubSelectCurrentVar = new Alias("TEMP_".concat(currentVariable.getName()));
         Alias aliasSubSelectCurrentVar = new Alias("TEMP_obj");
         tempVar.setAlias(aliasSubSelectCurrentVar);
         PlainSelect finalPlainSelect = new PlainSelect();
@@ -83,18 +82,7 @@ public final class PropertyCallExp extends NavigationCallExp {
         String propertyName = this.name.substring(this.name.indexOf(":") + 1, this.name.length());
         String propertyClass = this.name.substring(0, this.name.indexOf(":"));
 
-//        CaseExpression caseExpression = new CaseExpression();
-//        BinaryExpression isValValid = new EqualsTo();
-//        isValValid.setLeftExpression(new Column(aliasSubSelectCurrentVar.getName().concat(".val")));
-//        isValValid.setRightExpression(new LongValue(0L));
-//        WhenClause whenClause = new WhenClause();
-//        whenClause.setWhenExpression(isValValid);
-//        whenClause.setThenExpression(new NullValue());
-//        caseExpression.setWhenClauses(Arrays.asList(whenClause));
-//        caseExpression.setElseExpression(new Column(propertyName));
-        
         ResSelectExpression resSelectExpression = new ResSelectExpression();
-//        resSelectExpression.setExpression(caseExpression);
         resSelectExpression.setExpression(new Column(propertyName));
         
         Table table = new Table();
@@ -139,7 +127,8 @@ public final class PropertyCallExp extends NavigationCallExp {
             join.setRightItem(table);
             join.setOnExpression(andEx);
             finalPlainSelect.addSelectItems(resSelectExpression);
-            finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasSubSelectCurrentVar.getName().concat(".val"))));
+            finalPlainSelect.setVal(new ValSelectExpression(
+                    new Column(aliasSubSelectCurrentVar.getName().concat(".val"))));
             finalPlainSelect.setFromItem(tempVar);
             finalPlainSelect.setJoins(Arrays.asList(join));
             
@@ -160,24 +149,6 @@ public final class PropertyCallExp extends NavigationCallExp {
 
             table.setName(assocClass);
             
-//            if(VariableUtils.isSourceHasRequiredClass(tempVar, propertyClass)) {
-//                PlainSelect plainSelectVar = (PlainSelect) tempVar.getSelectBody();
-//                finalPlainSelect.addSelectItem(resSelectExpression);
-//                finalPlainSelect.setFromItem(table);
-//                for(SelectItem item : plainSelectVar.getSelectItems()) {
-//                    if(item instanceof RefSelectExpression) {
-//                        RefSelectExpression refExpression = (RefSelectExpression) item;
-//                        if(refExpression.getVar().equals(currentVariable.getName())) {
-//                            RefSelectExpression newRef = new RefSelectExpression(currentVariable.getName());
-//                            newRef.setExpression(new Column(oppositeEnd));
-//                            finalPlainSelect.addSelectItem(newRef);
-//                        } else {
-//                            finalPlainSelect.addSelectItem(item);
-//                        }
-//                    }
-//                }
-//                return finalSelect;
-//            }
             if(VariableUtils.isSourceAClassAllInstances(currentVarSource.getSelectBody(), propertyClass)) {
                 String tableName = ((Table) ((PlainSelect) currentVarSource.getSelectBody()).getFromItem()).getName();
                 finalPlainSelect.setRes(resSelectExpression);
@@ -247,15 +218,15 @@ public final class PropertyCallExp extends NavigationCallExp {
             
             finalPlainSelect.setVal(new ValSelectExpression(caseValExpression));
             
-//            for(VarSelectExpression var : finalPlainSelect.getVars()) {
-//                if(currentVariable.getName().equals(var.getVar())) {
-//                    IsNullExpression isNullExp = new IsNullExpression();
-//                    isNullExp.setNot(true);
-//                    isNullExp.setLeftExpression(new Column(assocClass.concat(".").concat(oppositeEnd)));
-//                    var.setValExpression(isNullExp);
-//                    break;
+//                for(VarSelectExpression var : finalPlainSelect.getVars()) {
+//                    if(currentVariable.getName().equals(var.getVar())) {
+//                        IsNullExpression isNullExp = new IsNullExpression();
+//                        isNullExp.setNot(true);
+//                        isNullExp.setLeftExpression(new Column(assocClass.concat(".").concat(oppositeEnd)));
+//                        var.setValExpression(isNullExp);
+//                        break;
+//                    }
 //                }
-//            }
             
             ((OCL2SQLParser) visitor).increaseLevelOfSet();
 
