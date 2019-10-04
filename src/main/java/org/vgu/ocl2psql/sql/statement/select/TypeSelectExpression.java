@@ -20,12 +20,12 @@ limitations under the License.
 package org.vgu.ocl2psql.sql.statement.select;
 
 import net.sf.jsqlparser.expression.Alias;
-import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
 public class TypeSelectExpression extends SelectExpressionItem{
     public TypeSelectExpression(String typeName) {
-        super(new Column(typeName));
+        super(new StringValue(typeName));
         super.setAlias(new Alias("type"));
     }
 }

@@ -151,7 +151,7 @@ public final class PropertyCallExp extends NavigationCallExp {
             String oppositeEnd = Utilities.getAssociationOpposite(visitor.getPlainUMLContext(),
                     propertyClass, propertyName);
             
-            String oppositeClassName = Utilities.getAssociationOppositeClassName(visitor.getPlainUMLContext(), propertyClass, propertyName);
+            String oppositeClassName = Utilities.getAssociationOppositeClassName(visitor.getPlainUMLContext(), assocClass, propertyClass);
             finalPlainSelect.setType(new TypeSelectExpression(oppositeClassName));
 
             table.setName(assocClass);

@@ -40,15 +40,24 @@ public class TesterOCL2SQLParser {
             ocl2psql.setPlainUMLContextFromFile(props.getProperty("cardb.filePath"));
             ocl2psql.setDescriptionMode(true);
             
-            test(ocl2psql, "self");
-            test(ocl2psql, "self = caller");
-            test(ocl2psql, "self.Person:name");
-            test(ocl2psql, "self.Person:name = 'Hoang'");
-            test(ocl2psql, "self.Person:ownedCars");
-            test(ocl2psql, "self.Person:ownedCars->size()");
-            test(ocl2psql, "self.Person:ownedCars->exists(c|c.Car:color = 'black')");
-            test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p = self))");
-            test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p.Person:ownedCars->size() < self.Person:ownedCars->size()))");
+//            test(ocl2psql, "self");
+//            test(ocl2psql, "self = caller");
+//            test(ocl2psql, "self.Person:name");
+//            test(ocl2psql, "self.Person:name = 'Hoang'");
+//            test(ocl2psql, "self.Person:ownedCars");
+//            test(ocl2psql, "self.Person:ownedCars->size()");
+//            test(ocl2psql, "self.Person:ownedCars->exists(c|c.Car:color = 'black')");
+//            test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p = self))");
+//            test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p.Person:ownedCars->size() < self.Person:ownedCars->size()))");
+        
+            test(ocl2psql, "true");
+            test(ocl2psql, "1");
+            test(ocl2psql, "'Hoang'");
+            test(ocl2psql, "Car::allInstances()");
+            test(ocl2psql, "self.Car:color");
+            test(ocl2psql, "self.Car:owners");
+            test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)");
+            test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)");
         }
     }
 

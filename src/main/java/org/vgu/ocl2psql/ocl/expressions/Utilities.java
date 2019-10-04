@@ -86,11 +86,10 @@ public class Utilities {
               if (((JSONObject) object).containsKey("association") 
                       && ((JSONObject) object).get("association").equals(assocName)) {
                  JSONArray classes = (JSONArray) ((JSONObject) object).get("classes");
-                 JSONArray ends = (JSONArray) ((JSONObject) object).get("ends");
                  if(classes.get(0).equals(className))
-                     return (String) ends.get(1);
+                     return (String) classes.get(1);
                  else
-                     return (String) ends.get(0);
+                     return (String) classes.get(0);
               }
           }
           return null;
