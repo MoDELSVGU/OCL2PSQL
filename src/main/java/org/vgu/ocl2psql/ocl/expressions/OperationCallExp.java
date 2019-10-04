@@ -29,6 +29,7 @@ import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 import org.vgu.ocl2psql.sql.statement.select.SubSelect;
+import org.vgu.ocl2psql.sql.statement.select.TypeSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.VarSelectExpression;
 
@@ -261,6 +262,7 @@ public final class OperationCallExp extends FeatureCallExp {
             ResSelectExpression resExpression = new ResSelectExpression(new Column(tableName.concat("_id")));
             Table table = new Table(tableName);
             finalPlainSelect.setRes(resExpression);
+            finalPlainSelect.setType(new TypeSelectExpression(tableName));
             finalPlainSelect.setFromItem(table);
         }
         else if("not".equals(this.name)) {
@@ -331,7 +333,7 @@ public final class OperationCallExp extends FeatureCallExp {
                 resExp.setExpression(eqExp);
                 finalPlainSelect.setRes(resExp);
                 finalPlainSelect.setFromItem(tempLeft);
-                finalPlainSelect.setValAsTrue();
+                finalPlainSelect.createTrueValColumn();
                 Join join = new Join();
                 join.setSimple(true);
                 join.setRightItem(tempRight);

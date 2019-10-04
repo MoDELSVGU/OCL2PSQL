@@ -14,6 +14,7 @@ import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
+import org.vgu.ocl2psql.sql.statement.select.TypeSelectExpression;
 
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.statement.Statement;
@@ -44,6 +45,7 @@ public class StringLiteralExp extends PrimitiveLiteralExp {
 	    finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
         ResSelectExpression resExpression = new ResSelectExpression(new StringValue(this.stringSymbol));
         finalPlainSelect.setRes(resExpression);
+        finalPlainSelect.setType(new TypeSelectExpression("String"));
         
         Select finalSelect = new Select();
         finalSelect.setSelectBody(finalPlainSelect);

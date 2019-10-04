@@ -374,7 +374,7 @@ public final class IteratorExp extends LoopExp {
                 
                 finalPlainSelect.setFromItem(tempFlattenSource);
                 finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempFlattenSource.getName().concat(".res"))));
-                finalPlainSelect.setValAsTrue();
+                finalPlainSelect.createTrueValColumn();
                 
                 BinaryExpression valTrue = new EqualsTo();
                 valTrue.setLeftExpression(new Column(aliasTempFlattenSource.getName().concat(".val")));
@@ -695,7 +695,7 @@ public final class IteratorExp extends LoopExp {
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty() && fVarsBody.size() == 1) {
-                finalPlainSelect.setValAsTrue();
+                finalPlainSelect.createTrueValColumn();
                 
                 Function count = new Function();
                 count.setName("COUNT");
@@ -714,7 +714,7 @@ public final class IteratorExp extends LoopExp {
                 finalPlainSelect.setWhere(bodyWhereExp);
                 
             } else {
-                finalPlainSelect.setValAsTrue();
+                finalPlainSelect.createTrueValColumn();
                 
                 String outerVar = VariableUtils.getOuterVariable(this);
                 MyIteratorSource outerIter = visitor.getVisitorContext().stream()
@@ -812,7 +812,7 @@ public final class IteratorExp extends LoopExp {
             return finalSelect;
         }
         else {
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
             
             List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             for(String v : SVarsSource) {
@@ -908,7 +908,7 @@ public final class IteratorExp extends LoopExp {
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty() && fVarsBody.size() == 1) {
-                finalPlainSelect.setValAsTrue();
+                finalPlainSelect.createTrueValColumn();
                 
                 Function count = new Function();
                 count.setName("COUNT");
@@ -926,7 +926,7 @@ public final class IteratorExp extends LoopExp {
                 finalPlainSelect.setWhere(bodyWhereExp);
             }
             else {
-                finalPlainSelect.setValAsTrue();
+                finalPlainSelect.createTrueValColumn();
                 
                 String outerVar = VariableUtils.getOuterVariable(this);
                 MyIteratorSource outerIter = visitor.getVisitorContext().stream()
@@ -1029,7 +1029,7 @@ public final class IteratorExp extends LoopExp {
             return finalSelect;
         }
         else {
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
             
             List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             for(String v : SVarsSource) {
@@ -1252,7 +1252,7 @@ public final class IteratorExp extends LoopExp {
             countRes.setExpression(isNotEqualsZero);
 
             finalPlainSelect.setRes(countRes);
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
         }
         else {
             finalPlainSelect.setFromItem(tempNotEmptySource);
@@ -1276,7 +1276,7 @@ public final class IteratorExp extends LoopExp {
             caseResExpression.setElseExpression(new LongValue(1L));
 
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
             
             List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             
@@ -1326,7 +1326,7 @@ public final class IteratorExp extends LoopExp {
             countRes.setExpression(isEqualsZero);
 
             finalPlainSelect.setRes(countRes);
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
         }
         else {
             finalPlainSelect.setFromItem(tempEmptySource);
@@ -1350,7 +1350,7 @@ public final class IteratorExp extends LoopExp {
             caseResExpression.setElseExpression(new LongValue(0L));
 
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
             
             List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             
@@ -1481,7 +1481,7 @@ public final class IteratorExp extends LoopExp {
             countRes.setExpression(count);
 
             finalPlainSelect.setRes(countRes);
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
         }
         else {
             finalPlainSelect.setFromItem(tempSizeSource);
@@ -1505,7 +1505,7 @@ public final class IteratorExp extends LoopExp {
             caseResExpression.setElseExpression(count);
 
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
             
             List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             

@@ -15,6 +15,7 @@ import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
+import org.vgu.ocl2psql.sql.statement.select.TypeSelectExpression;
 
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.statement.Statement;
@@ -50,6 +51,7 @@ public class IntegerLiteralExp extends NumericLiteralExp {
         finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
         ResSelectExpression resExpression = new ResSelectExpression(new LongValue(this.integerSymbol));
         finalPlainSelect.setRes(resExpression);
+        finalPlainSelect.setType(new TypeSelectExpression("Integer"));
         
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
