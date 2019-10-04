@@ -15,15 +15,36 @@ public class PlainSelect extends net.sf.jsqlparser.statement.select.PlainSelect 
     
     public PlainSelect() {
         super();
-        this.setValAsTrue();
+        this.createTrueValColumn();
     }
     
+    public void setType(TypeSelectExpression type) {
+        TypeSelectExpression curType = this.getType();
+        if(Objects.isNull(curType)) {
+            super.addSelectItems(type);
+        } else {
+            curType.setExpression(type.getExpression());
+        }
+    }
+
+    public TypeSelectExpression getType() {
+        if(Objects.isNull(super.getSelectItems())) {
+            return null;
+        } else {
+            return super.getSelectItems().stream()
+            .filter(item -> item instanceof TypeSelectExpression)
+            .map(TypeSelectExpression.class::cast)
+            .findFirst()
+            .orElse(null);
+        }
+    }
+
     public void setAllColumn() {
         this.getSelectItems().clear();
         this.addSelectItems(new AllColumns());
     }
     
-    public void setValAsTrue() {
+    public void createTrueValColumn() {
         ValSelectExpression val = new ValSelectExpression(new LongValue(1L));
         this.setVal(val);
     }
