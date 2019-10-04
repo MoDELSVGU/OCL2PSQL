@@ -81,7 +81,7 @@ public class Utilities {
           return association;
       }
     
-    public static String getAssociationAttribute(JSONArray context, String assocName, String className) {
+    public static String getAssociationOppositeClassName(JSONArray context, String assocName, String className) {
           for(Object object : context) {
               if (((JSONObject) object).containsKey("association") 
                       && ((JSONObject) object).get("association").equals(assocName)) {
@@ -295,5 +295,22 @@ public class Utilities {
 
 
 	}
+
+    public static String getAttributeType(JSONArray plainUMLContext, String propertyClass, String propertyName) {
+        for(Object entity : plainUMLContext) {
+            if (((JSONObject) entity).containsKey("class")) {
+                if (((JSONObject) entity).get("class").equals(propertyClass)) {
+                    if (((JSONObject) entity).containsKey("attributes")) {
+                        for(Object association : (JSONArray) ((JSONObject) entity).get("attributes")) {
+                            if (((JSONObject) association).get("name").equals(propertyName)) {
+                                return (String) ((JSONObject) association).get("type");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
 	
 }

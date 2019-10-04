@@ -21,6 +21,7 @@ import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 import org.vgu.ocl2psql.sql.statement.select.SubSelect;
+import org.vgu.ocl2psql.sql.statement.select.TypeSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.VarSelectExpression;
 
@@ -99,7 +100,10 @@ public final class PropertyCallExp extends NavigationCallExp {
         if (Utilities.isAttribute(visitor.getPlainUMLContext(), propertyClass, propertyName)) {
 
             String tableRefColumn = propertyClass.concat(".").concat(propertyClass).concat("_id");
-
+            
+            String propertyType = Utilities.getAttributeType(visitor.getPlainUMLContext(), propertyClass, propertyName);
+            finalPlainSelect.setType(new TypeSelectExpression(propertyType));
+            
             table.setName(propertyClass);
 
             if(VariableUtils.isSourceAClassAllInstances(currentVarSource.getSelectBody(), propertyClass)) {
@@ -146,6 +150,9 @@ public final class PropertyCallExp extends NavigationCallExp {
                     propertyName);
             String oppositeEnd = Utilities.getAssociationOpposite(visitor.getPlainUMLContext(),
                     propertyClass, propertyName);
+            
+            String oppositeClassName = Utilities.getAssociationOppositeClassName(visitor.getPlainUMLContext(), propertyClass, propertyName);
+            finalPlainSelect.setType(new TypeSelectExpression(oppositeClassName));
 
             table.setName(assocClass);
             
