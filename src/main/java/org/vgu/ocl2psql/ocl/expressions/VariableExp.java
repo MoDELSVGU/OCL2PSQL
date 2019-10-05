@@ -15,6 +15,7 @@ import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.RefSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
+import org.vgu.ocl2psql.sql.statement.select.TypeSelectExpression;
 
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
@@ -66,6 +67,7 @@ public class VariableExp extends OclExpression {
             ref.setExpression(new Column(this.getReferredVariable().getName()));
             finalPlainSelect.addSelectItems(ref);
             finalSelect.setSelectBody(finalPlainSelect);
+            finalPlainSelect.setType(new TypeSelectExpression("Unknown"));
             //Create and add new iterator into visitor context.
             MyIteratorSource newFreeIteratorSource = new MyIteratorSource();
             newFreeIteratorSource.setIterator(new Variable(var_name));

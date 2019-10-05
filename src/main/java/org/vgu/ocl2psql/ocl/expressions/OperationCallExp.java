@@ -300,6 +300,8 @@ public final class OperationCallExp extends FeatureCallExp {
             
             finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasSource.getName().concat(".val"))));
             
+            finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
+            
             List<String> sVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             for(String s : sVarsSource) {
                 VarSelectExpression varExp = new VarSelectExpression(s);
@@ -322,6 +324,8 @@ public final class OperationCallExp extends FeatureCallExp {
             List<String> fVarsRight = VariableUtils.FVars(this.getArguments().get( 0 ));
             List<String> sVarsLeft = VariableUtils.SVars(this.getSource(), visitor);
             List<String> sVarsRight = VariableUtils.SVars(this.getArguments().get(0), visitor);
+            
+            finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
             
             if(fVarsLeft.isEmpty() && fVarsRight.isEmpty()) {
                 ResSelectExpression resExp = new ResSelectExpression();

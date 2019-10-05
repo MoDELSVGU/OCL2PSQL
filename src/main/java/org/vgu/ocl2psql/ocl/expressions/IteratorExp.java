@@ -29,6 +29,7 @@ import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 import org.vgu.ocl2psql.sql.statement.select.SubSelect;
+import org.vgu.ocl2psql.sql.statement.select.TypeSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.VarSelectExpression;
 
@@ -39,6 +40,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
@@ -375,6 +377,7 @@ public final class IteratorExp extends LoopExp {
                 finalPlainSelect.setFromItem(tempFlattenSource);
                 finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempFlattenSource.getName().concat(".res"))));
                 finalPlainSelect.createTrueValColumn();
+                finalPlainSelect.setType(new TypeSelectExpression(new Column(aliasTempFlattenSource.getName().concat(".type"))));
                 
                 BinaryExpression valTrue = new EqualsTo();
                 valTrue.setLeftExpression(new Column(aliasTempFlattenSource.getName().concat(".val")));
@@ -433,6 +436,7 @@ public final class IteratorExp extends LoopExp {
 
                 finalPlainSelect.setRes(new ResSelectExpression(caseResVExpression));
                 finalPlainSelect.setVal(new ValSelectExpression(caseValVExpression));
+                finalPlainSelect.setType(new TypeSelectExpression(new Column(aliasTempFlat.getName().concat(".type"))));
                 
                 List<String> sVarsSource = VariableUtils.SVars(this.getSource(), visitor);
                 BinaryExpression onCondition = null;
@@ -492,6 +496,8 @@ public final class IteratorExp extends LoopExp {
         eqEx.setRightExpression(countAllDistinct);
         uniqueRes.setExpression(eqEx);
         finalPlainSelect.setRes(uniqueRes);
+        
+        finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
         return finalSelect;
     }
 
@@ -554,7 +560,8 @@ public final class IteratorExp extends LoopExp {
                 
                 finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempGBody.getName().concat(".ref_").concat(currentIter))));
                 finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasTempGBody.getName().concat(".val"))));
-
+                finalPlainSelect.setType(new TypeSelectExpression(new Column(aliasTempGBody.getName().concat(".type"))));
+                
                 List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
                 for(String v : SVarsSource) {
                     VarSelectExpression newVar = new VarSelectExpression(v);
@@ -596,6 +603,14 @@ public final class IteratorExp extends LoopExp {
                 caseValExpression.setWhenClauses(Arrays.asList(whenValClause));
                 caseValExpression.setElseExpression(new LongValue(1L));
                 finalPlainSelect.setVal(new ValSelectExpression(caseValExpression));
+                
+                CaseExpression caseTypeExpression = new CaseExpression();
+                WhenClause whenTypeClause = new WhenClause();
+                whenTypeClause.setWhenExpression(caseBinExp);
+                whenTypeClause.setThenExpression(new StringValue("Col"));
+                caseTypeExpression.setWhenClauses(Arrays.asList(whenTypeClause));
+                caseTypeExpression.setElseExpression(new Column(aliasTempSelectSource.getName().concat(".type")));
+                finalPlainSelect.setType(new TypeSelectExpression(caseTypeExpression));
                 
                 BinaryExpression onCondition = new EqualsTo();
                 onCondition.setLeftExpression(new Column(aliasTempSelectSource.getName().concat(".res")));
@@ -659,6 +674,7 @@ public final class IteratorExp extends LoopExp {
         VariableUtils.reserveVars(finalPlainSelect, tempAsSetSource);
         finalPlainSelect.setRes(new ResSelectExpression(new Column("TEMP_src.res")));
         finalPlainSelect.setVal(new ValSelectExpression(new Column("TEMP_src.val")));
+        finalPlainSelect.setType(new TypeSelectExpression(new Column("TEMP_src.type")));
         
         return finalSelect;
     }
@@ -692,6 +708,7 @@ public final class IteratorExp extends LoopExp {
         String currentIter = this.getIterator().getName();
         List<String> fVarsSource = VariableUtils.FVars(this.getSource());
         List<String> fVarsBody = VariableUtils.FVars(this.getBody());
+        finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty() && fVarsBody.size() == 1) {
@@ -905,6 +922,7 @@ public final class IteratorExp extends LoopExp {
         String currentIter = this.getIterator().getName();
         List<String> fVarsSource = VariableUtils.FVars(this.getSource());
         List<String> fVarsBody = VariableUtils.FVars( this.getBody() );
+        finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty() && fVarsBody.size() == 1) {
@@ -1141,7 +1159,8 @@ public final class IteratorExp extends LoopExp {
                 
                 finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempGBody.getName().concat(".ref_").concat(currentIter))));
                 finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasTempGBody.getName().concat(".val"))));
-
+                finalPlainSelect.setType(new TypeSelectExpression(new Column(aliasTempGBody.getName().concat(".type"))));
+                
                 List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
                 for(String v : SVarsSource) {
                     VarSelectExpression newVar = new VarSelectExpression(v);
@@ -1183,6 +1202,14 @@ public final class IteratorExp extends LoopExp {
                 caseValExpression.setWhenClauses(Arrays.asList(whenValClause));
                 caseValExpression.setElseExpression(new LongValue(1L));
                 finalPlainSelect.setVal(new ValSelectExpression(caseValExpression));
+                
+                CaseExpression caseTypeExpression = new CaseExpression();
+                WhenClause whenTypeClause = new WhenClause();
+                whenTypeClause.setWhenExpression(caseBinExp);
+                whenTypeClause.setThenExpression(new StringValue("Col"));
+                caseTypeExpression.setWhenClauses(Arrays.asList(whenTypeClause));
+                caseTypeExpression.setElseExpression(new Column(aliasTempSelectSource.getName().concat(".type")));
+                finalPlainSelect.setType(new TypeSelectExpression(caseTypeExpression));
                 
                 BinaryExpression onCondition = new EqualsTo();
                 onCondition.setLeftExpression(new Column(aliasTempSelectSource.getName().concat(".res")));
@@ -1253,6 +1280,7 @@ public final class IteratorExp extends LoopExp {
 
             finalPlainSelect.setRes(countRes);
             finalPlainSelect.createTrueValColumn();
+            finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
         }
         else {
             finalPlainSelect.setFromItem(tempNotEmptySource);
@@ -1277,6 +1305,7 @@ public final class IteratorExp extends LoopExp {
 
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
             finalPlainSelect.createTrueValColumn();
+            finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
             
             List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             
@@ -1327,6 +1356,7 @@ public final class IteratorExp extends LoopExp {
 
             finalPlainSelect.setRes(countRes);
             finalPlainSelect.createTrueValColumn();
+            finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
         }
         else {
             finalPlainSelect.setFromItem(tempEmptySource);
@@ -1351,6 +1381,7 @@ public final class IteratorExp extends LoopExp {
 
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
             finalPlainSelect.createTrueValColumn();
+            finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
             
             List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             
@@ -1407,8 +1438,9 @@ public final class IteratorExp extends LoopExp {
         List<String> fVarsBody = VariableUtils.FVars(this.getBody());
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
-            finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempCollectBody.getName().concat(".").concat("res"))));
+            finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempCollectBody.getName().concat(".res"))));
             finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasTempCollectBody.getName().concat(".val"))));
+            finalPlainSelect.setType(new TypeSelectExpression(new Column(aliasTempCollectBody.getName().concat(".type"))));
             finalPlainSelect.setFromItem(tempCollectBody);
             
             List<String> SVarsBody = VariableUtils.SVars(this.getBody(), visitor);
@@ -1482,6 +1514,7 @@ public final class IteratorExp extends LoopExp {
 
             finalPlainSelect.setRes(countRes);
             finalPlainSelect.createTrueValColumn();
+            finalPlainSelect.setType(new TypeSelectExpression("Integer"));
         }
         else {
             finalPlainSelect.setFromItem(tempSizeSource);
@@ -1506,6 +1539,7 @@ public final class IteratorExp extends LoopExp {
 
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
             finalPlainSelect.createTrueValColumn();
+            finalPlainSelect.setType(new TypeSelectExpression("Integer"));
             
             List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             
