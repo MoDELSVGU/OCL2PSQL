@@ -30,7 +30,8 @@ public class IntegerLiteralExp extends NumericLiteralExp {
     private final int integerSymbol;
 
     public IntegerLiteralExp(int newintegerSymbol) {
-	this.integerSymbol = newintegerSymbol;
+        this.integerSymbol = newintegerSymbol;
+        this.setType("Integer");
     }
     
     @Override
@@ -51,7 +52,7 @@ public class IntegerLiteralExp extends NumericLiteralExp {
         finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
         ResSelectExpression resExpression = new ResSelectExpression(new LongValue(this.integerSymbol));
         finalPlainSelect.setRes(resExpression);
-        finalPlainSelect.setType(new TypeSelectExpression("Integer"));
+        finalPlainSelect.setType(new TypeSelectExpression(this));
         
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );

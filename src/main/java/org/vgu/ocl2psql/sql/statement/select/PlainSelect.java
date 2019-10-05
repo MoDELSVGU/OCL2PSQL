@@ -242,5 +242,4 @@ public class PlainSelect extends net.sf.jsqlparser.statement.select.PlainSelect 
     public void setCorrespondOCLExpression(String correspondOCLExpression) {
         this.correspondOCLExpression = correspondOCLExpression;
     }
-    
 }

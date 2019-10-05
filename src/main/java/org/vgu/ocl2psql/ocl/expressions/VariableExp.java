@@ -30,7 +30,10 @@ public class VariableExp extends OclExpression {
     private final Variable referredVariable;
 
     public VariableExp(Variable referredVariable) {
-	this.referredVariable = referredVariable;
+        this.referredVariable = referredVariable;
+        if(referredVariable.getInitExpression() != null) {
+            this.setType(referredVariable.getInitExpression().getType());
+        }
     }
 
     @Override
@@ -67,7 +70,8 @@ public class VariableExp extends OclExpression {
             ref.setExpression(new Column(this.getReferredVariable().getName()));
             finalPlainSelect.addSelectItems(ref);
             finalSelect.setSelectBody(finalPlainSelect);
-            finalPlainSelect.setType(new TypeSelectExpression("Unknown"));
+            this.setType(null);
+            finalPlainSelect.setType(new TypeSelectExpression(this));
             //Create and add new iterator into visitor context.
             MyIteratorSource newFreeIteratorSource = new MyIteratorSource();
             newFreeIteratorSource.setIterator(new Variable(var_name));
@@ -75,6 +79,7 @@ public class VariableExp extends OclExpression {
             visitor.getVisitorContext().add(newFreeIteratorSource);
             return finalSelect;
         }
+        this.setType(((MyIteratorSource) iter).getSourceExpression().getType());
         Select finalSelect = (Select) ((MyIteratorSource) iter).getSource();
         PlainSelect finalPlainSelect = (PlainSelect) finalSelect.getSelectBody();
         OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();

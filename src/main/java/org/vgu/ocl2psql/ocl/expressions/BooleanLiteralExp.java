@@ -29,7 +29,8 @@ public final class BooleanLiteralExp extends PrimitiveLiteralExp {
     private final boolean booleanSymbol;
 
     public BooleanLiteralExp(boolean newbooleanSymbol) {
-	this.booleanSymbol = newbooleanSymbol;
+        this.booleanSymbol = newbooleanSymbol;
+        this.setType("Boolean");
     }
     
     @Override
@@ -50,7 +51,7 @@ public final class BooleanLiteralExp extends PrimitiveLiteralExp {
 		finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
 		ResSelectExpression resExpression = new ResSelectExpression(new LongValue(((this.booleanSymbol) == true)? "TRUE" : "FALSE"));
 		finalPlainSelect.setRes(resExpression);
-		finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
+		finalPlainSelect.setType(new TypeSelectExpression(this));
 		
 		Select finalSelect = new Select();
 		finalSelect.setSelectBody(finalPlainSelect);

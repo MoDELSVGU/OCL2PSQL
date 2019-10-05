@@ -259,13 +259,15 @@ public final class OperationCallExp extends FeatureCallExp {
             if(!Utilities.isClass(visitor.getPlainUMLContext(), tableName)) {
                 throw new NullPointerException("Invalid class: ".concat(tableName));
             }
+            this.setType(tableName);
             ResSelectExpression resExpression = new ResSelectExpression(new Column(tableName.concat("_id")));
             Table table = new Table(tableName);
             finalPlainSelect.setRes(resExpression);
-            finalPlainSelect.setType(new TypeSelectExpression(tableName));
+            finalPlainSelect.setType(new TypeSelectExpression(this));
             finalPlainSelect.setFromItem(table);
         }
         else if("not".equals(this.name)) {
+            this.setType("Boolean");
             Select select = (Select) visitor.visit(this.getArguments().get(0));
             PlainSelect selectBody = (PlainSelect) select.getSelectBody();
             ResSelectExpression curRes = selectBody.getRes();
@@ -273,6 +275,7 @@ public final class OperationCallExp extends FeatureCallExp {
             return select;
         }
         else if("oclIsUndefined".equals(this.name)) {
+            this.setType("Boolean");
             Select select = (Select) visitor.visit(this.source);
             SubSelect tempSource = new SubSelect();
             tempSource.setSelectBody(select.getSelectBody());
@@ -300,7 +303,7 @@ public final class OperationCallExp extends FeatureCallExp {
             
             finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasSource.getName().concat(".val"))));
             
-            finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
+            finalPlainSelect.setType(new TypeSelectExpression(this));
             
             List<String> sVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             for(String s : sVarsSource) {
@@ -310,6 +313,7 @@ public final class OperationCallExp extends FeatureCallExp {
             }
         }
         else {
+            this.setType("Boolean");
             SubSelect tempLeft = new SubSelect();
             tempLeft.setSelectBody(((Select) visitor.visit(this.getSource())).getSelectBody());
             Alias alias_Left = new Alias("TEMP_LEFT");
@@ -325,7 +329,7 @@ public final class OperationCallExp extends FeatureCallExp {
             List<String> sVarsLeft = VariableUtils.SVars(this.getSource(), visitor);
             List<String> sVarsRight = VariableUtils.SVars(this.getArguments().get(0), visitor);
             
-            finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
+            finalPlainSelect.setType(new TypeSelectExpression(this));
             
             if(fVarsLeft.isEmpty() && fVarsRight.isEmpty()) {
                 ResSelectExpression resExp = new ResSelectExpression();

@@ -377,7 +377,7 @@ public final class IteratorExp extends LoopExp {
                 finalPlainSelect.setFromItem(tempFlattenSource);
                 finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempFlattenSource.getName().concat(".res"))));
                 finalPlainSelect.createTrueValColumn();
-                finalPlainSelect.setType(new TypeSelectExpression(new Column(aliasTempFlattenSource.getName().concat(".type"))));
+                finalPlainSelect.setType(new TypeSelectExpression(this.getSource()));
                 
                 BinaryExpression valTrue = new EqualsTo();
                 valTrue.setLeftExpression(new Column(aliasTempFlattenSource.getName().concat(".val")));
@@ -433,10 +433,17 @@ public final class IteratorExp extends LoopExp {
                 whenValClause.setThenExpression(new LongValue(0L));
                 caseValVExpression.setWhenClauses(Arrays.asList(whenValClause));
                 caseValVExpression.setElseExpression(new Column(aliasTempFlat.getName().concat(".val")));
+                
+                CaseExpression caseTypeExpression = new CaseExpression();
+                WhenClause whenTypeClause = new WhenClause();
+                whenTypeClause.setWhenExpression(isOuterRefNull);
+                whenTypeClause.setThenExpression(new StringValue("EmptyCol"));
+                caseTypeExpression.setWhenClauses(Arrays.asList(whenTypeClause));
+                caseTypeExpression.setElseExpression(new StringValue(this.getSource().getType()));
 
                 finalPlainSelect.setRes(new ResSelectExpression(caseResVExpression));
                 finalPlainSelect.setVal(new ValSelectExpression(caseValVExpression));
-                finalPlainSelect.setType(new TypeSelectExpression(new Column(aliasTempFlat.getName().concat(".type"))));
+                finalPlainSelect.setType(new TypeSelectExpression(caseTypeExpression));
                 
                 List<String> sVarsSource = VariableUtils.SVars(this.getSource(), visitor);
                 BinaryExpression onCondition = null;
@@ -459,7 +466,7 @@ public final class IteratorExp extends LoopExp {
                 }
                 join.setOnExpression(onCondition);
                 
-                
+                this.setType(this.getSource().getType());
                 ((OCL2SQLParser) visitor).decreaseLevelOfSet();
                         
                 return finalSelect;
@@ -497,7 +504,8 @@ public final class IteratorExp extends LoopExp {
         uniqueRes.setExpression(eqEx);
         finalPlainSelect.setRes(uniqueRes);
         
-        finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
+        this.setType("Boolean");
+        finalPlainSelect.setType(new TypeSelectExpression(this));
         return finalSelect;
     }
 
@@ -560,7 +568,7 @@ public final class IteratorExp extends LoopExp {
                 
                 finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempGBody.getName().concat(".ref_").concat(currentIter))));
                 finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasTempGBody.getName().concat(".val"))));
-                finalPlainSelect.setType(new TypeSelectExpression(new Column(aliasTempGBody.getName().concat(".type"))));
+                finalPlainSelect.setType(new TypeSelectExpression(this.getSource()));
                 
                 List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
                 for(String v : SVarsSource) {
@@ -607,9 +615,9 @@ public final class IteratorExp extends LoopExp {
                 CaseExpression caseTypeExpression = new CaseExpression();
                 WhenClause whenTypeClause = new WhenClause();
                 whenTypeClause.setWhenExpression(caseBinExp);
-                whenTypeClause.setThenExpression(new StringValue("Col"));
+                whenTypeClause.setThenExpression(new StringValue("EmptyCol"));
                 caseTypeExpression.setWhenClauses(Arrays.asList(whenTypeClause));
-                caseTypeExpression.setElseExpression(new Column(aliasTempSelectSource.getName().concat(".type")));
+                caseTypeExpression.setElseExpression(new StringValue(this.getSource().getType()));
                 finalPlainSelect.setType(new TypeSelectExpression(caseTypeExpression));
                 
                 BinaryExpression onCondition = new EqualsTo();
@@ -649,6 +657,7 @@ public final class IteratorExp extends LoopExp {
             
         }
 
+        this.setType(this.getSource().getType());
         // create result
         Select finalSelect = new Select();
         finalSelect.setSelectBody( finalPlainSelect );
@@ -657,6 +666,7 @@ public final class IteratorExp extends LoopExp {
     }
 
     private Statement asSetMap(StmVisitor visitor, String oclExpression) {
+        this.setType(this.getSource().getType());
         Select source = (Select) visitor.visit(this.getSource());
         
         SubSelect tempAsSetSource = new SubSelect(source.getSelectBody(), "TEMP_src");
@@ -680,6 +690,7 @@ public final class IteratorExp extends LoopExp {
     }
 
     private Statement existsMap(StmVisitor visitor, String oclExpression) {
+        this.setType("Boolean");
         MyIteratorSource currentIterator = new MyIteratorSource();
         currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
@@ -708,7 +719,7 @@ public final class IteratorExp extends LoopExp {
         String currentIter = this.getIterator().getName();
         List<String> fVarsSource = VariableUtils.FVars(this.getSource());
         List<String> fVarsBody = VariableUtils.FVars(this.getBody());
-        finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
+        finalPlainSelect.setType(new TypeSelectExpression(this));
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty() && fVarsBody.size() == 1) {
@@ -894,6 +905,7 @@ public final class IteratorExp extends LoopExp {
     }
 
     private Statement forAllMap(StmVisitor visitor, String oclExpression) {
+        this.setType("Boolean");
         MyIteratorSource currentIterator = new MyIteratorSource();
         currentIterator.setSourceExpression(this.getSource());
         currentIterator.setIterator(this.getIterator());  
@@ -922,7 +934,7 @@ public final class IteratorExp extends LoopExp {
         String currentIter = this.getIterator().getName();
         List<String> fVarsSource = VariableUtils.FVars(this.getSource());
         List<String> fVarsBody = VariableUtils.FVars( this.getBody() );
-        finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
+        finalPlainSelect.setType(new TypeSelectExpression(this));
         
         if(VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if(fVarsSource.isEmpty() && fVarsBody.size() == 1) {
@@ -1159,7 +1171,7 @@ public final class IteratorExp extends LoopExp {
                 
                 finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempGBody.getName().concat(".ref_").concat(currentIter))));
                 finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasTempGBody.getName().concat(".val"))));
-                finalPlainSelect.setType(new TypeSelectExpression(new Column(aliasTempGBody.getName().concat(".type"))));
+                finalPlainSelect.setType(new TypeSelectExpression(this.getSource()));
                 
                 List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
                 for(String v : SVarsSource) {
@@ -1206,9 +1218,9 @@ public final class IteratorExp extends LoopExp {
                 CaseExpression caseTypeExpression = new CaseExpression();
                 WhenClause whenTypeClause = new WhenClause();
                 whenTypeClause.setWhenExpression(caseBinExp);
-                whenTypeClause.setThenExpression(new StringValue("Col"));
+                whenTypeClause.setThenExpression(new StringValue("EmptyCol"));
                 caseTypeExpression.setWhenClauses(Arrays.asList(whenTypeClause));
-                caseTypeExpression.setElseExpression(new Column(aliasTempSelectSource.getName().concat(".type")));
+                caseTypeExpression.setElseExpression(new StringValue(this.getSource().getType()));
                 finalPlainSelect.setType(new TypeSelectExpression(caseTypeExpression));
                 
                 BinaryExpression onCondition = new EqualsTo();
@@ -1256,6 +1268,7 @@ public final class IteratorExp extends LoopExp {
     }
 
     private Statement notEmptyMap(StmVisitor visitor, String oclExpression) {
+        this.setType("Boolean");
         Select source = (Select) visitor.visit(this.getSource());
         
         SubSelect tempNotEmptySource = new SubSelect(source.getSelectBody(), "TEMP_src");
@@ -1280,7 +1293,7 @@ public final class IteratorExp extends LoopExp {
 
             finalPlainSelect.setRes(countRes);
             finalPlainSelect.createTrueValColumn();
-            finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
+            finalPlainSelect.setType(new TypeSelectExpression(this));
         }
         else {
             finalPlainSelect.setFromItem(tempNotEmptySource);
@@ -1305,7 +1318,7 @@ public final class IteratorExp extends LoopExp {
 
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
             finalPlainSelect.createTrueValColumn();
-            finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
+            finalPlainSelect.setType(new TypeSelectExpression(this));
             
             List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             
@@ -1332,6 +1345,7 @@ public final class IteratorExp extends LoopExp {
     }
 
     private Statement emptyMap(StmVisitor visitor, String oclExpression) {
+        this.setType("Boolean");
         Select source = (Select) visitor.visit(this.getSource());
         
         SubSelect tempEmptySource = new SubSelect(source.getSelectBody(), "TEMP_src");
@@ -1356,7 +1370,7 @@ public final class IteratorExp extends LoopExp {
 
             finalPlainSelect.setRes(countRes);
             finalPlainSelect.createTrueValColumn();
-            finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
+            finalPlainSelect.setType(new TypeSelectExpression(this));
         }
         else {
             finalPlainSelect.setFromItem(tempEmptySource);
@@ -1381,7 +1395,7 @@ public final class IteratorExp extends LoopExp {
 
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
             finalPlainSelect.createTrueValColumn();
-            finalPlainSelect.setType(new TypeSelectExpression("Boolean"));
+            finalPlainSelect.setType(new TypeSelectExpression(this));
             
             List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             
@@ -1433,6 +1447,8 @@ public final class IteratorExp extends LoopExp {
         Alias aliasTempCollectBody = new Alias("TEMP_body");
         tempCollectBody.setAlias(aliasTempCollectBody);
         
+        this.setType(this.getBody().getType());
+        
         String currentIter = this.getIterator().getName();
 //        List<String> fVarsSource = VariableUtils.FVars(this.getSource());
         List<String> fVarsBody = VariableUtils.FVars(this.getBody());
@@ -1454,6 +1470,7 @@ public final class IteratorExp extends LoopExp {
         else {
             finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempCollectBody.getName().concat(".res"))));
             finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasTempCollectBody.getName().concat(".val"))));
+            finalPlainSelect.setType(new TypeSelectExpression(new Column(aliasTempCollectBody.getName().concat(".type"))));
             finalPlainSelect.setFromItem(tempCollectSource);
             Join join = new Join();
             join.setRightItem(tempCollectBody);
@@ -1494,6 +1511,7 @@ public final class IteratorExp extends LoopExp {
     }
 
     private Statement sizeMap(StmVisitor visitor, String oclExpression) {
+        this.setType("Integer");
         Select source = (Select) visitor.visit(this.getSource());
         
         SubSelect tempSizeSource = new SubSelect(source.getSelectBody(), "TEMP_src");
@@ -1514,7 +1532,7 @@ public final class IteratorExp extends LoopExp {
 
             finalPlainSelect.setRes(countRes);
             finalPlainSelect.createTrueValColumn();
-            finalPlainSelect.setType(new TypeSelectExpression("Integer"));
+            finalPlainSelect.setType(new TypeSelectExpression(this));
         }
         else {
             finalPlainSelect.setFromItem(tempSizeSource);
@@ -1539,7 +1557,7 @@ public final class IteratorExp extends LoopExp {
 
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
             finalPlainSelect.createTrueValColumn();
-            finalPlainSelect.setType(new TypeSelectExpression("Integer"));
+            finalPlainSelect.setType(new TypeSelectExpression(this));
             
             List<String> SVarsSource = VariableUtils.SVars(this.getSource(), visitor);
             

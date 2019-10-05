@@ -25,6 +25,8 @@ import org.vgu.ocl2psql.ocl.expressions.StmVisitable;
  * Class OclExpression
  */
 public abstract class OclExpression implements StmVisitable, DeparserVisitable {
+    
+    private String type;
 
     public abstract Object eval(OclContext context)
 	    throws OclEvaluationException;
@@ -493,6 +495,14 @@ public abstract class OclExpression implements StmVisitable, DeparserVisitable {
 	String encoded = pushBrackets(pushStrings(eliminateComments(ocl),
 		stringStack), bracketStack);
 	return parse(encoded, bracketStack, stringStack, context);
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
 }

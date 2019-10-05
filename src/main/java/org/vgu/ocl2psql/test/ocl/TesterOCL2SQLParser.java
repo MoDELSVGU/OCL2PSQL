@@ -50,19 +50,19 @@ public class TesterOCL2SQLParser {
 //            test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p = self))");
 //            test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p.Person:ownedCars->size() < self.Person:ownedCars->size()))");
         
-            test(ocl2psql, "true");
-            test(ocl2psql, "1");
-            test(ocl2psql, "'Hoang'");
-            test(ocl2psql, "Car::allInstances()");
-            test(ocl2psql, "self.Car:color");
-            test(ocl2psql, "self.Car:owners");
-            test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)");
-            test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)");
+//            test(ocl2psql, "true");
+//            test(ocl2psql, "1");
+//            test(ocl2psql, "'Hoang'");
+            test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners->forAll(p|p.Person:name <> 'Hoang'))");
+//            test(ocl2psql, "self.Car:color");
+//            test(ocl2psql, "self.Car:owners");
+//            test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)");
+//            test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)");
         }
     }
 
     private static void test(OCL2PSQL ocl2psql, String oclExp) throws OclParseException {
-        System.out.println(oclExp);
+//        System.out.println(oclExp);
         String finalStatementWithDescription = ocl2psql.mapToString(oclExp);
         System.out.println(finalStatementWithDescription);
         System.out.println();

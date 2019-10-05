@@ -29,6 +29,7 @@ import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.CaseExpression;
 import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -102,7 +103,8 @@ public final class PropertyCallExp extends NavigationCallExp {
             String tableRefColumn = propertyClass.concat(".").concat(propertyClass).concat("_id");
             
             String propertyType = Utilities.getAttributeType(visitor.getPlainUMLContext(), propertyClass, propertyName);
-            finalPlainSelect.setType(new TypeSelectExpression(propertyType));
+            this.setType(propertyType);
+            finalPlainSelect.setType(new TypeSelectExpression(this));
             
             table.setName(propertyClass);
 
@@ -152,7 +154,7 @@ public final class PropertyCallExp extends NavigationCallExp {
                     propertyClass, propertyName);
             
             String oppositeClassName = Utilities.getAssociationOppositeClassName(visitor.getPlainUMLContext(), assocClass, propertyClass);
-            finalPlainSelect.setType(new TypeSelectExpression(oppositeClassName));
+            this.setType(oppositeClassName);
 
             table.setName(assocClass);
             
@@ -178,6 +180,14 @@ public final class PropertyCallExp extends NavigationCallExp {
                 whenValClause.setThenExpression(new LongValue(0L));
                 caseValExpression.setWhenClauses(Arrays.asList(whenValClause));
                 caseValExpression.setElseExpression(new LongValue(1L));
+                
+                CaseExpression caseTypeExpression = new CaseExpression();
+                WhenClause whenTypeClause = new WhenClause();
+                whenTypeClause.setWhenExpression(isOppEndNull);
+                whenTypeClause.setThenExpression(new StringValue("EmptyCol"));
+                caseTypeExpression.setWhenClauses(Arrays.asList(whenTypeClause));
+                caseTypeExpression.setElseExpression(new StringValue(this.getType()));
+                finalPlainSelect.setType(new TypeSelectExpression(caseTypeExpression));
                 
                 finalPlainSelect.setVal(new ValSelectExpression(caseValExpression));
                 
@@ -206,6 +216,14 @@ public final class PropertyCallExp extends NavigationCallExp {
             whenValClause.setThenExpression(new LongValue(0L));
             caseValExpression.setWhenClauses(Arrays.asList(whenValClause));
             caseValExpression.setElseExpression(new LongValue(1L));
+            
+            CaseExpression caseTypeExpression = new CaseExpression();
+            WhenClause whenTypeClause = new WhenClause();
+            whenTypeClause.setWhenExpression(isOppEndNull);
+            whenTypeClause.setThenExpression(new StringValue("EmptyCol"));
+            caseTypeExpression.setWhenClauses(Arrays.asList(whenTypeClause));
+            caseTypeExpression.setElseExpression(new StringValue(this.getType()));
+            finalPlainSelect.setType(new TypeSelectExpression(caseTypeExpression));
             
             Join join = new Join();
             join.setLeft(true);

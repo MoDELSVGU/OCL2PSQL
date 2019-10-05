@@ -29,7 +29,8 @@ public class StringLiteralExp extends PrimitiveLiteralExp {
     private final String stringSymbol;
 
     public StringLiteralExp(String newstringSymbol) {
-	this.stringSymbol = newstringSymbol;
+        this.stringSymbol = newstringSymbol;
+        this.setType("String");
     }
 
     @Override
@@ -45,7 +46,7 @@ public class StringLiteralExp extends PrimitiveLiteralExp {
 	    finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
         ResSelectExpression resExpression = new ResSelectExpression(new StringValue(this.stringSymbol));
         finalPlainSelect.setRes(resExpression);
-        finalPlainSelect.setType(new TypeSelectExpression("String"));
+        finalPlainSelect.setType(new TypeSelectExpression(this));
         
         Select finalSelect = new Select();
         finalSelect.setSelectBody(finalPlainSelect);
