@@ -18,7 +18,7 @@ limitations under the License.
 
 package org.vgu.ocl2psql.ocl.exception;
 
-public class SetOfSetException extends RuntimeException{
+public class SetOfSetException extends RuntimeException {
 
     /**
      * 

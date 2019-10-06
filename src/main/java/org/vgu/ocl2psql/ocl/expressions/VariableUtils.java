@@ -115,16 +115,17 @@ public class VariableUtils {
     public static Variable getCurrentVariable(OclExpression currentExpression) {
         if(currentExpression instanceof PropertyCallExp) {
             PropertyCallExp propertyCallExp = (PropertyCallExp) currentExpression;
-            return Optional.ofNullable(propertyCallExp)
-                    .map(PropertyCallExp::getSource)
-                    .filter(oclExpression -> oclExpression instanceof VariableExp)
-                    .map(VariableExp.class::cast)
-                    .map(VariableExp::getReferredVariable)
-                    .orElse(null);
+            if(propertyCallExp.getSource() instanceof VariableExp) {
+                VariableExp variableExp = (VariableExp) propertyCallExp.getSource();
+                return variableExp.getReferredVariable();
+            } else if(propertyCallExp.getSource() instanceof OperationCallExp) {
+                OperationCallExp operationCallExp = (OperationCallExp) propertyCallExp.getSource();
+                if("oclAsType".equals(operationCallExp.getName())) {
+                    return ((VariableExp) operationCallExp.getSource()).getReferredVariable();
+                }
+            }
         }
-        else {
-            return null;
-        }
+        return null;
     }
     
     public static boolean containsNoVariable(Select select) {

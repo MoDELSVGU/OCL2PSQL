@@ -14,6 +14,7 @@ import java.util.List;
 import org.vgu.ocl2psql.ocl.context.OclContext;
 import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.deparser.OclExpressionDeParser;
+import org.vgu.ocl2psql.ocl.exception.OclConformanceException;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
 import org.vgu.ocl2psql.sql.statement.select.Join;
@@ -83,20 +84,26 @@ public final class PropertyCallExp extends NavigationCallExp {
         finalSelect.setSelectBody(finalPlainSelect);
         String propertyName = this.name.substring(this.name.indexOf(":") + 1, this.name.length());
         String propertyClass = this.name.substring(0, this.name.indexOf(":"));
+        
+        String varType = this.getSource().getType();
+        
+        if(!Utilities.isSuperClassOf(visitor.getPlainUMLContext(), propertyClass, varType)) {
+            throw new OclConformanceException("Invalid operation on type ".concat(varType));
+        }
 
         ResSelectExpression resSelectExpression = new ResSelectExpression();
         resSelectExpression.setExpression(new Column(propertyName));
         
         Table table = new Table();
         
-        Select currentVarSource = null;
-        
-        for(IteratorSource v : visitor.getVisitorContext()) {
-            MyIteratorSource myV = (MyIteratorSource) v;
-            if(myV.getIterator().getName().equals(currentVariable.getName())) {
-                currentVarSource = myV.getSourceWithoutIter();
-            }
-        }
+      //TODO: What for?
+//        Select currentVarSource = null;
+//        for(IteratorSource v : visitor.getVisitorContext()) {
+//            MyIteratorSource myV = (MyIteratorSource) v;
+//            if(myV.getIterator().getName().equals(currentVariable.getName())) {
+//                currentVarSource = myV.getSourceWithoutIter();
+//            }
+//        }
         
         if (Utilities.isAttribute(visitor.getPlainUMLContext(), propertyClass, propertyName)) {
 
@@ -108,7 +115,7 @@ public final class PropertyCallExp extends NavigationCallExp {
             
             table.setName(propertyClass);
 
-            if(VariableUtils.isSourceAClassAllInstances(currentVarSource.getSelectBody(), propertyClass)) {
+            if(VariableUtils.isSourceAClassAllInstances(tempVar.getSelectBody(), propertyClass)) {
                 finalPlainSelect.setRes(resSelectExpression);
                 finalPlainSelect.setFromItem(table);
                 VarSelectExpression newVar = new VarSelectExpression(currentVariable.getName());
@@ -158,8 +165,8 @@ public final class PropertyCallExp extends NavigationCallExp {
 
             table.setName(assocClass);
             
-            if(VariableUtils.isSourceAClassAllInstances(currentVarSource.getSelectBody(), propertyClass)) {
-                String tableName = ((Table) ((PlainSelect) currentVarSource.getSelectBody()).getFromItem()).getName();
+            if(VariableUtils.isSourceAClassAllInstances(tempVar.getSelectBody(), propertyClass)) {
+                String tableName = ((Table) ((PlainSelect) tempVar.getSelectBody()).getFromItem()).getName();
                 finalPlainSelect.setRes(resSelectExpression);
                 finalPlainSelect.setFromItem(new Table(tableName));
                 

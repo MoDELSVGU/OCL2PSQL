@@ -17,6 +17,7 @@ import java.util.Objects;
 
 import org.vgu.ocl2psql.ocl.context.OclContext;
 import org.vgu.ocl2psql.ocl.deparser.OclExpressionDeParser;
+import org.vgu.ocl2psql.ocl.exception.OclConformanceException;
 import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
 import org.vgu.ocl2psql.ocl.impl.OclAnySupport;
 import org.vgu.ocl2psql.ocl.impl.OclBooleanSupport;
@@ -395,6 +396,58 @@ public final class OperationCallExp extends FeatureCallExp {
         else if("oclAsType".equals(this.name)) {
             String classType = ((VariableExp) this.getArguments().get(0)).getReferredVariable().getName();
             
+            Select select = (Select) visitor.visit(this.source);
+            SubSelect tempSource = new SubSelect();
+            tempSource.setSelectBody(select.getSelectBody());
+            Alias aliasSource = new Alias("TEMP_src");
+            tempSource.setAlias(aliasSource);
+            
+            String sourceType = this.getSource().getType();
+            boolean isKindOf = Utilities.isSuperClassOf(visitor.getPlainUMLContext(), sourceType, classType);
+            
+            if(!isKindOf) {
+                throw new OclConformanceException(sourceType.concat(" does not conform to ").concat(classType));
+            }
+            else {
+                this.setType(classType);
+                finalPlainSelect.setFromItem(tempSource);
+                
+                BinaryExpression valEq = new EqualsTo();
+                valEq.setLeftExpression(new Column(aliasSource.getName().concat(".val")));
+                valEq.setRightExpression(new LongValue(0L));
+                
+                finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasSource.getName().concat(".res"))));
+                
+                finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasSource.getName().concat(".val"))));
+                
+                CaseExpression caseTypeExpression = new CaseExpression();
+                WhenClause whenTypeClause = new WhenClause();
+                whenTypeClause.setWhenExpression(valEq);
+                whenTypeClause.setThenExpression(new NullValue());
+                caseTypeExpression.setWhenClauses(Arrays.asList(whenTypeClause));
+                caseTypeExpression.setElseExpression(new StringValue(classType));
+                
+                finalPlainSelect.setType(new TypeSelectExpression(caseTypeExpression));
+                
+                if(! (classType.equals("String") || classType.equals("Integer") || classType.equals("Boolean"))) {
+                    Join join = new Join();
+                    join.setRightItem(new Table(classType));
+//                    join.setSemi(true);
+//                    join.setUsingColumns(Arrays.asList(new Column(classType.concat("_id"))));
+                    BinaryExpression idEqual = new EqualsTo();
+                    idEqual.setLeftExpression(new Column(aliasSource.getName().concat(".res")));
+                    idEqual.setRightExpression(new Column(classType.concat("_id")));
+                    join.setOnExpression(idEqual);
+                    finalPlainSelect.setJoins(Arrays.asList(join));
+                }
+                
+                List<String> sVarsSource = VariableUtils.SVars(this.getSource(), visitor);
+                for(String s : sVarsSource) {
+                    VarSelectExpression varExp = new VarSelectExpression(s);
+                    varExp.setRefExpression(new Column(aliasSource.getName().concat(".ref_").concat(s)));
+                    finalPlainSelect.addVar(varExp);
+                }
+            }
         }
         else {
             this.setType("Boolean");
