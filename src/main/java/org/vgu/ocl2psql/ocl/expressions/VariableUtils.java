@@ -217,6 +217,9 @@ public class VariableUtils {
                 case "not":
                     return FVarsAux( opCallExpSrc.getArguments().get( 0 ), fVars );
                 case "oclIsUndefined":
+                case "oclIsTypeOf":
+                case "oclIsKindOf":
+                case "oclAsType":
                     return FVarsAux( opCallExpSrc.getSource(), fVars );
                 case "=":
                 case "<>":

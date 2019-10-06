@@ -40,6 +40,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NotExpression;
 import net.sf.jsqlparser.expression.NullValue;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
@@ -311,6 +312,53 @@ public final class OperationCallExp extends FeatureCallExp {
                 varExp.setRefExpression(new Column(aliasSource.getName().concat(".ref_").concat(s)));
                 finalPlainSelect.addVar(varExp);
             }
+        }
+        else if("oclIsTypeOf".equals(this.name)) {
+            String classType = ((VariableExp) this.getArguments().get(0)).getReferredVariable().getName();
+            this.setType("Boolean");
+            Select select = (Select) visitor.visit(this.source);
+            SubSelect tempSource = new SubSelect();
+            tempSource.setSelectBody(select.getSelectBody());
+            Alias aliasSource = new Alias("TEMP_src");
+            tempSource.setAlias(aliasSource);
+            
+            finalPlainSelect.setFromItem(tempSource);
+            
+            BinaryExpression valEq = new EqualsTo();
+            valEq.setLeftExpression(new Column(aliasSource.getName().concat(".val")));
+            valEq.setRightExpression(new LongValue(0L));
+            
+            CaseExpression caseResExpression = new CaseExpression();
+            WhenClause whenResClause = new WhenClause();
+            whenResClause.setWhenExpression(valEq);
+            whenResClause.setThenExpression(new NullValue());
+            caseResExpression.setWhenClauses(Arrays.asList(whenResClause));
+
+            BinaryExpression typeEq = new EqualsTo();
+            typeEq.setLeftExpression( new Column(aliasSource.getName().concat(".type")) );
+            typeEq.setRightExpression( new StringValue(classType) );
+            caseResExpression.setElseExpression(typeEq);
+
+            finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
+            
+            finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasSource.getName().concat(".val"))));
+            
+            finalPlainSelect.setType(new TypeSelectExpression(this));
+            
+            List<String> sVarsSource = VariableUtils.SVars(this.getSource(), visitor);
+            for(String s : sVarsSource) {
+                VarSelectExpression varExp = new VarSelectExpression(s);
+                varExp.setRefExpression(new Column(aliasSource.getName().concat(".ref_").concat(s)));
+                finalPlainSelect.addVar(varExp);
+            }
+        }
+        else if("oclIsKindOf".equals(this.name)) {
+            String classType = ((VariableExp) this.getArguments().get(0)).getReferredVariable().getName();
+            
+        }
+        else if("oclAsType".equals(this.name)) {
+            String classType = ((VariableExp) this.getArguments().get(0)).getReferredVariable().getName();
+            
         }
         else {
             this.setType("Boolean");
