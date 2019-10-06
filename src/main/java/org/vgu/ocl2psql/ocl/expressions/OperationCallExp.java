@@ -354,7 +354,43 @@ public final class OperationCallExp extends FeatureCallExp {
         }
         else if("oclIsKindOf".equals(this.name)) {
             String classType = ((VariableExp) this.getArguments().get(0)).getReferredVariable().getName();
+            this.setType("Boolean");
+            Select select = (Select) visitor.visit(this.source);
+            SubSelect tempSource = new SubSelect();
+            tempSource.setSelectBody(select.getSelectBody());
+            Alias aliasSource = new Alias("TEMP_src");
+            tempSource.setAlias(aliasSource);
             
+            String sourceType = this.getSource().getType();
+            boolean isKindOf = Utilities.isSuperClassOf(visitor.getPlainUMLContext(), classType, sourceType);
+            
+            finalPlainSelect.setFromItem(tempSource);
+            
+            BinaryExpression valEq = new EqualsTo();
+            valEq.setLeftExpression(new Column(aliasSource.getName().concat(".val")));
+            valEq.setRightExpression(new LongValue(0L));
+            
+            CaseExpression caseResExpression = new CaseExpression();
+            WhenClause whenResClause = new WhenClause();
+            whenResClause.setWhenExpression(valEq);
+            whenResClause.setThenExpression(new NullValue());
+            caseResExpression.setWhenClauses(Arrays.asList(whenResClause));
+
+            caseResExpression.setElseExpression(
+                    new LongValue(isKindOf? "TRUE" : "FALSE"));
+
+            finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
+            
+            finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasSource.getName().concat(".val"))));
+            
+            finalPlainSelect.setType(new TypeSelectExpression(this));
+            
+            List<String> sVarsSource = VariableUtils.SVars(this.getSource(), visitor);
+            for(String s : sVarsSource) {
+                VarSelectExpression varExp = new VarSelectExpression(s);
+                varExp.setRefExpression(new Column(aliasSource.getName().concat(".ref_").concat(s)));
+                finalPlainSelect.addVar(varExp);
+            }
         }
         else if("oclAsType".equals(this.name)) {
             String classType = ((VariableExp) this.getArguments().get(0)).getReferredVariable().getName();

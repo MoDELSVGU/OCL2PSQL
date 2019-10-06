@@ -311,5 +311,30 @@ public class Utilities {
         }
         return null;
     }
+
+    public static boolean isSuperClassOf(JSONArray plainUMLContext, String expectedSuperType, String targetType) {
+        if(expectedSuperType.equals(targetType))
+            return true;
+        while(true) {
+            String superClazz = findDirectSuperClass(plainUMLContext, targetType);
+            if(superClazz == null)
+                return false;
+            if(expectedSuperType.equals(superClazz))
+                return true;
+            targetType = superClazz;
+        }
+    }
+
+    private static String findDirectSuperClass(JSONArray plainUMLContext, String targetType) {
+        for(Object entity : plainUMLContext) {
+            JSONObject clazz = (JSONObject) entity;
+            if (clazz.containsKey("class") 
+                    && targetType.equals(clazz.get("class")) 
+                    && clazz.containsKey("super")) {
+                return (String) clazz.get("super");
+            }
+        }
+        return null;
+    }
 	
 }
