@@ -313,6 +313,8 @@ public class Utilities {
     }
 
     public static boolean isSuperClassOf(JSONArray plainUMLContext, String expectedSuperType, String targetType) {
+        if(targetType == null)
+            return true;
         if(expectedSuperType.equals(targetType))
             return true;
         while(true) {

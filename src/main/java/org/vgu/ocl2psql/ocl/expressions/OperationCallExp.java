@@ -429,7 +429,10 @@ public final class OperationCallExp extends FeatureCallExp {
                 
                 finalPlainSelect.setType(new TypeSelectExpression(caseTypeExpression));
                 
-                if(! (classType.equals("String") || classType.equals("Integer") || classType.equals("Boolean"))) {
+                if(! (classType.equals("String") 
+                        || classType.equals("Integer") 
+                        || classType.equals("Boolean")
+                        || classType.equals(sourceType))) {
                     Join join = new Join();
                     join.setRightItem(new Table(classType));
 //                    join.setSemi(true);

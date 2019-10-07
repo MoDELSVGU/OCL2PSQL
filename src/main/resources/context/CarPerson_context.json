@@ -1,0 +1,70 @@
+[
+    {
+        "class": "Car",
+        "attributes": [
+            {
+                "name": "color",
+                "type": "String"
+            }
+        ]
+    },
+    {
+        "class": "Bus",
+        "attributes": [
+            {
+                "name": "color",
+                "type": "String"
+            }
+        ]
+    },
+    {
+        "class": "Person",
+        "attributes": [
+            {
+                "name": "name",
+                "type": "String"
+            }
+        ]
+    },
+    {
+        "class": "Automobile",
+        "attributes": [
+            {
+                "name": "price",
+                "type": "Integer"
+            }
+        ]
+    },
+    {
+        "class": "Vehicle",
+        "attributes": [
+            {
+                "name": "category",
+                "type": "String"
+            }
+        ]
+    },
+    {
+        "class": "Car",
+        "super": "Automobile"
+    },
+    {
+        "class": "Bus",
+        "super": "Automobile"
+    },
+    {
+        "class": "Automobile",
+        "super": "Vehicle"
+    },
+    {
+        "association": "Ownership",
+        "ends": [
+            "owners",
+            "ownedCars"
+        ],
+        "classes": [
+            "Car",
+            "Person"
+        ]
+    }
+]
