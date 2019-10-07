@@ -19,14 +19,13 @@ limitations under the License.
 
 package org.vgu.ocl2psql.expressions.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
@@ -36,7 +35,6 @@ import org.vgu.ocl2psql.ocl.exception.OclParseException;
 import org.vgu.ocl2psql.ocl.expressions.IteratorExp;
 import org.vgu.ocl2psql.ocl.expressions.OclExpression;
 import org.vgu.ocl2psql.ocl.expressions.OperationCallExp;
-import org.vgu.ocl2psql.ocl.expressions.PropertyCallExp;
 import org.vgu.ocl2psql.ocl.expressions.VariableUtils;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
 
@@ -45,15 +43,10 @@ public class SVarsTest {
     private static OCL2PSQL ocl2psql = new OCL2PSQL();
     
     static {
-        String resourceName = "config.properties"; // could also be a constant
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        Properties props = new Properties();
-        try (InputStream resourceStream = loader.getResourceAsStream(resourceName)){
-            props.load(resourceStream);
-            ocl2psql.setPlainUMLContextFromFile(props.getProperty("cardb.filePath"));
-        } catch (IOException e ) { 
-            e.printStackTrace();
-        } catch ( ParseException e ) {
+        File contextModel = new File("./src/main/resources/context-model/old-CarPerson_context.json");
+        try {
+            ocl2psql.setPlainUMLContextFromFile(contextModel.getAbsolutePath());
+        } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
     }

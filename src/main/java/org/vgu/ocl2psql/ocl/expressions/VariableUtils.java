@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
