@@ -21,6 +21,7 @@ package org.vgu.ocl2psql.expressions.test;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -45,15 +46,10 @@ public class SVarsTest {
     private static OCL2PSQL ocl2psql = new OCL2PSQL();
     
     static {
-        String resourceName = "config.properties"; // could also be a constant
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        Properties props = new Properties();
-        try (InputStream resourceStream = loader.getResourceAsStream(resourceName)){
-            props.load(resourceStream);
-            ocl2psql.setPlainUMLContextFromFile(props.getProperty("cardb.filePath"));
-        } catch (IOException e ) { 
-            e.printStackTrace();
-        } catch ( ParseException e ) {
+        File contextModel = new File("./src/main/resources/context-model/old-CarPerson_context.json");
+        try {
+            ocl2psql.setPlainUMLContextFromFile(contextModel.getAbsolutePath());
+        } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
     }

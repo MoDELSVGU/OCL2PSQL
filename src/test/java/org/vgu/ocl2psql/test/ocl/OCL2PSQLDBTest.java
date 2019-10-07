@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ***************************************************************************/
-package org.vgu.ocl2psql.test;
+package org.vgu.ocl2psql.test.ocl;
 
 import static org.junit.Assert.assertArrayEquals;
 
@@ -38,7 +38,7 @@ import org.vgu.ocl2psql.ocl.expressions.IteratorSource;
 import org.vgu.ocl2psql.ocl.expressions.OclExpression;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
 
-public class SqlSITest {
+public class OCL2PSQLDBTest {
 
 	private static Connection getConnection(String db)  {
 		Connection con = null;

@@ -1,0 +1,31 @@
+[
+    {
+        "class": "Car",
+        "attributes": [
+            {
+                "name": "color",
+                "type": "String"
+            }
+        ]
+    },
+    {
+        "class": "Person",
+        "attributes": [
+            {
+                "name": "name",
+                "type": "String"
+            }
+        ]
+    },
+    {
+        "association": "Ownership",
+        "ends": [
+            "owners",
+            "ownedCars"
+        ],
+        "classes": [
+            "Car",
+            "Person"
+        ]
+    }
+]

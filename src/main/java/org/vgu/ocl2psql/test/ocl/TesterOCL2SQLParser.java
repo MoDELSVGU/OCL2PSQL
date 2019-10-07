@@ -15,8 +15,7 @@ limitations under the License.
 ***************************************************************************/
 package org.vgu.ocl2psql.test.ocl;
 
-import java.io.InputStream;
-import java.util.Properties;
+import java.io.File;
 
 import org.vgu.ocl2psql.main.OCL2PSQL;
 import org.vgu.ocl2psql.ocl.exception.OclParseException;
@@ -30,30 +29,25 @@ public class TesterOCL2SQLParser {
      */
     public static void main(String[] args)
             throws Exception {
-        String resourceName = "config.properties"; // could also be a constant
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        Properties props = new Properties();
-        try (InputStream resourceStream = loader.getResourceAsStream(resourceName)){
-            props.load(resourceStream);
 
-            OCL2PSQL ocl2psql = new OCL2PSQL();
-            ocl2psql.setPlainUMLContextFromFile(props.getProperty("cardb.filePath"));
-            ocl2psql.setDescriptionMode(true);
-            
-            test(ocl2psql, "self");
-            test(ocl2psql, "self = caller");
-            test(ocl2psql, "self.Person:name");
-            test(ocl2psql, "self.Person:name = 'Hoang'");
-            test(ocl2psql, "self.Person:ownedCars");
-            test(ocl2psql, "self.Person:ownedCars->size()");
-            test(ocl2psql, "self.Person:ownedCars->exists(c|c.Car:color = 'black')");
-            test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p = self))");
-            test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p.Person:ownedCars->size() < self.Person:ownedCars->size()))");
-        }
+        OCL2PSQL ocl2psql = new OCL2PSQL();
+        File contextModel = new File("./src/main/resources/context-model/old-CarPerson_context.json");
+        ocl2psql.setPlainUMLContextFromFile(contextModel.getAbsolutePath());
+        ocl2psql.setDescriptionMode(true);
+        
+        test(ocl2psql, "self");
+        test(ocl2psql, "self = caller");
+        test(ocl2psql, "self.Person:name");
+        test(ocl2psql, "self.Person:name = 'Hoang'");
+        test(ocl2psql, "self.Person:ownedCars");
+        test(ocl2psql, "self.Person:ownedCars->size()");
+        test(ocl2psql, "self.Person:ownedCars->exists(c|c.Car:color = 'black')");
+        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p = self))");
+        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p.Person:ownedCars->size() < self.Person:ownedCars->size()))");
     }
 
     private static void test(OCL2PSQL ocl2psql, String oclExp) throws OclParseException {
-        System.out.println(oclExp);
+//        System.out.println(oclExp);
         String finalStatementWithDescription = ocl2psql.mapToString(oclExp);
         System.out.println(finalStatementWithDescription);
         System.out.println();
