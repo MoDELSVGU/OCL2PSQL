@@ -42,7 +42,6 @@ public class MyIteratorSource extends IteratorSource{
                 finalPlainSelect.setJoins(selectBody.getJoins());
                 
                 finalPlainSelect.setGroupByElement( selectBody.getGroupBy() );
-//                finalPlainSelect.setGroupByColumnReferences(selectBody.getGroupByColumnReferences());
                 
                 VarSelectExpression newVar = new VarSelectExpression(this.getIterator().getName());
                 newVar.setRefExpression(selectBody.getRes().getExpression());
@@ -50,7 +49,9 @@ public class MyIteratorSource extends IteratorSource{
                 Select finalSelect = new Select();
                 finalSelect.setSelectBody(finalPlainSelect);
                 
-                this.setSourceWithoutIter(statement);
+                Select finalSelectWithoutIter = new Select();
+                finalSelectWithoutIter.setSelectBody(statement.getSelectBody());
+                this.setSourceWithoutIter(finalSelectWithoutIter);
                 super.setSource(finalSelect);
                 return;
             }
@@ -73,7 +74,10 @@ public class MyIteratorSource extends IteratorSource{
                 VariableUtils.reserveVars(finalPlainSelect, dmn);
                 Select finalSelect = new Select();
                 finalSelect.setSelectBody(finalPlainSelect);
-                this.setSourceWithoutIter(statement);
+                
+                Select finalSelectWithoutIter = new Select();
+                finalSelectWithoutIter.setSelectBody(statement.getSelectBody());
+                this.setSourceWithoutIter(finalSelectWithoutIter);
                 super.setSource(finalSelect);
                 return;
             }

@@ -770,10 +770,10 @@ public class OCL2SQLParser implements RobertStmVisitor {
     @Override
     public void visit(VariableExp variableExp) {
         String var_name = variableExp.getReferredVariable().getName();
-        IteratorSource iter = null;
+        MyIteratorSource iter = null;
         for (IteratorSource iter_item : this.getVisitorContext()) {
             if (iter_item.getIterator().getName().equals(var_name)) {
-                iter = iter_item;
+                iter = (MyIteratorSource) iter_item;
                 break;
             }
         }
@@ -793,7 +793,7 @@ public class OCL2SQLParser implements RobertStmVisitor {
             this.getVisitorContext().add(newFreeIteratorSource);
             return;
         }
-        this.finalSelect = (Select) ((MyIteratorSource) iter).getSource();
+        this.finalSelect.setSelectBody(iter.getSource().getSelectBody());
         PlainSelect finalPlainSelect = (PlainSelect) finalSelect.getSelectBody();
         OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
         variableExp.accept(oclExpressionDeParser);
@@ -1123,7 +1123,8 @@ public class OCL2SQLParser implements RobertStmVisitor {
         currentIterator.setSourceExpression(iteratorExp.getSource());
         currentIterator.setIterator(iteratorExp.getIterator());
         iteratorExp.getSource().accept(this);
-        Select source = this.getFinalSelect();
+        Select source = new Select();
+        source.setSelectBody(this.getFinalSelect().getSelectBody());
         currentIterator.setSource(source);
 
         SubSelect tempExistsSource = new SubSelect();
@@ -1330,7 +1331,8 @@ public class OCL2SQLParser implements RobertStmVisitor {
         currentIterator.setSourceExpression(iteratorExp.getSource());
         currentIterator.setIterator(iteratorExp.getIterator());
         iteratorExp.getSource().accept(this);
-        Select source = this.getFinalSelect();
+        Select source = new Select();
+        source.setSelectBody(this.getFinalSelect().getSelectBody());
         currentIterator.setSource(source);
 
         SubSelect tempForAllSource = new SubSelect();
