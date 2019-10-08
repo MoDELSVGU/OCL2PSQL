@@ -19,7 +19,10 @@ limitations under the License.
 
 package org.vgu.ocl2psql.sql.statement.select;
 
+import java.util.Optional;
+
 import org.vgu.ocl2psql.ocl.roberts.expressions.OclExpression;
+import org.vgu.ocl2psql.ocl.type.Type;
 
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
@@ -38,7 +41,7 @@ public class TypeSelectExpression extends SelectExpressionItem{
     }
 
     public TypeSelectExpression(OclExpression oclExp) {
-        super(new StringValue(oclExp.getType() == null ? "Unknown" : oclExp.getType()));
+        super(new StringValue(Optional.ofNullable(oclExp).map(OclExpression::getType).map(Type::getTypeName).orElse("Unknown")));
         super.setAlias(new Alias("type"));
     }
 }

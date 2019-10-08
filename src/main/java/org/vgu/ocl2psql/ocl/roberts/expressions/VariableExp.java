@@ -20,12 +20,12 @@ public class VariableExp extends OclExpression {
     private final Variable referredVariable;
 
     public VariableExp(Variable referredVariable) {
-	this.referredVariable = referredVariable;
+        this.referredVariable = referredVariable;
     }
 
-	public Variable getReferredVariable() {
-		return referredVariable;
-	}
+    public Variable getReferredVariable() {
+        return referredVariable;
+    }
 
     @Override
     public void accept(RobertStmVisitor visitor) {

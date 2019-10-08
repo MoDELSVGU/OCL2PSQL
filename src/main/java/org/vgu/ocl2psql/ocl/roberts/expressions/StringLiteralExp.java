@@ -9,6 +9,7 @@
 package org.vgu.ocl2psql.ocl.roberts.expressions;
 
 import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
+import org.vgu.ocl2psql.ocl.type.SingleType;
 
 /**
  * Class StringLiteralExp
@@ -21,6 +22,7 @@ public class StringLiteralExp extends PrimitiveLiteralExp {
 
     public StringLiteralExp(String newstringSymbol) {
         this.stringSymbol = newstringSymbol;
+        this.setType(new SingleType("String"));
     }
 
     @Override

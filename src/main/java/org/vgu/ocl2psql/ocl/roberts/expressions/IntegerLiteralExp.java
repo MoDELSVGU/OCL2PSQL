@@ -9,6 +9,7 @@
 package org.vgu.ocl2psql.ocl.roberts.expressions;
 
 import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
+import org.vgu.ocl2psql.ocl.type.SingleType;
 
 /**
  * Class IntegerLiteralExp
@@ -20,17 +21,17 @@ public class IntegerLiteralExp extends NumericLiteralExp {
     private final int integerSymbol;
 
     public IntegerLiteralExp(int newintegerSymbol) {
-	this.integerSymbol = newintegerSymbol;
+        this.integerSymbol = newintegerSymbol;
+        this.setType(new SingleType("Integer"));
     }
 
-	@Override
-	public void accept(RobertStmVisitor visitor) {
-	    visitor.visit(this);
-	}
+    @Override
+    public void accept(RobertStmVisitor visitor) {
+        visitor.visit(this);
+    }
 
     public int getIntegerSymbol() {
         return integerSymbol;
     }
 
-	
 }
