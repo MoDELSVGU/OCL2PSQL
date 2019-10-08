@@ -33,12 +33,12 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.vgu.ocl2psql.main.parser.RobertOCLParser;
 import org.vgu.ocl2psql.ocl.roberts.context.DefaultOclContext;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
 import org.vgu.ocl2psql.ocl.roberts.expressions.IteratorSource;
 import org.vgu.ocl2psql.ocl.roberts.expressions.OclExpression;
 import org.vgu.ocl2psql.ocl.roberts.parse.SimpleParser;
-import org.vgu.ocl2psql.parser.RobertOCLParser;
 
 @Ignore
 public class OCL2PSQLDBTest {

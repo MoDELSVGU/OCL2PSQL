@@ -26,12 +26,12 @@ import java.util.List;
 
 import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
+import org.vgu.ocl2psql.main.parser.RobertOCLParser;
 import org.vgu.ocl2psql.ocl.roberts.context.DefaultOclContext;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
 import org.vgu.ocl2psql.ocl.roberts.expressions.IteratorSource;
 import org.vgu.ocl2psql.ocl.roberts.expressions.OclExpression;
 import org.vgu.ocl2psql.ocl.roberts.parse.SimpleParser;
-import org.vgu.ocl2psql.parser.RobertOCLParser;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;

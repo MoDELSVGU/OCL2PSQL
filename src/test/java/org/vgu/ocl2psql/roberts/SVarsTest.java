@@ -32,6 +32,7 @@ import java.util.Properties;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 import org.vgu.ocl2psql.main.OCL2PSQL;
+import org.vgu.ocl2psql.main.parser.RobertOCLParser;
 import org.vgu.ocl2psql.ocl.roberts.context.DefaultOclContext;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
 import org.vgu.ocl2psql.ocl.roberts.expressions.IteratorExp;
@@ -40,7 +41,6 @@ import org.vgu.ocl2psql.ocl.roberts.expressions.OperationCallExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.PropertyCallExp;
 import org.vgu.ocl2psql.ocl.roberts.parse.SimpleParser;
 import org.vgu.ocl2psql.ocl.roberts.utils.VariableUtils;
-import org.vgu.ocl2psql.parser.RobertOCLParser;
 
 public class SVarsTest {
 

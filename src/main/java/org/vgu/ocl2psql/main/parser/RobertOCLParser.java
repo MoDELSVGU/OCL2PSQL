@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ***************************************************************************/
 
-package org.vgu.ocl2psql.parser;
+package org.vgu.ocl2psql.main.parser;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
