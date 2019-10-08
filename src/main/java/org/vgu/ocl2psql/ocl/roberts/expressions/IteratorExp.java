@@ -8,7 +8,6 @@
  */
 package org.vgu.ocl2psql.ocl.roberts.expressions;
 
-import org.vgu.ocl2psql.ocl.roberts.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 
 
@@ -23,11 +22,6 @@ public final class IteratorExp extends LoopExp {
 	    Variable iterator, OclExpression body) {
 	super(source, iterator, body);
 	this.kind = kind;
-    }
-    
-    @Override
-    public void accept( DeparserVisitor visitor ) {
-        visitor.visit( this );
     }
 
     @Override

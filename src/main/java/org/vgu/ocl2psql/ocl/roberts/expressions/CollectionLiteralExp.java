@@ -11,7 +11,6 @@ package org.vgu.ocl2psql.ocl.roberts.expressions;
 import java.util.Arrays;
 import java.util.List;
 
-import org.vgu.ocl2psql.ocl.roberts.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 
 /**
@@ -29,11 +28,6 @@ public final class CollectionLiteralExp extends LiteralExp {
 
     @Override
     public void accept(RobertStmVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public void accept(DeparserVisitor visitor) {
         visitor.visit(this);
     }
 }

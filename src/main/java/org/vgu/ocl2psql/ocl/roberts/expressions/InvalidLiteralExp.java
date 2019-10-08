@@ -8,7 +8,6 @@
  */
 package org.vgu.ocl2psql.ocl.roberts.expressions;
 
-import org.vgu.ocl2psql.ocl.roberts.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 
 /**
@@ -20,11 +19,5 @@ public class InvalidLiteralExp extends LiteralExp {
     public void accept(RobertStmVisitor visitor) {
         visitor.visit(this);
     }
-
-    @Override
-    public void accept(DeparserVisitor visitor) {
-        visitor.visit(this);
-    }
-
 	
 }

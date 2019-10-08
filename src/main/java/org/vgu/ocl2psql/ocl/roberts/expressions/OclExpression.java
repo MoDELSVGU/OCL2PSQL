@@ -8,7 +8,6 @@
  */
 package org.vgu.ocl2psql.ocl.roberts.expressions;
 
-import org.vgu.ocl2psql.ocl.roberts.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 
 /**
@@ -16,5 +15,4 @@ import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
  */
 public interface OclExpression {
     void accept(RobertStmVisitor visitor);
-    void accept(DeparserVisitor visitor);
 }

@@ -8,7 +8,6 @@
  */
 package org.vgu.ocl2psql.ocl.roberts.expressions;
 
-import org.vgu.ocl2psql.ocl.roberts.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 
 /**
@@ -22,11 +21,6 @@ public class IntegerLiteralExp extends NumericLiteralExp {
 
     public IntegerLiteralExp(int newintegerSymbol) {
 	this.integerSymbol = newintegerSymbol;
-    }
-    
-    @Override
-    public void accept( DeparserVisitor visitor ) {
-        visitor.visit( this );
     }
 
 	@Override

@@ -8,9 +8,7 @@
  */
 package org.vgu.ocl2psql.ocl.roberts.expressions;
 
-import org.vgu.ocl2psql.ocl.roberts.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
-import org.vgu.ocl2psql.sql.statement.select.Select;
 
 /**
  * Class NullLiteralExp
@@ -21,12 +19,4 @@ public class NullLiteralExp extends LiteralExp {
     public void accept(RobertStmVisitor visitor) {
         visitor.visit(this);
     }
-
-    @Override
-    public void accept(DeparserVisitor visitor) {
-        // TODO Auto-generated method stub
-        
-    }
-
-
 }

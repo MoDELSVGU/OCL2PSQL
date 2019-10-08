@@ -8,7 +8,6 @@
  */
 package org.vgu.ocl2psql.ocl.roberts.expressions;
 
-import org.vgu.ocl2psql.ocl.roberts.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 
 /**
@@ -26,11 +25,6 @@ public class VariableExp implements OclExpression {
 
 	public Variable getReferredVariable() {
 		return referredVariable;
-	}
-	
-	@Override
-	public void accept( DeparserVisitor visitor ) {
-	    visitor.visit( this );
 	}
 
     @Override

@@ -42,6 +42,7 @@ import org.vgu.ocl2psql.ocl.roberts.expressions.IteratorSource;
 import org.vgu.ocl2psql.ocl.roberts.expressions.LetExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.MyIteratorSource;
 import org.vgu.ocl2psql.ocl.roberts.expressions.NullLiteralExp;
+import org.vgu.ocl2psql.ocl.roberts.expressions.OclExpression;
 import org.vgu.ocl2psql.ocl.roberts.expressions.OperationCallExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.PropertyCallExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.RealLiteralExp;
@@ -93,7 +94,8 @@ public class RobertOCLParser implements RobertStmVisitor {
     private JSONArray plainUMLContext;
     private int levelOfSets = 0;
     private Select finalSelect = new Select();
-
+    private OclExpressionDeParser deParser = new OclExpressionDeParser();
+    
     public List<IteratorSource> getVisitorContext() {
         return this.context;
     }
@@ -143,9 +145,7 @@ public class RobertOCLParser implements RobertStmVisitor {
         Alias aliasSubSelectCurrentVar = new Alias("TEMP_obj");
         tempVar.setAlias(aliasSubSelectCurrentVar);
         PlainSelect finalPlainSelect = new PlainSelect();
-        OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
-        propertyCallExp.accept(oclExpressionDeParser);
-        finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
+        genSQLCommentFromOCLExpressionToStatement(propertyCallExp, finalPlainSelect);
         String propertyName = propertyCallExp.getName().substring(propertyCallExp.getName().indexOf(":") + 1,
                 propertyCallExp.getName().length());
         String propertyClass = propertyCallExp.getName().substring(0, propertyCallExp.getName().indexOf(":"));
@@ -299,12 +299,16 @@ public class RobertOCLParser implements RobertStmVisitor {
         }
     }
 
+    private void genSQLCommentFromOCLExpressionToStatement(OclExpression oclExpression, PlainSelect finalPlainSelect) {
+        deParser.clearComment();
+        oclExpression.accept(deParser);
+        finalPlainSelect.setCorrespondOCLExpression(deParser.getDeParsedStr());
+    }
+
     @Override
     public void visit(OperationCallExp operationCallExp) {
         PlainSelect finalPlainSelect = new PlainSelect();
-        OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
-        operationCallExp.accept(oclExpressionDeParser);
-        finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
+        genSQLCommentFromOCLExpressionToStatement(operationCallExp, finalPlainSelect);
 
         if ("allInstances".equals(operationCallExp.getName())) {
             this.increaseLevelOfSet();
@@ -596,42 +600,42 @@ public class RobertOCLParser implements RobertStmVisitor {
 
     @Override
     public void visit(IteratorExp iteratorExp) {
-        OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
-        iteratorExp.accept(oclExpressionDeParser);
-        String oclExpression = oclExpressionDeParser.getDeParsedStr();
+        PlainSelect finalPlainSelect = new PlainSelect();
+        genSQLCommentFromOCLExpressionToStatement(iteratorExp, finalPlainSelect);
+        
         switch (iteratorExp.kind) {
         case isEmpty:
-            emptyMap(iteratorExp, oclExpression);
+            emptyMap(iteratorExp, finalPlainSelect);
             break;
         case notEmpty:
-            notEmptyMap(iteratorExp, oclExpression);
+            notEmptyMap(iteratorExp, finalPlainSelect);
             break;
         case select:
-            selectMap(iteratorExp, oclExpression);
+            selectMap(iteratorExp, finalPlainSelect);
             break;
         case reject:
-            rejectMap(iteratorExp, oclExpression);
+            rejectMap(iteratorExp, finalPlainSelect);
             break;
         case forAll:
-            forAllMap(iteratorExp, oclExpression);
+            forAllMap(iteratorExp, finalPlainSelect);
             break;
         case exists:
-            existsMap(iteratorExp, oclExpression);
+            existsMap(iteratorExp, finalPlainSelect);
             break;
         case collect:
-            collectMap(iteratorExp, oclExpression);
+            collectMap(iteratorExp, finalPlainSelect);
             break;
         case size:
-            sizeMap(iteratorExp, oclExpression);
+            sizeMap(iteratorExp, finalPlainSelect);
             break;
         case asSet:
-            asSetMap(iteratorExp, oclExpression);
+            asSetMap(iteratorExp, finalPlainSelect);
             break;
         case isUnique:
-            isUniqueMap(iteratorExp, oclExpression);
+            isUniqueMap(iteratorExp, finalPlainSelect);
             break;
         case flatten:
-            flattenMap(iteratorExp, oclExpression);
+            flattenMap(iteratorExp, finalPlainSelect);
             break;
         case sum:
             throw new NullPointerException("Unsupported sum operation");
@@ -715,9 +719,7 @@ public class RobertOCLParser implements RobertStmVisitor {
     @Override
     public void visit(BooleanLiteralExp booleanLiteralExp) {
         PlainSelect finalPlainSelect = new PlainSelect();
-        OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
-        booleanLiteralExp.accept(oclExpressionDeParser);
-        finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
+        genSQLCommentFromOCLExpressionToStatement(booleanLiteralExp, finalPlainSelect);
         ResSelectExpression resExpression = new ResSelectExpression(
                 new LongValue(booleanLiteralExp.isBooleanSymbol() ? "TRUE" : "FALSE"));
         finalPlainSelect.setRes(resExpression);
@@ -727,9 +729,7 @@ public class RobertOCLParser implements RobertStmVisitor {
     @Override
     public void visit(IntegerLiteralExp integerLiteralExp) {
         PlainSelect finalPlainSelect = new PlainSelect();
-        OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
-        integerLiteralExp.accept(oclExpressionDeParser);
-        finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
+        genSQLCommentFromOCLExpressionToStatement(integerLiteralExp, finalPlainSelect);
         ResSelectExpression resExpression = new ResSelectExpression(
                 new LongValue(integerLiteralExp.getIntegerSymbol()));
         finalPlainSelect.setRes(resExpression);
@@ -745,9 +745,7 @@ public class RobertOCLParser implements RobertStmVisitor {
     @Override
     public void visit(StringLiteralExp stringLiteralExp) {
         PlainSelect finalPlainSelect = new PlainSelect();
-        OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
-        stringLiteralExp.accept(oclExpressionDeParser);
-        finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
+        genSQLCommentFromOCLExpressionToStatement(stringLiteralExp, finalPlainSelect);
         ResSelectExpression resExpression = new ResSelectExpression(
                 new StringValue(stringLiteralExp.getStringSymbol()));
         finalPlainSelect.setRes(resExpression);
@@ -793,11 +791,9 @@ public class RobertOCLParser implements RobertStmVisitor {
             this.getVisitorContext().add(newFreeIteratorSource);
             return;
         }
-        this.finalSelect.setSelectBody(iter.getSource().getSelectBody());
+        finalSelect.setSelectBody(iter.getSource().getSelectBody());
         PlainSelect finalPlainSelect = (PlainSelect) finalSelect.getSelectBody();
-        OclExpressionDeParser oclExpressionDeParser = new OclExpressionDeParser();
-        variableExp.accept(oclExpressionDeParser);
-        finalPlainSelect.setCorrespondOCLExpression(oclExpressionDeParser.getDeParsedStr());
+        genSQLCommentFromOCLExpressionToStatement(variableExp, finalPlainSelect);
         return;
     }
 
@@ -809,13 +805,10 @@ public class RobertOCLParser implements RobertStmVisitor {
         this.finalSelect = finalSelect;
     }
 
-    private void flattenMap(IteratorExp iteratorExp, String oclExpression) {
+    private void flattenMap(IteratorExp iteratorExp, PlainSelect finalPlainSelect) {
         if (iteratorExp.getSource() instanceof IteratorExp) {
             iteratorExp.getSource().accept(this);
             Select source = this.getFinalSelect();
-
-            PlainSelect finalPlainSelect = new PlainSelect();
-            finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
             SubSelect tempFlattenSource = new SubSelect();
             tempFlattenSource.setSelectBody(source.getSelectBody());
@@ -919,7 +912,7 @@ public class RobertOCLParser implements RobertStmVisitor {
         throw new SetOfSetException("The source is not set of set to be flattened");
     }
 
-    private void isUniqueMap(IteratorExp iteratorExp, String oclExpression) {
+    private void isUniqueMap(IteratorExp iteratorExp, PlainSelect finalPlainSelect) {
         iteratorExp.getSource().accept(this);
         Select sizeSourceSelect = this.getFinalSelect();
         PlainSelect sizeSourcePlainSelect = (PlainSelect) sizeSourceSelect.getSelectBody();
@@ -929,8 +922,6 @@ public class RobertOCLParser implements RobertStmVisitor {
         Alias aliasFinalSubSelect = new Alias("TEMP_unique_source");
         finalSubSelect.setAlias(aliasFinalSubSelect);
 
-        PlainSelect finalPlainSelect = new PlainSelect();
-        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
         finalSelect.setSelectBody(finalPlainSelect);
 
         finalPlainSelect.setFromItem(finalSubSelect);
@@ -952,7 +943,7 @@ public class RobertOCLParser implements RobertStmVisitor {
         return;
     }
 
-    private void rejectMap(IteratorExp iteratorExp, String oclExpression) {
+    private void rejectMap(IteratorExp iteratorExp, PlainSelect finalPlainSelect) {
         MyIteratorSource currentIterator = new MyIteratorSource();
         currentIterator.setSourceExpression(iteratorExp.getSource());
         currentIterator.setIterator(iteratorExp.getIterator());
@@ -964,9 +955,6 @@ public class RobertOCLParser implements RobertStmVisitor {
         tempSelectSource.setSelectBody(source.getSelectBody());
         Alias aliasTempSelectSource = new Alias("TEMP_src");
         tempSelectSource.setAlias(aliasTempSelectSource);
-
-        PlainSelect finalPlainSelect = new PlainSelect();
-        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
         if (this.getVisitorContext().stream().map(IteratorSource::getIterator).map(Variable::getName)
                 .noneMatch(name -> currentIterator.getIterator().getName().equals(name))) {
@@ -1098,14 +1086,12 @@ public class RobertOCLParser implements RobertStmVisitor {
         return;
     }
 
-    private void asSetMap(IteratorExp iteratorExp, String oclExpression) {
+    private void asSetMap(IteratorExp iteratorExp, PlainSelect finalPlainSelect) {
         iteratorExp.getSource().accept(this);
         Select source = this.getFinalSelect();
 
         SubSelect tempAsSetSource = new SubSelect(source.getSelectBody(), "TEMP_src");
 
-        PlainSelect finalPlainSelect = new PlainSelect();
-        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
         finalSelect.setSelectBody(finalPlainSelect);
 
         finalPlainSelect.setFromItem(tempAsSetSource);
@@ -1118,7 +1104,7 @@ public class RobertOCLParser implements RobertStmVisitor {
         finalPlainSelect.setVal(new ValSelectExpression(new Column("TEMP_src.val")));
     }
 
-    private void existsMap(IteratorExp iteratorExp, String oclExpression) {
+    private void existsMap(IteratorExp iteratorExp, PlainSelect finalPlainSelect) {
         MyIteratorSource currentIterator = new MyIteratorSource();
         currentIterator.setSourceExpression(iteratorExp.getSource());
         currentIterator.setIterator(iteratorExp.getIterator());
@@ -1131,9 +1117,6 @@ public class RobertOCLParser implements RobertStmVisitor {
         tempExistsSource.setSelectBody(source.getSelectBody());
         Alias aliasTempExistsSource = new Alias("TEMP_src");
         tempExistsSource.setAlias(aliasTempExistsSource);
-
-        PlainSelect finalPlainSelect = new PlainSelect();
-        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
         if (this.getVisitorContext().stream().map(IteratorSource::getIterator).map(Variable::getName)
                 .noneMatch(name -> currentIterator.getIterator().getName().equals(name))) {
@@ -1326,7 +1309,7 @@ public class RobertOCLParser implements RobertStmVisitor {
         }
     }
 
-    private void forAllMap(IteratorExp iteratorExp, String oclExpression) {
+    private void forAllMap(IteratorExp iteratorExp, PlainSelect finalPlainSelect) {
         MyIteratorSource currentIterator = new MyIteratorSource();
         currentIterator.setSourceExpression(iteratorExp.getSource());
         currentIterator.setIterator(iteratorExp.getIterator());
@@ -1339,9 +1322,6 @@ public class RobertOCLParser implements RobertStmVisitor {
         tempForAllSource.setSelectBody(source.getSelectBody());
         Alias aliasTempForAllSource = new Alias("TEMP_src");
         tempForAllSource.setAlias(aliasTempForAllSource);
-
-        PlainSelect finalPlainSelect = new PlainSelect();
-        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
         if (this.getVisitorContext().stream().map(IteratorSource::getIterator).map(Variable::getName)
                 .noneMatch(name -> currentIterator.getIterator().getName().equals(name))) {
@@ -1537,7 +1517,7 @@ public class RobertOCLParser implements RobertStmVisitor {
         }
     }
 
-    private void selectMap(IteratorExp iteratorExp, String oclExpression) {
+    private void selectMap(IteratorExp iteratorExp, PlainSelect finalPlainSelect) {
         MyIteratorSource currentIterator = new MyIteratorSource();
         currentIterator.setSourceExpression(iteratorExp.getSource());
         currentIterator.setIterator(iteratorExp.getIterator());
@@ -1549,9 +1529,6 @@ public class RobertOCLParser implements RobertStmVisitor {
         tempSelectSource.setSelectBody(source.getSelectBody());
         Alias aliasTempSelectSource = new Alias("TEMP_src");
         tempSelectSource.setAlias(aliasTempSelectSource);
-
-        PlainSelect finalPlainSelect = new PlainSelect();
-        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
         if (this.getVisitorContext().stream().map(IteratorSource::getIterator).map(Variable::getName)
                 .noneMatch(name -> currentIterator.getIterator().getName().equals(name))) {
@@ -1672,14 +1649,12 @@ public class RobertOCLParser implements RobertStmVisitor {
         finalSelect.setSelectBody(finalPlainSelect);
     }
 
-    private void notEmptyMap(IteratorExp iteratorExp, String oclExpression) {
+    private void notEmptyMap(IteratorExp iteratorExp, PlainSelect finalPlainSelect) {
         iteratorExp.getSource().accept(this);
         Select source = this.getFinalSelect();
 
         SubSelect tempNotEmptySource = new SubSelect(source.getSelectBody(), "TEMP_src");
 
-        PlainSelect finalPlainSelect = new PlainSelect();
-        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
         finalSelect.setSelectBody(finalPlainSelect);
 
         if (VariableUtils.FVars(iteratorExp.getSource()).isEmpty()) {
@@ -1744,14 +1719,12 @@ public class RobertOCLParser implements RobertStmVisitor {
 
     }
 
-    private void emptyMap(IteratorExp iteratorExp, String oclExpression) {
+    private void emptyMap(IteratorExp iteratorExp, PlainSelect finalPlainSelect) {
         iteratorExp.getSource().accept(this);
         Select source = this.getFinalSelect();
 
         SubSelect tempEmptySource = new SubSelect(source.getSelectBody(), "TEMP_src");
 
-        PlainSelect finalPlainSelect = new PlainSelect();
-        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
         finalSelect.setSelectBody(finalPlainSelect);
 
         if (VariableUtils.FVars(iteratorExp.getSource()).isEmpty()) {
@@ -1816,7 +1789,7 @@ public class RobertOCLParser implements RobertStmVisitor {
 
     }
 
-    private void collectMap(IteratorExp iteratorExp, String oclExpression) {
+    private void collectMap(IteratorExp iteratorExp, PlainSelect finalPlainSelect) {
         MyIteratorSource currentIterator = new MyIteratorSource();
         currentIterator.setSourceExpression(iteratorExp.getSource());
         currentIterator.setIterator(iteratorExp.getIterator());
@@ -1828,9 +1801,6 @@ public class RobertOCLParser implements RobertStmVisitor {
         tempCollectSource.setSelectBody(source.getSelectBody());
         Alias aliasTempCollectSource = new Alias("TEMP_src");
         tempCollectSource.setAlias(aliasTempCollectSource);
-
-        PlainSelect finalPlainSelect = new PlainSelect();
-        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
 
         if (this.getVisitorContext().stream().map(IteratorSource::getIterator).map(Variable::getName)
                 .noneMatch(name -> currentIterator.getIterator().getName().equals(name))) {
@@ -1903,14 +1873,12 @@ public class RobertOCLParser implements RobertStmVisitor {
 
     }
 
-    private void sizeMap(IteratorExp iteratorExp, String oclExpression) {
+    private void sizeMap(IteratorExp iteratorExp, PlainSelect finalPlainSelect) {
         iteratorExp.getSource().accept(this);
         Select source = this.getFinalSelect();
 
         SubSelect tempSizeSource = new SubSelect(source.getSelectBody(), "TEMP_src");
 
-        PlainSelect finalPlainSelect = new PlainSelect();
-        finalPlainSelect.setCorrespondOCLExpression(oclExpression);
         finalSelect.setSelectBody(finalPlainSelect);
 
         if (VariableUtils.FVars(iteratorExp.getSource()).isEmpty()) {

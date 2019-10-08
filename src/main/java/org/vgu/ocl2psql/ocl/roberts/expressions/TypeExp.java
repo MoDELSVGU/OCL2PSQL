@@ -8,7 +8,6 @@
  */
 package org.vgu.ocl2psql.ocl.roberts.expressions;
 
-import org.vgu.ocl2psql.ocl.roberts.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 
 /**
@@ -24,17 +23,9 @@ public final class TypeExp implements OclExpression {
 	public TypeExp(String referredType) {
         this.referredType = referredType;
     }
-	
-	@Override
-	public void accept(DeparserVisitor visitor) {
-	    visitor.visit( this );
-	}
 
     @Override
     public void accept(RobertStmVisitor visitor) {
         visitor.visit(this);
     }
-
-	
-
 }

@@ -8,7 +8,6 @@
  */
 package org.vgu.ocl2psql.ocl.roberts.expressions;
 
-import org.vgu.ocl2psql.ocl.roberts.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 
 /**
@@ -27,11 +26,4 @@ public final class IterateExp extends LoopExp {
     public void accept(RobertStmVisitor visitor) {
         visitor.visit(this);
     }
-
-    @Override
-    public void accept(DeparserVisitor visitor) {
-        // TODO Auto-generated method stub
-
-    }
-
 }

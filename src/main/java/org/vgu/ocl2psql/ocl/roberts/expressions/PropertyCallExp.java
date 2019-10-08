@@ -8,7 +8,6 @@
  */
 package org.vgu.ocl2psql.ocl.roberts.expressions;
 
-import org.vgu.ocl2psql.ocl.roberts.deparser.DeparserVisitor;
 import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 
 /**
@@ -25,11 +24,6 @@ public final class PropertyCallExp extends NavigationCallExp {
     public PropertyCallExp(OclExpression newsource, String name, OclExpression... qualifier) {
         super(newsource, qualifier);
         this.name = name;
-    }
-    
-    @Override
-    public void accept( DeparserVisitor visitor ) {
-        visitor.visit( this );
     }
 
     @Override

@@ -20,16 +20,26 @@ limitations under the License.
 package org.vgu.ocl2psql.ocl.roberts.deparser;
 
 import org.vgu.ocl2psql.ocl.roberts.expressions.BooleanLiteralExp;
+import org.vgu.ocl2psql.ocl.roberts.expressions.CollectionLiteralExp;
+import org.vgu.ocl2psql.ocl.roberts.expressions.EnumLiteralExp;
+import org.vgu.ocl2psql.ocl.roberts.expressions.IfExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.IntegerLiteralExp;
+import org.vgu.ocl2psql.ocl.roberts.expressions.InvalidLiteralExp;
+import org.vgu.ocl2psql.ocl.roberts.expressions.IterateExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.IteratorExp;
+import org.vgu.ocl2psql.ocl.roberts.expressions.LetExp;
+import org.vgu.ocl2psql.ocl.roberts.expressions.NullLiteralExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.OclExpression;
 import org.vgu.ocl2psql.ocl.roberts.expressions.OperationCallExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.PropertyCallExp;
+import org.vgu.ocl2psql.ocl.roberts.expressions.RealLiteralExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.StringLiteralExp;
+import org.vgu.ocl2psql.ocl.roberts.expressions.TupleLiteralExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.TypeExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.VariableExp;
+import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 
-public class OclExpressionDeParser implements DeparserVisitor {
+public class OclExpressionDeParser implements RobertStmVisitor {
     protected String deParsedStr;
 
     public OclExpressionDeParser() {
@@ -49,7 +59,6 @@ public class OclExpressionDeParser implements DeparserVisitor {
     }
 
     public void visit(OclExpression oclExp) {
-        
         if ( oclExp instanceof TypeExp ) {
             visit( (TypeExp) oclExp );
         } 
@@ -74,9 +83,6 @@ public class OclExpressionDeParser implements DeparserVisitor {
         else if ( oclExp instanceof IntegerLiteralExp ) {
             visit( (IntegerLiteralExp) oclExp );
         }
-
-
-
     }
     
     public void visit(TypeExp typeExp) {
@@ -125,6 +131,64 @@ public class OclExpressionDeParser implements DeparserVisitor {
         IntegerLiteralExpDeParser deParser = new IntegerLiteralExpDeParser();
         integerLiteralExp.accept( deParser );
         this.deParsedStr = this.deParsedStr.concat( deParser.getDeParsedStr() );
+    }
+
+    @Override
+    public void visit(IterateExp iterateExp) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void visit(IfExp ifExp) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void visit(LetExp letExp) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void visit(CollectionLiteralExp collectionLiteralExp) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void visit(EnumLiteralExp enumLiteralExp) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void visit(InvalidLiteralExp invalidLiteralExp) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void visit(NullLiteralExp nullLiteralExp) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void visit(RealLiteralExp realLiteralExp) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void visit(TupleLiteralExp tupleLiteralExp) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void clearComment() {
+        this.deParsedStr = "";
     }
     
 }
