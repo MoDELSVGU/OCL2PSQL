@@ -39,6 +39,7 @@ import org.vgu.ocl2psql.ocl.expressions.OclExpression;
 import org.vgu.ocl2psql.ocl.expressions.OperationCallExp;
 import org.vgu.ocl2psql.ocl.expressions.PropertyCallExp;
 import org.vgu.ocl2psql.ocl.expressions.VariableUtils;
+import org.vgu.ocl2psql.ocl.parse.SimpleParser;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
 
 public class SVarsTest {
@@ -57,9 +58,10 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances() throws OclParseException {
         String testCase ="Car::allInstances()";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((OperationCallExp) exp).getSource();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -74,9 +76,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_isUnique() throws OclParseException {
         String testCase ="Car::allInstances()->isUnique()";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) exp).getSource();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -92,9 +94,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_size() throws OclParseException {
         String testCase ="Car::allInstances()->size()";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) exp).getSource();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -109,9 +111,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_isEmpty() throws OclParseException {
         String testCase ="Car::allInstances()->isEmpty()";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) exp).getSource();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -126,9 +128,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_notEmpty() throws OclParseException {
         String testCase ="Car::allInstances()->notEmpty()";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) exp).getSource();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -143,9 +145,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_collect_body() throws OclParseException {
         String testCase ="Car::allInstances()->collect(c|c.Car:color)";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) exp).getBody();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -160,9 +162,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_collect_source() throws OclParseException {
         String testCase ="Car::allInstances()->collect(c|c.Car:color)";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) exp).getSource();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -177,9 +179,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_select_body() throws OclParseException {
         String testCase ="Car::allInstances()->select(c|c.Car:color='blue')";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) exp).getBody();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -194,9 +196,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_select_source() throws OclParseException {
         String testCase ="Car::allInstances()->select(c|c.Car:color='blue')";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) exp).getSource();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -211,9 +213,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_forAll_body() throws OclParseException {
         String testCase ="Car::allInstances()->forAll(c|c.Car:color='blue')";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) exp).getBody();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -228,9 +230,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_forAll_source() throws OclParseException {
         String testCase ="Car::allInstances()->forAll(c|c.Car:color='blue')";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) exp).getSource();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -245,9 +247,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_reject_body() throws OclParseException {
         String testCase ="Car::allInstances()->reject(c|c.Car:color='blue')";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) exp).getBody();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -262,9 +264,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_reject_source() throws OclParseException {
         String testCase ="Car::allInstances()->reject(c|c.Car:color='blue')";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) exp).getSource();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -279,9 +281,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_exists_body() throws OclParseException {
         String testCase ="Car::allInstances()->exists(c|c.Car:color='blue')";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) exp).getBody();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -296,9 +298,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_exists_source() throws OclParseException {
         String testCase ="Car::allInstances()->exists(c|c.Car:color='blue')";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) exp).getSource();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -313,9 +315,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_exists_forAll_body() throws OclParseException {
         String testCase ="Car::allInstances()->exists(c|c.Car:owners->forAll(p|p.Person:name='Hoang'))";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) ((IteratorExp) exp).getBody()).getSource();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -330,9 +332,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_collect_forAll_source() throws OclParseException {
         String testCase ="Car::allInstances()->collect(c|c.Car:owners->forAll(p|p.Person:name='Hoang'))";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) ((IteratorExp) exp).getBody()).getBody();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -347,9 +349,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_collect_forAll_body() throws OclParseException {
         String testCase ="Car::allInstances()->collect(c|c.Car:owners->forAll(p|p.Person:name='Hoang'))";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) ((IteratorExp) exp).getBody()).getSource();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -364,9 +366,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_collect_oclIsUndefined() throws OclParseException {
         String testCase ="Car::allInstances()->collect(c|c.Car:color.oclIsUndefined())";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) exp).getBody();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -381,9 +383,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_collect_isEmpty() throws OclParseException {
         String testCase ="Car::allInstances()->collect(c|c.Car:color->isEmpty())";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) ((IteratorExp) exp).getBody()).getSource();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -398,9 +400,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_exists_forAll_source() throws OclParseException {
         String testCase ="Car::allInstances()->exists(c|c.Car:owners->forAll(p|p.Person:name='Hoang'))";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) ((IteratorExp) exp).getBody()).getBody();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -415,9 +417,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_exists_forAll_2_level() throws OclParseException {
         String testCase ="Car::allInstances()->collect(c|c.Car:owners->forAll(p|p.Person:name=c.Car:color))";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) ((IteratorExp) exp).getBody()).getSource();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -432,9 +434,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_exists_forAll_2_level_2() throws OclParseException {
         String testCase ="Car::allInstances()->collect(c|c.Car:owners->forAll(p|p.Person:name=c.Car:color))";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) ((IteratorExp) exp).getBody()).getBody();
         List<String> actualSVars = VariableUtils.SVars( testExp, ocl2sqlParser );
@@ -451,9 +453,9 @@ public class SVarsTest {
     @Test
     public void test_Car_allInstances_collect_asSet_flatten() throws OclParseException {
         String testCase ="Car::allInstances()->collect(c|c.Car:owners->asSet())->flatten()";
-        OclExpression exp = OclExpression.parse( testCase, new DefaultOclContext() );
+        OclExpression exp = SimpleParser.parse( testCase, new DefaultOclContext() );
         OCL2SQLParser ocl2sqlParser = ocl2psql.getOcl2sqlParser();
-        ocl2sqlParser.visit( exp );
+        exp.accept(ocl2sqlParser);
 
         OclExpression testExp = ((IteratorExp) ((IteratorExp) ((IteratorExp) exp).getSource()).getBody()).getSource();
         List<String> actualFVars = VariableUtils.SVars( testExp, ocl2sqlParser );

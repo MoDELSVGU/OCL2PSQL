@@ -16,19 +16,8 @@ limitations under the License.
 
 package org.vgu.ocl2psql.ocl.expressions;
 
-import java.util.List;
-
-import org.json.simple.JSONArray;
-
 import net.sf.jsqlparser.statement.Statement;
 
-
-public interface StmVisitor {
-	public JSONArray getPlainUMLContext();
-	public List<IteratorSource> getVisitorContext();
-	public void setVisitorContext(List<IteratorSource> context);
-	
-	public Statement visit(OclExpression source);
+public interface RobertStmVisitable {
+    public Statement accept(RobertStmVisitor visitor);
 }
-	
-	

@@ -8,15 +8,13 @@
  */
 package org.vgu.ocl2psql.ocl.expressions;
 
-import org.vgu.ocl2psql.ocl.context.OclContext;
-import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
-
-import net.sf.jsqlparser.statement.Statement;
+import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
+import org.vgu.ocl2psql.sql.statement.select.Select;
 
 /**
  * Class IfExp
  */
-public class IfExp extends OclExpression {
+public class IfExp implements OclExpression {
     /**
      * Attribute condition
      */
@@ -30,38 +28,25 @@ public class IfExp extends OclExpression {
      */
     private final OclExpression thenExpression;
 
-    public IfExp(OclExpression condition, OclExpression thenExpression,
-	    OclExpression elseExpression) {
-	this.condition = condition;
-	this.thenExpression = thenExpression;
-	this.elseExpression = elseExpression;
+    public IfExp(OclExpression condition, OclExpression thenExpression, OclExpression elseExpression) {
+        this.condition = condition;
+        this.thenExpression = thenExpression;
+        this.elseExpression = elseExpression;
     }
 
     public IfExp(OclExpression condition, OclExpression thenExpression) {
-	this(condition, thenExpression, null);
+        this(condition, thenExpression, null);
     }
 
     @Override
-    public Object eval(OclContext context) throws OclEvaluationException {
-	Object condition = this.condition.eval(context);
-	if (condition instanceof Boolean) {
-	    if ((Boolean) condition) {
-		return this.thenExpression.eval(context);
-	    } else if (this.elseExpression != null) {
-		return this.elseExpression.eval(context);
-	    } else {
-		return null;
-	    }
-	} else {
-	    throw new OclEvaluationException("Condition is not a boolean!");
-	}
+    public void accept(RobertStmVisitor visitor) {
+        visitor.visit(this);
     }
 
     @Override
-    public Statement map(StmVisitor visitor) {
+    public void accept(DeparserVisitor visitor) {
         // TODO Auto-generated method stub
-        return null;
+
     }
 
-	
 }

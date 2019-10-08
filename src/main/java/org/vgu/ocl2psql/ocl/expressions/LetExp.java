@@ -11,16 +11,13 @@ package org.vgu.ocl2psql.ocl.expressions;
 import java.util.Arrays;
 import java.util.List;
 
-import org.vgu.ocl2psql.ocl.context.CascadingOclContext;
-import org.vgu.ocl2psql.ocl.context.OclContext;
-import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
-
-import net.sf.jsqlparser.statement.Statement;
+import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
+import org.vgu.ocl2psql.sql.statement.select.Select;
 
 /**
  * Class LetExp
  */
-public final class LetExp extends OclExpression {
+public final class LetExp implements OclExpression {
     private OclExpression in;
 
     private List<Variable> variables;
@@ -31,26 +28,14 @@ public final class LetExp extends OclExpression {
     }
 
     @Override
-    public Object eval(OclContext context) throws OclEvaluationException {
-	// clone the context
-	CascadingOclContext innerContext = new CascadingOclContext(context);
-	for (Variable v : variables) {
-	    // store the variable in the inner context
-	    if (v.initExpression == null) {
-		innerContext.setVariable(v.getName(), null);
-	    } else {
-		innerContext
-			.setVariable(v.getName(), v.initExpression.eval(context));
-	    }
-	}
-	// evaluate the let expression with the inner context
-	return in.eval(innerContext);
+    public void accept(RobertStmVisitor visitor) {
+        visitor.visit(this);
     }
 
     @Override
-    public Statement map(StmVisitor visitor) {
+    public void accept(DeparserVisitor visitor) {
         // TODO Auto-generated method stub
-        return null;
+        
     }
 
 	

@@ -8,16 +8,12 @@
  */
 package org.vgu.ocl2psql.ocl.expressions;
 
-import org.vgu.ocl2psql.ocl.context.OclContext;
 import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
-import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
-
-import net.sf.jsqlparser.statement.Statement;
 
 /**
  * Class TypeExp
  */
-public final class TypeExp extends OclExpression {
+public final class TypeExp implements OclExpression {
     protected final String referredType;
 
     public String getReferredType() {
@@ -34,28 +30,8 @@ public final class TypeExp extends OclExpression {
 	}
 
     @Override
-    public Object eval(OclContext context) throws OclEvaluationException {
-	if ("String".equals(this.referredType)) {
-	    return String.class;
-	} else if ("Boolean".equals(this.referredType)) {
-	    return Boolean.class;
-	} else if ("Integer".equals(this.referredType)) {
-	    return Integer.class;
-	} else if ("Real".equals(this.referredType)) {
-	    return Double.class;
-	} else if ("OclVoid".equals(this.referredType)) {
-	    return Void.class;
-	} else if ("OclAny".equals(this.referredType)) {
-	    return Object.class;
-	} else {
-	    return context.getType(this.referredType);
-	}
-    }
-
-    @Override
-    public Statement map(StmVisitor visitor) {
-        // TODO Auto-generated method stub
-        return null;
+    public void accept(RobertStmVisitor visitor) {
+        visitor.visit(this);
     }
 
 	

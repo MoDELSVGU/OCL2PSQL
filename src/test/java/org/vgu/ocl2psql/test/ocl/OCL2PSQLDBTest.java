@@ -36,6 +36,7 @@ import org.vgu.ocl2psql.ocl.context.DefaultOclContext;
 import org.vgu.ocl2psql.ocl.exception.OclParseException;
 import org.vgu.ocl2psql.ocl.expressions.IteratorSource;
 import org.vgu.ocl2psql.ocl.expressions.OclExpression;
+import org.vgu.ocl2psql.ocl.parse.SimpleParser;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
 
 public class OCL2PSQLDBTest {
@@ -62,8 +63,9 @@ public class OCL2PSQLDBTest {
 			OCL2SQLParser ocl2sql = new OCL2SQLParser();
 			ocl2sql.setPlainUMLContext(context);
 			ocl2sql.setVisitorContext(new ArrayList<IteratorSource>());
-			
-			String sql = ocl2sql.visit(OclExpression.parse(exp, new DefaultOclContext())).toString();
+			OclExpression oclExp = SimpleParser.parse(exp, new DefaultOclContext());
+			oclExp.accept(ocl2sql);
+			String sql =  ocl2sql.getFinalSelect().toString();
 			Connection con = getConnection(db);
 			
 			PreparedStatement st = con.prepareStatement(sql);

@@ -8,10 +8,8 @@
  */
 package org.vgu.ocl2psql.ocl.expressions;
 
-import org.vgu.ocl2psql.ocl.context.OclContext;
-import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
-
-import net.sf.jsqlparser.statement.Statement;
+import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
+import org.vgu.ocl2psql.sql.statement.select.Select;
 
 /**
  * Class RealLiteralExp
@@ -27,14 +25,14 @@ public class RealLiteralExp extends NumericLiteralExp {
     }
 
     @Override
-    public Object eval(OclContext context) throws OclEvaluationException {
-	return this.realSymbol;
+    public void accept(RobertStmVisitor visitor) {
+        visitor.visit(this);
     }
 
     @Override
-    public Statement map(StmVisitor visitor) {
+    public void accept(DeparserVisitor visitor) {
         // TODO Auto-generated method stub
-        return null;
+        
     }
 
 	

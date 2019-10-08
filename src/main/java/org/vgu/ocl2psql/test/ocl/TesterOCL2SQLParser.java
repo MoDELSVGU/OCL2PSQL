@@ -35,15 +35,7 @@ public class TesterOCL2SQLParser {
         ocl2psql.setPlainUMLContextFromFile(contextModel.getAbsolutePath());
         ocl2psql.setDescriptionMode(true);
         
-        test(ocl2psql, "self");
-        test(ocl2psql, "self = caller");
-        test(ocl2psql, "self.Person:name");
-        test(ocl2psql, "self.Person:name = 'Hoang'");
-        test(ocl2psql, "self.Person:ownedCars");
-        test(ocl2psql, "self.Person:ownedCars->size()");
-        test(ocl2psql, "self.Person:ownedCars->exists(c|c.Car:color = 'black')");
-        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p = self))");
-        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p.Person:ownedCars->size() < self.Person:ownedCars->size()))");
+        test(ocl2psql, "Car::allInstances()->isUnique()");
     }
 
     private static void test(OCL2PSQL ocl2psql, String oclExp) throws OclParseException {

@@ -43,40 +43,43 @@ public class VariableUtils {
         PlainSelect selectBodyLeft = (PlainSelect) mainSubSelect.getSelectBody();
         PlainSelect selectBodyRight = (PlainSelect) joinSubSelect.getSelectBody();
         BinaryExpression onCondition = null;
-        
-        for(VarSelectExpression selectItemLeft : selectBodyLeft.getVars()) {
-                for(VarSelectExpression selectItemRight : selectBodyRight.getVars()) {
-                    if(selectItemLeft.equals(selectItemRight)) {
-                        BinaryExpression bexp = new EqualsTo();
-                        bexp.setLeftExpression(new Column(mainSubSelect.getAlias().getName().concat(".").concat(selectItemLeft.getRef().getAlias().getName())));
-                        bexp.setRightExpression(new Column(joinSubSelect.getAlias().getName().concat(".").concat(selectItemRight.getRef().getAlias().getName())));
-                        if(Objects.isNull(onCondition)) {
-                            onCondition = bexp;
-                        } else {
-                            onCondition = new AndExpression(onCondition, bexp);
-                        }
+
+        for (VarSelectExpression selectItemLeft : selectBodyLeft.getVars()) {
+            for (VarSelectExpression selectItemRight : selectBodyRight.getVars()) {
+                if (selectItemLeft.equals(selectItemRight)) {
+                    BinaryExpression bexp = new EqualsTo();
+                    bexp.setLeftExpression(new Column(mainSubSelect.getAlias().getName().concat(".")
+                            .concat(selectItemLeft.getRef().getAlias().getName())));
+                    bexp.setRightExpression(new Column(joinSubSelect.getAlias().getName().concat(".")
+                            .concat(selectItemRight.getRef().getAlias().getName())));
+                    if (Objects.isNull(onCondition)) {
+                        onCondition = bexp;
+                    } else {
+                        onCondition = new AndExpression(onCondition, bexp);
                     }
                 }
+            }
         }
         return onCondition;
     }
-    
-    public static void reserveVars(PlainSelect target, SubSelect source){
+
+    public static void reserveVars(PlainSelect target, SubSelect source) {
         PlainSelect selectBody = (PlainSelect) source.getSelectBody();
         List<VarSelectExpression> targetRefList = target.getVars();
-        for(VarSelectExpression var : selectBody.getVars()) {
-                if(!targetRefList.contains(var)) {
-                    VarSelectExpression newVar = new VarSelectExpression(var.getVar());
-                    newVar.setRefExpression(new Column(source.getAlias().getName().concat(".").concat(var.getRef().getAlias().getName())));
-                    target.addVar(newVar);
-                }
+        for (VarSelectExpression var : selectBody.getVars()) {
+            if (!targetRefList.contains(var)) {
+                VarSelectExpression newVar = new VarSelectExpression(var.getVar());
+                newVar.setRefExpression(
+                        new Column(source.getAlias().getName().concat(".").concat(var.getRef().getAlias().getName())));
+                target.addVar(newVar);
+            }
         }
     }
 
-    public static SelectBody findMappingVars(StmVisitor visitor, String variable) {
-        for(IteratorSource iter : visitor.getVisitorContext()) {
+    public static SelectBody findMappingVars(OCL2SQLParser visitor, String variable) {
+        for (IteratorSource iter : visitor.getVisitorContext()) {
             MyIteratorSource myIter = (MyIteratorSource) iter;
-            if(myIter.getIterator().getName().equals(variable)) {
+            if (myIter.getIterator().getName().equals(variable)) {
                 return myIter.getSource().getSelectBody();
             }
         }
@@ -86,53 +89,51 @@ public class VariableUtils {
     public static void reserveVarsForCollect(PlainSelect target, SubSelect source, Variable iterator) {
         PlainSelect selectBody = (PlainSelect) source.getSelectBody();
         LinkedList<VarSelectExpression> targetRefList = target.getVars();
-        for(VarSelectExpression var : selectBody.getVars()) {
-            if(!targetRefList.contains(var)) {
+        for (VarSelectExpression var : selectBody.getVars()) {
+            if (!targetRefList.contains(var)) {
                 VarSelectExpression newVar = new VarSelectExpression(var.getVar());
-                newVar.setRefExpression(new Column(source.getAlias().getName().concat(".").concat(var.getRef().getAlias().getName())));
+                newVar.setRefExpression(
+                        new Column(source.getAlias().getName().concat(".").concat(var.getRef().getAlias().getName())));
                 target.addVar(newVar);
-                if(iterator.getName().equals(var.getVar())) {
+                if (iterator.getName().equals(var.getVar())) {
                 }
             }
         }
     }
-    
+
     public static void reserveVarsExcludeOne(PlainSelect target, SubSelect source, Variable iterator) {
         PlainSelect selectBody = (PlainSelect) source.getSelectBody();
         LinkedList<VarSelectExpression> targetRefList = target.getVars();
-        for(VarSelectExpression var : selectBody.getVars()) {
-            if(!targetRefList.contains(var)) {
-                if(iterator.getName().equals(var.getVar())) {
+        for (VarSelectExpression var : selectBody.getVars()) {
+            if (!targetRefList.contains(var)) {
+                if (iterator.getName().equals(var.getVar())) {
                     continue;
                 }
                 VarSelectExpression newVar = new VarSelectExpression(var.getVar());
-                newVar.setRefExpression(new Column(source.getAlias().getName().concat(".").concat(var.getRef().getAlias().getName())));
+                newVar.setRefExpression(
+                        new Column(source.getAlias().getName().concat(".").concat(var.getRef().getAlias().getName())));
                 target.addVar(newVar);
             }
         }
     }
-    
+
     public static Variable getCurrentVariable(OclExpression currentExpression) {
-        if(currentExpression instanceof PropertyCallExp) {
+        if (currentExpression instanceof PropertyCallExp) {
             PropertyCallExp propertyCallExp = (PropertyCallExp) currentExpression;
-            return Optional.ofNullable(propertyCallExp)
-                    .map(PropertyCallExp::getSource)
-                    .filter(oclExpression -> oclExpression instanceof VariableExp)
-                    .map(VariableExp.class::cast)
-                    .map(VariableExp::getReferredVariable)
-                    .orElse(null);
-        }
-        else {
+            return Optional.ofNullable(propertyCallExp).map(PropertyCallExp::getSource)
+                    .filter(oclExpression -> oclExpression instanceof VariableExp).map(VariableExp.class::cast)
+                    .map(VariableExp::getReferredVariable).orElse(null);
+        } else {
             return null;
         }
     }
-    
+
     public static boolean containsNoVariable(Select select) {
         PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
-        for(SelectItem item : plainSelect.getSelectItems()) {
-            if(item instanceof RefSelectExpression) {
+        for (SelectItem item : plainSelect.getSelectItems()) {
+            if (item instanceof RefSelectExpression) {
                 RefSelectExpression refExpression = (RefSelectExpression) item;
-                if(!refExpression.getAlias().getName().contains("closed"))
+                if (!refExpression.getAlias().getName().contains("closed"))
                     return false;
             }
         }
@@ -144,23 +145,24 @@ public class VariableUtils {
         VariableExp variableExp = (VariableExp) propertyCallExp.getSource();
         return variableExp.getReferredVariable().getName();
     }
-    
-    public static List<Expression> getGroupingVariablesExcludeOne(PlainSelect bodyBooleanExp, Variable excludeVariable) {
+
+    public static List<Expression> getGroupingVariablesExcludeOne(PlainSelect bodyBooleanExp,
+            Variable excludeVariable) {
         List<Expression> groupByExps = new ArrayList<Expression>();
-        
-        for(VarSelectExpression var : bodyBooleanExp.getVars()) {
-            if(!var.getVar().equals(excludeVariable.getName())) {
+
+        for (VarSelectExpression var : bodyBooleanExp.getVars()) {
+            if (!var.getVar().equals(excludeVariable.getName())) {
                 groupByExps.add(var.getRef().getExpression());
             }
         }
         return groupByExps;
     }
-    
+
     public static List<Expression> getGroupingVariables(PlainSelect bodyBooleanExp) {
         List<Expression> groupByExps = new ArrayList<Expression>();
-        
-        for(SelectItem item : bodyBooleanExp.getSelectItems()) {
-            if(item instanceof RefSelectExpression) {
+
+        for (SelectItem item : bodyBooleanExp.getSelectItems()) {
+            if (item instanceof RefSelectExpression) {
                 groupByExps.add(new Column(((RefSelectExpression) item).getAlias().getName()));
             }
         }
@@ -169,118 +171,124 @@ public class VariableUtils {
 
     public static boolean isSourceAClassAllInstances(SelectBody selectBody, String className) {
         PlainSelect plainSelectVar = (PlainSelect) selectBody;
-        return (plainSelectVar.getFromItem() instanceof Table) && ((Table) plainSelectVar.getFromItem()).getName().equals(className);
+        return (plainSelectVar.getFromItem() instanceof Table)
+                && ((Table) plainSelectVar.getFromItem()).getName().equals(className);
     }
 
-    public static IteratorSource getSourceLevelVar(StmVisitor visitor) {
+    public static IteratorSource getSourceLevelVar(OCL2SQLParser visitor) {
         int currentLevel = ((OCL2SQLParser) visitor).getLevelOfSets();
-        return visitor.getVisitorContext().get(currentLevel-2);
+        return visitor.getVisitorContext().get(currentLevel - 2);
     }
 
-    public static boolean isSetOfSetAfterCollect(IteratorExp iteratorExp, StmVisitor visitor) {
-        if(iteratorExp.getSource() instanceof IteratorExp) {
+    public static boolean isSetOfSetAfterCollect(IteratorExp iteratorExp, RobertStmVisitor visitor) {
+        if (iteratorExp.getSource() instanceof IteratorExp) {
             IteratorExp insideIter = (IteratorExp) iteratorExp.getSource();
-            if(insideIter.kind == IteratorKind.collect) {
-                if(((OCL2SQLParser) visitor).getLevelOfSets() > 1) {
+            if (insideIter.kind == IteratorKind.collect) {
+                if (((OCL2SQLParser) visitor).getLevelOfSets() > 1) {
                     return true;
                 }
             }
         }
         return false;
     }
-    
+
     /**
-     * <p>This is an implementation of FVars function in the manuscript
-     * <b>OCL2PSQL: An OCL-to-SQL Code-Generator for Model Driven Engineering</b>. 
-     * Assuming <code>c</code> is the valid OCL expression.
+     * <p>
+     * This is an implementation of FVars function in the manuscript <b>OCL2PSQL: An
+     * OCL-to-SQL Code-Generator for Model Driven Engineering</b>. Assuming
+     * <code>c</code> is the valid OCL expression.
      * </p>
+     * 
      * @param ? the valid OCL sub-expression
      * @return the set of variables that occurs free in ?
      * @since 1.0
      */
     public static List<String> FVars(OclExpression src) {
         ArrayList<String> fVars = new ArrayList<String>();
-        
+
         return FVarsAux(src, fVars);
     }
-    
-    private static List<String> FVarsAux(OclExpression src, List<String> fVars ) {
-        
-        if( src instanceof IteratorExp ) {
-            return FVarsAux( ((IteratorExp) src).getSource(), fVars );
+
+    private static List<String> FVarsAux(OclExpression src, List<String> fVars) {
+
+        if (src instanceof IteratorExp) {
+            return FVarsAux(((IteratorExp) src).getSource(), fVars);
         }
 
-        if ( src instanceof OperationCallExp ) {
+        if (src instanceof OperationCallExp) {
             OperationCallExp opCallExpSrc = (OperationCallExp) src;
-            
-            switch( opCallExpSrc.getName() ) {
-                case "not":
-                    return FVarsAux( opCallExpSrc.getArguments().get( 0 ), fVars );
-                case "oclIsUndefined":
-                    return FVarsAux( opCallExpSrc.getSource(), fVars );
-                case "=":
-                case "<>":
-                case "<=":
-                case "<":
-                case ">=":
-                case ">":
-                case "and":
-                case "or":
-                    FVarsAux( opCallExpSrc.getArguments().get( 0 ), fVars);
-                    return FVarsAux( opCallExpSrc.getSource(), fVars );
-                case "allInstances":
-                    return fVars;
-                default:
+
+            switch (opCallExpSrc.getName()) {
+            case "not":
+                return FVarsAux(opCallExpSrc.getArguments().get(0), fVars);
+            case "oclIsUndefined":
+                return FVarsAux(opCallExpSrc.getSource(), fVars);
+            case "=":
+            case "<>":
+            case "<=":
+            case "<":
+            case ">=":
+            case ">":
+            case "and":
+            case "or":
+                FVarsAux(opCallExpSrc.getArguments().get(0), fVars);
+                return FVarsAux(opCallExpSrc.getSource(), fVars);
+            case "allInstances":
+                return fVars;
+            default:
             }
-            
-        } 
-        
-        if ( src instanceof PropertyCallExp ) {
-            return FVarsAux( ((PropertyCallExp) src).getSource(), fVars);
+
         }
 
-        if ( src instanceof VariableExp ) {
+        if (src instanceof PropertyCallExp) {
+            return FVarsAux(((PropertyCallExp) src).getSource(), fVars);
+        }
+
+        if (src instanceof VariableExp) {
             VariableExp varExpSrc = (VariableExp) src;
-            String v = varExpSrc.getReferredVariable().getName() ;
-            if ( !fVars.contains( v ) ) {
-                fVars.add( v );
+            String v = varExpSrc.getReferredVariable().getName();
+            if (!fVars.contains(v)) {
+                fVars.add(v);
             }
             return fVars;
-        } 
+        }
 
         // ELSE
         return fVars;
     }
-    
-    public static boolean isVariableOf (List<String> vars, String var) {
+
+    public static boolean isVariableOf(List<String> vars, String var) {
         return vars.stream().anyMatch(s -> var.equals(s));
     }
-    
+
     /**
-     * <p>This is an implementation of SVars function in the manuscript
-     * <b>OCL2PSQL: An OCL-to-SQL Code-Generator for Model Driven Engineering</b>. 
-     * Assuming e is the whole OCL expression.
+     * <p>
+     * This is an implementation of SVars function in the manuscript <b>OCL2PSQL: An
+     * OCL-to-SQL Code-Generator for Model Driven Engineering</b>. Assuming e is the
+     * whole OCL expression.
      * </p>
-     * @param ePrime (e') the sub-expression of e
+     * 
+     * @param ePrime  (e') the sub-expression of e
      * @param visitor the context of OCL expression
      * @return the set of variables which e' depends on
      * @since 1.0
      */
-    public static List<String> SVars(OclExpression ePrime, StmVisitor visitor) {
+    public static List<String> SVars(OclExpression ePrime, OCL2SQLParser visitor) {
         List<String> FVars = FVars(ePrime);
-        if(FVars.isEmpty()) return new ArrayList<String>();
+        if (FVars.isEmpty())
+            return new ArrayList<String>();
         List<String> SVars = new ArrayList<String>();
-        for(String var : FVars) {
+        for (String var : FVars) {
             OclExpression srcVarExpression = findSourceOfVar(visitor, var);
-            if(SVars.contains(var) || srcVarExpression == null) {
+            if (SVars.contains(var) || srcVarExpression == null) {
                 continue;
             }
             SVars.add(var);
-            for(String srcVar : SVars(srcVarExpression, visitor)) {
-                if(SVars.contains( srcVar )) {
+            for (String srcVar : SVars(srcVarExpression, visitor)) {
+                if (SVars.contains(srcVar)) {
                     continue;
                 }
-                SVars.add( srcVar );
+                SVars.add(srcVar);
             }
         }
         return SVars;
@@ -296,12 +304,12 @@ public class VariableUtils {
 //        return null;
 //    }
 
-    private static OclExpression findSourceOfVar(StmVisitor visitor, String var) {
+    private static OclExpression findSourceOfVar(OCL2SQLParser visitor, String var) {
         List<IteratorSource> vars = visitor.getVisitorContext();
-        for(IteratorSource i : vars) {
+        for (IteratorSource i : vars) {
             String iName = i.getIterator().getName();
-            if(var.equals(iName)) {
-                if(i instanceof MyIteratorSource) {
+            if (var.equals(iName)) {
+                if (i instanceof MyIteratorSource) {
                     MyIteratorSource myI = (MyIteratorSource) i;
                     return myI.getSourceExpression();
                 }

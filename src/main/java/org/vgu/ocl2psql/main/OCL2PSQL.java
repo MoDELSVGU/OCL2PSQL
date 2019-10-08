@@ -30,6 +30,7 @@ import org.vgu.ocl2psql.ocl.context.DefaultOclContext;
 import org.vgu.ocl2psql.ocl.exception.OclParseException;
 import org.vgu.ocl2psql.ocl.expressions.IteratorSource;
 import org.vgu.ocl2psql.ocl.expressions.OclExpression;
+import org.vgu.ocl2psql.ocl.parse.SimpleParser;
 import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
@@ -73,13 +74,12 @@ public class OCL2PSQL {
     public Select mapToSQL(String oclExpression) throws OclParseException {
         ocl2sqlParser.resetLevelOfSet();
         ocl2sqlParser.setVisitorContext(new ArrayList<IteratorSource>());
-        OclExpression exp = OclExpression.parse(oclExpression, new DefaultOclContext());
-        Select finalStatement = (Select) ocl2sqlParser.visit(exp);
-        cookFinalStatement(finalStatement);
-        return finalStatement;
+        OclExpression exp = SimpleParser.parse(oclExpression, new DefaultOclContext());
+        exp.accept(ocl2sqlParser);
+        return cookFinalStatement(ocl2sqlParser.getFinalSelect());
     }
     
-    private void cookFinalStatement(Select finalStatement) {
+    private Select cookFinalStatement(Select finalStatement) {
         PlainSelect finalPlainSelect = (PlainSelect) finalStatement.getSelectBody();
         List<SelectItem> newSelectItems = new ArrayList<SelectItem>();
         for(SelectItem item : finalPlainSelect.getSelectItems()) {
@@ -89,6 +89,7 @@ public class OCL2PSQL {
         }
         finalPlainSelect.getSelectItems().clear();
         finalPlainSelect.getSelectItems().addAll(newSelectItems);
+        return finalStatement;
     }
     
     public void setContext(JSONArray context) {

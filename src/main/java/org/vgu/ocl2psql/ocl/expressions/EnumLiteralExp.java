@@ -8,10 +8,8 @@
  */
 package org.vgu.ocl2psql.ocl.expressions;
 
-import org.vgu.ocl2psql.ocl.context.OclContext;
-import org.vgu.ocl2psql.ocl.exception.OclEvaluationException;
-
-import net.sf.jsqlparser.statement.Statement;
+import org.vgu.ocl2psql.ocl.deparser.DeparserVisitor;
+import org.vgu.ocl2psql.sql.statement.select.Select;
 
 /**
  * Class EnumLiteralExp
@@ -22,29 +20,19 @@ public final class EnumLiteralExp extends LiteralExp {
     private final String referredLiteral;
 
     public EnumLiteralExp(TypeExp type, String referredLiteral) {
-	this.type = type;
-	this.referredLiteral = referredLiteral;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Object eval(OclContext context) throws OclEvaluationException {
-	@SuppressWarnings("rawtypes")
-    Class type = (Class) this.type.eval(context);
-	if (type == null)
-	    return null;
-	if (type.isEnum()) {
-	    return Enum.valueOf(type, referredLiteral);
-	}
-	throw new OclEvaluationException("Not an Enum Type: "
-		+ this.type.referredType);
+        this.type = type;
+        this.referredLiteral = referredLiteral;
     }
 
     @Override
-    public Statement map(StmVisitor visitor) {
+    public void accept(RobertStmVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
+    public void accept(DeparserVisitor visitor) {
         // TODO Auto-generated method stub
-        return null;
-    }
 
+    }
 
 }

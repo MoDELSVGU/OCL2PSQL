@@ -43,21 +43,6 @@ public class Variable {
 	this(name, null);
     }
 
-    public Object init(OclContext context) throws OclEvaluationException {
-	if (initExpression != null) {
-	    return initExpression.eval(context);
-	} else
-	if (type != null) {
-	    try {
-		return ((Class<?>)type.eval(context)).newInstance();
-	    } catch (Exception e) {
-		throw new OclEvaluationException("cannot instantiate the type: "+type.referredType);
-	    }
-	} else {
-	    return new Object();
-	}
-    }
-
     public String getName() {
 	return name;
     }
