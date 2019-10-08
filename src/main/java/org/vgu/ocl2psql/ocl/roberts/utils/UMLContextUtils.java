@@ -34,7 +34,7 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
-public class Utilities {
+public class UMLContextUtils {
     
     public static String getAssociationOpposite(JSONArray context, String className, String endName) {
         String opposite = null;
@@ -172,11 +172,11 @@ public class Utilities {
 	}
 	
 	public static void groupingVariables (PlainSelect pselect, String var_iter, SubSelect subselect_Iter, SubSelect subselect_Body) {
-		List<SelectItem> vars_Iter = Utilities.getVariableAliases(subselect_Iter);
-		List<SelectItem> vars_Body = Utilities.getVariableAliases(subselect_Body);
+		List<SelectItem> vars_Iter = UMLContextUtils.getVariableAliases(subselect_Iter);
+		List<SelectItem> vars_Body = UMLContextUtils.getVariableAliases(subselect_Body);
 		if (var_iter != null) {
-			Utilities.removeVariableAliase(vars_Iter, var_iter);
-			Utilities.removeVariableAliase(vars_Body, var_iter);
+			UMLContextUtils.removeVariableAliase(vars_Iter, var_iter);
+			UMLContextUtils.removeVariableAliase(vars_Body, var_iter);
 		}
 		
 		List<Expression> gexps = new ArrayList<Expression>();
@@ -211,7 +211,7 @@ public class Utilities {
 	
 	// ripplingUpVariables
 	public static void ripplingUpVariablesSimple(PlainSelect pselect, SubSelect selectBody) {
-		List<SelectItem> vars_Iter = Utilities.getVariableAliases(selectBody);	
+		List<SelectItem> vars_Iter = UMLContextUtils.getVariableAliases(selectBody);	
 		// 1. add all the variable-item on the Iter
 		for(SelectItem item_var : vars_Iter) {
 			SelectExpressionItem new_item_var = new SelectExpressionItem();
@@ -231,11 +231,11 @@ public class Utilities {
 	// 3. for (1) and (2), the current iterator variables, var_iter, it is not taken into account
 	
 	public static void ripplingUpVariables(PlainSelect pselect, String var_iter, SubSelect selectBody, SubSelect selectBody2) {
-		List<SelectItem> vars_Iter = Utilities.getVariableAliases(selectBody);
-		List<SelectItem> vars_Body = Utilities.getVariableAliases(selectBody2);
+		List<SelectItem> vars_Iter = UMLContextUtils.getVariableAliases(selectBody);
+		List<SelectItem> vars_Body = UMLContextUtils.getVariableAliases(selectBody2);
 		if (var_iter != null) {
-			Utilities.removeVariableAliase(vars_Iter, var_iter);
-			Utilities.removeVariableAliase(vars_Body, var_iter);
+			UMLContextUtils.removeVariableAliase(vars_Iter, var_iter);
+			UMLContextUtils.removeVariableAliase(vars_Body, var_iter);
 		}
 		List<Expression> wexps = new ArrayList<Expression>();
 		

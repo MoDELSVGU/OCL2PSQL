@@ -51,7 +51,7 @@ import org.vgu.ocl2psql.ocl.roberts.expressions.TupleLiteralExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.TypeExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.Variable;
 import org.vgu.ocl2psql.ocl.roberts.expressions.VariableExp;
-import org.vgu.ocl2psql.ocl.roberts.utils.Utilities;
+import org.vgu.ocl2psql.ocl.roberts.utils.UMLContextUtils;
 import org.vgu.ocl2psql.ocl.roberts.utils.VariableUtils;
 import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 import org.vgu.ocl2psql.sql.statement.select.Join;
@@ -164,7 +164,7 @@ public class RobertOCLParser implements RobertStmVisitor {
             }
         }
 
-        if (Utilities.isAttribute(this.getPlainUMLContext(), propertyClass, propertyName)) {
+        if (UMLContextUtils.isAttribute(this.getPlainUMLContext(), propertyClass, propertyName)) {
 
             String tableRefColumn = propertyClass.concat(".").concat(propertyClass).concat("_id");
 
@@ -210,9 +210,9 @@ public class RobertOCLParser implements RobertStmVisitor {
             finalSelect.setSelectBody(finalPlainSelect);
             return;
 
-        } else if (Utilities.isAssociation(this.getPlainUMLContext(), propertyClass, propertyName)) {
-            String assocClass = Utilities.getAssociation(this.getPlainUMLContext(), propertyClass, propertyName);
-            String oppositeEnd = Utilities.getAssociationOpposite(this.getPlainUMLContext(), propertyClass,
+        } else if (UMLContextUtils.isAssociation(this.getPlainUMLContext(), propertyClass, propertyName)) {
+            String assocClass = UMLContextUtils.getAssociation(this.getPlainUMLContext(), propertyClass, propertyName);
+            String oppositeEnd = UMLContextUtils.getAssociationOpposite(this.getPlainUMLContext(), propertyClass,
                     propertyName);
 
             table.setName(assocClass);
@@ -292,7 +292,7 @@ public class RobertOCLParser implements RobertStmVisitor {
             finalSelect.setSelectBody(finalPlainSelect);
             return;
         } else {
-            if (!Utilities.isClass(this.getPlainUMLContext(), propertyClass)) {
+            if (!UMLContextUtils.isClass(this.getPlainUMLContext(), propertyClass)) {
                 throw new NullPointerException("Invalid class: ".concat(propertyClass));
             }
             throw new NullPointerException("Invalid attribute or association: ".concat(propertyName));
@@ -313,7 +313,7 @@ public class RobertOCLParser implements RobertStmVisitor {
         if ("allInstances".equals(operationCallExp.getName())) {
             this.increaseLevelOfSet();
             String tableName = ((TypeExp) operationCallExp.getSource()).getReferredType();
-            if (!Utilities.isClass(this.getPlainUMLContext(), tableName)) {
+            if (!UMLContextUtils.isClass(this.getPlainUMLContext(), tableName)) {
                 throw new NullPointerException("Invalid class: ".concat(tableName));
             }
             ResSelectExpression resExpression = new ResSelectExpression(new Column(tableName.concat("_id")));
