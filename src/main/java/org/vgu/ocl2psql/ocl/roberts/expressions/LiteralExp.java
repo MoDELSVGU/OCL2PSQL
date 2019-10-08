@@ -11,6 +11,6 @@ package org.vgu.ocl2psql.ocl.roberts.expressions;
 /**
  * Class LiteralExp
  */
-public abstract class LiteralExp implements OclExpression {
+public abstract class LiteralExp extends OclExpression {
 
 }

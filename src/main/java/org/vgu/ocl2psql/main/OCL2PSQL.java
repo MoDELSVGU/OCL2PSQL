@@ -35,6 +35,7 @@ import org.vgu.ocl2psql.ocl.roberts.parse.SimpleParser;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
+import org.vgu.ocl2psql.sql.statement.select.TypeSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.utils.SQLAsStringUtils;
 
@@ -83,7 +84,9 @@ public class OCL2PSQL {
         PlainSelect finalPlainSelect = (PlainSelect) finalStatement.getSelectBody();
         List<SelectItem> newSelectItems = new ArrayList<SelectItem>();
         for(SelectItem item : finalPlainSelect.getSelectItems()) {
-            if(item instanceof ResSelectExpression || item instanceof ValSelectExpression) {
+            if(item instanceof ResSelectExpression 
+                    || item instanceof ValSelectExpression
+                    || item instanceof TypeSelectExpression) {
                 newSelectItems.add(item);
             }
         }

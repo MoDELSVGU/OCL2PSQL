@@ -19,15 +19,13 @@ limitations under the License.
 
 package org.vgu.ocl2psql.roberts;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 import org.json.simple.parser.ParseException;
 import org.junit.Test;

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.vgu.ocl2psql.main.parser.RobertOCLParser;
 import org.vgu.ocl2psql.ocl.roberts.expressions.IteratorExp;
@@ -130,12 +129,17 @@ public class VariableUtils {
     public static Variable getCurrentVariable(OclExpression currentExpression) {
         if (currentExpression instanceof PropertyCallExp) {
             PropertyCallExp propertyCallExp = (PropertyCallExp) currentExpression;
-            return Optional.ofNullable(propertyCallExp).map(PropertyCallExp::getSource)
-                    .filter(oclExpression -> oclExpression instanceof VariableExp).map(VariableExp.class::cast)
-                    .map(VariableExp::getReferredVariable).orElse(null);
-        } else {
-            return null;
+            if(propertyCallExp.getSource() instanceof VariableExp) {
+                VariableExp variableExp = (VariableExp) propertyCallExp.getSource();
+                return variableExp.getReferredVariable();
+            } else if(propertyCallExp.getSource() instanceof OperationCallExp) {
+                OperationCallExp operationCallExp = (OperationCallExp) propertyCallExp.getSource();
+                if("oclAsType".equals(operationCallExp.getName())) {
+                    return ((VariableExp) operationCallExp.getSource()).getReferredVariable();
+                }
+            }
         }
+        return null;
     }
 
     public static boolean containsNoVariable(Select select) {
@@ -227,25 +231,28 @@ public class VariableUtils {
 
         if (src instanceof OperationCallExp) {
             OperationCallExp opCallExpSrc = (OperationCallExp) src;
-
-            switch (opCallExpSrc.getName()) {
-            case "not":
-                return FVarsAux(opCallExpSrc.getArguments().get(0), fVars);
-            case "oclIsUndefined":
-                return FVarsAux(opCallExpSrc.getSource(), fVars);
-            case "=":
-            case "<>":
-            case "<=":
-            case "<":
-            case ">=":
-            case ">":
-            case "and":
-            case "or":
-                FVarsAux(opCallExpSrc.getArguments().get(0), fVars);
-                return FVarsAux(opCallExpSrc.getSource(), fVars);
-            case "allInstances":
-                return fVars;
-            default:
+            
+            switch( opCallExpSrc.getName() ) {
+                case "not":
+                    return FVarsAux( opCallExpSrc.getArguments().get( 0 ), fVars );
+                case "oclIsUndefined":
+                case "oclIsTypeOf":
+                case "oclIsKindOf":
+                case "oclAsType":
+                    return FVarsAux( opCallExpSrc.getSource(), fVars );
+                case "=":
+                case "<>":
+                case "<=":
+                case "<":
+                case ">=":
+                case ">":
+                case "and":
+                case "or":
+                    FVarsAux( opCallExpSrc.getArguments().get( 0 ), fVars);
+                    return FVarsAux( opCallExpSrc.getSource(), fVars );
+                case "allInstances":
+                    return fVars;
+                default:
             }
 
         }

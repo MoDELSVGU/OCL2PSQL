@@ -11,7 +11,7 @@ package org.vgu.ocl2psql.ocl.roberts.expressions;
 /**
  * Class CallExp
  */
-public abstract class CallExp implements OclExpression {
+public abstract class CallExp extends OclExpression {
 
     protected final OclExpression source;
 

@@ -16,7 +16,7 @@ import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 /**
  * Class LetExp
  */
-public final class LetExp implements OclExpression {
+public final class LetExp extends OclExpression {
     private OclExpression in;
 
     private List<Variable> variables;

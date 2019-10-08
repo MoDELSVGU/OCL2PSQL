@@ -13,7 +13,7 @@ import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 /**
  * Class IfExp
  */
-public class IfExp implements OclExpression {
+public class IfExp extends OclExpression {
     /**
      * Attribute condition
      */

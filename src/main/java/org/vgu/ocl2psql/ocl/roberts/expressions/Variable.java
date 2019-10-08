@@ -22,9 +22,9 @@ public class Variable {
     protected final TypeExp type;
 
     public Variable(String name, TypeExp type, OclExpression initExpression) {
-	this.name = name;
-	this.initExpression = initExpression;
-	this.type = type;
+    	this.name = name;
+    	this.initExpression = initExpression;
+    	this.type = type;
     }
 
     public OclExpression getInitExpression() {

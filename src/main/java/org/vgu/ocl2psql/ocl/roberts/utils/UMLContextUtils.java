@@ -81,16 +81,15 @@ public class UMLContextUtils {
           return association;
       }
     
-    public static String getAssociationAttribute(JSONArray context, String assocName, String className) {
+    public static String getAssociationOppositeClassName(JSONArray context, String assocName, String className) {
           for(Object object : context) {
               if (((JSONObject) object).containsKey("association") 
                       && ((JSONObject) object).get("association").equals(assocName)) {
                  JSONArray classes = (JSONArray) ((JSONObject) object).get("classes");
-                 JSONArray ends = (JSONArray) ((JSONObject) object).get("ends");
                  if(classes.get(0).equals(className))
-                     return (String) ends.get(1);
+                     return (String) classes.get(1);
                  else
-                     return (String) ends.get(0);
+                     return (String) classes.get(0);
               }
           }
           return null;
@@ -295,5 +294,49 @@ public class UMLContextUtils {
 
 
 	}
+
+    public static String getAttributeType(JSONArray plainUMLContext, String propertyClass, String propertyName) {
+        for(Object entity : plainUMLContext) {
+            if (((JSONObject) entity).containsKey("class")) {
+                if (((JSONObject) entity).get("class").equals(propertyClass)) {
+                    if (((JSONObject) entity).containsKey("attributes")) {
+                        for(Object association : (JSONArray) ((JSONObject) entity).get("attributes")) {
+                            if (((JSONObject) association).get("name").equals(propertyName)) {
+                                return (String) ((JSONObject) association).get("type");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static boolean isSuperClassOf(JSONArray plainUMLContext, String expectedSuperType, String targetType) {
+        if(targetType == null)
+            return true;
+        if(expectedSuperType.equals(targetType))
+            return true;
+        while(true) {
+            String superClazz = findDirectSuperClass(plainUMLContext, targetType);
+            if(superClazz == null)
+                return false;
+            if(expectedSuperType.equals(superClazz))
+                return true;
+            targetType = superClazz;
+        }
+    }
+
+    private static String findDirectSuperClass(JSONArray plainUMLContext, String targetType) {
+        for(Object entity : plainUMLContext) {
+            JSONObject clazz = (JSONObject) entity;
+            if (clazz.containsKey("class") 
+                    && targetType.equals(clazz.get("class")) 
+                    && clazz.containsKey("super")) {
+                return (String) clazz.get("super");
+            }
+        }
+        return null;
+    }
 	
 }

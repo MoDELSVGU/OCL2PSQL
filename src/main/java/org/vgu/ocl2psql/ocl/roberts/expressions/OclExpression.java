@@ -8,11 +8,20 @@
  */
 package org.vgu.ocl2psql.ocl.roberts.expressions;
 
-import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
+import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitable;
 
 /**
  * Class OclExpression
  */
-public interface OclExpression {
-    void accept(RobertStmVisitor visitor);
+public abstract class OclExpression implements RobertStmVisitable{
+    private String type;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
 }

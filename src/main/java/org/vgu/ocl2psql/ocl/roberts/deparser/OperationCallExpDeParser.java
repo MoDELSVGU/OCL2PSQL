@@ -56,6 +56,16 @@ public class OperationCallExpDeParser extends OclExpressionDeParser {
                 finalParsedStr = deParser.getDeParsedStr() + 
                     "." + operationName + "()";
                 break;
+            case "oclIsKindOf":
+            case "oclIsTypeOf":
+            case "oclAsType":
+                opCallExp.getSource().accept( deParser );
+                finalParsedStr = deParser.getDeParsedStr() + 
+                    "." + operationName + "(";
+                deParser.setDeParsedStr(finalParsedStr);
+                opCallExp.getArguments().get(0).accept(deParser);
+                finalParsedStr = deParser.getDeParsedStr().concat(")");
+                break;
             default:
 //          these iclude : "=", "<", ">", "<=", ">=", "<>"
                 opCallExp.getSource().accept( deParser );

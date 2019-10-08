@@ -16,16 +16,9 @@ limitations under the License.
 @author: ngpbh
 ***************************************************************************/
 
-package org.vgu.ocl2psql.ocl.roberts.exception;
 
-public class SetOfSetException extends RuntimeException {
+package org.vgu.ocl2psql.ocl.roberts.visitor;
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
-    public SetOfSetException(String message) {
-        super(message);
-    }
+public interface RobertStmVisitable {
+    void accept(RobertStmVisitor visitor);
 }

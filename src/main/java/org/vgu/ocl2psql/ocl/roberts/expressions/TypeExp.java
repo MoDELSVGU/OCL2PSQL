@@ -13,7 +13,7 @@ import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 /**
  * Class TypeExp
  */
-public final class TypeExp implements OclExpression {
+public final class TypeExp extends OclExpression {
     protected final String referredType;
 
     public String getReferredType() {

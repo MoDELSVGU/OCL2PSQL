@@ -13,7 +13,7 @@ import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 /**
  * Class VariableExp
  */
-public class VariableExp implements OclExpression {
+public class VariableExp extends OclExpression {
     /**
      * Attribute referredVariable
      */

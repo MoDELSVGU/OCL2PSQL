@@ -40,6 +40,7 @@ import org.vgu.ocl2psql.ocl.roberts.expressions.IteratorSource;
 import org.vgu.ocl2psql.ocl.roberts.expressions.OclExpression;
 import org.vgu.ocl2psql.ocl.roberts.parse.SimpleParser;
 
+
 @Ignore
 public class OCL2PSQLDBTest {
 

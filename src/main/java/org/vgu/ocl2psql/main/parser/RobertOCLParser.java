@@ -385,7 +385,7 @@ public class RobertOCLParser implements RobertStmVisitor {
                 resExp.setExpression(eqExp);
                 finalPlainSelect.setRes(resExp);
                 finalPlainSelect.setFromItem(tempLeft);
-                finalPlainSelect.setValAsTrue();
+                finalPlainSelect.createTrueValColumn();
                 Join join = new Join();
                 join.setSimple(true);
                 join.setRightItem(tempRight);
@@ -823,7 +823,7 @@ public class RobertOCLParser implements RobertStmVisitor {
                 finalPlainSelect.setFromItem(tempFlattenSource);
                 finalPlainSelect
                         .setRes(new ResSelectExpression(new Column(aliasTempFlattenSource.getName().concat(".res"))));
-                finalPlainSelect.setValAsTrue();
+                finalPlainSelect.createTrueValColumn();
 
                 BinaryExpression valTrue = new EqualsTo();
                 valTrue.setLeftExpression(new Column(aliasTempFlattenSource.getName().concat(".val")));
@@ -1134,7 +1134,7 @@ public class RobertOCLParser implements RobertStmVisitor {
 
         if (VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if (fVarsSource.isEmpty() && fVarsBody.size() == 1) {
-                finalPlainSelect.setValAsTrue();
+                finalPlainSelect.createTrueValColumn();
 
                 Function count = new Function();
                 count.setName("COUNT");
@@ -1153,7 +1153,7 @@ public class RobertOCLParser implements RobertStmVisitor {
                 finalPlainSelect.setWhere(bodyWhereExp);
 
             } else {
-                finalPlainSelect.setValAsTrue();
+                finalPlainSelect.createTrueValColumn();
 
                 String outerVar = VariableUtils.getOuterVariable(iteratorExp);
                 MyIteratorSource outerIter = this.getVisitorContext().stream()
@@ -1246,7 +1246,7 @@ public class RobertOCLParser implements RobertStmVisitor {
             }
             finalSelect.setSelectBody(finalPlainSelect);
         } else {
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
 
             List<String> SVarsSource = VariableUtils.SVars(iteratorExp.getSource(), this);
             for (String v : SVarsSource) {
@@ -1339,7 +1339,7 @@ public class RobertOCLParser implements RobertStmVisitor {
 
         if (VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if (fVarsSource.isEmpty() && fVarsBody.size() == 1) {
-                finalPlainSelect.setValAsTrue();
+                finalPlainSelect.createTrueValColumn();
 
                 Function count = new Function();
                 count.setName("COUNT");
@@ -1356,7 +1356,7 @@ public class RobertOCLParser implements RobertStmVisitor {
                 bodyWhereExp.setRightExpression(new LongValue(0L));
                 finalPlainSelect.setWhere(bodyWhereExp);
             } else {
-                finalPlainSelect.setValAsTrue();
+                finalPlainSelect.createTrueValColumn();
 
                 String outerVar = VariableUtils.getOuterVariable(iteratorExp);
                 MyIteratorSource outerIter = this.getVisitorContext().stream()
@@ -1454,7 +1454,7 @@ public class RobertOCLParser implements RobertStmVisitor {
             }
             finalSelect.setSelectBody(finalPlainSelect);
         } else {
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
 
             List<String> SVarsSource = VariableUtils.SVars(iteratorExp.getSource(), this);
             for (String v : SVarsSource) {
@@ -1671,7 +1671,7 @@ public class RobertOCLParser implements RobertStmVisitor {
             countRes.setExpression(isNotEqualsZero);
 
             finalPlainSelect.setRes(countRes);
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
         } else {
             finalPlainSelect.setFromItem(tempNotEmptySource);
             Alias aliasTempNotEmptySource = tempNotEmptySource.getAlias();
@@ -1694,7 +1694,7 @@ public class RobertOCLParser implements RobertStmVisitor {
             caseResExpression.setElseExpression(new LongValue(1L));
 
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
 
             List<String> SVarsSource = VariableUtils.SVars(iteratorExp.getSource(), this);
 
@@ -1741,7 +1741,7 @@ public class RobertOCLParser implements RobertStmVisitor {
             countRes.setExpression(isEqualsZero);
 
             finalPlainSelect.setRes(countRes);
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
         } else {
             finalPlainSelect.setFromItem(tempEmptySource);
             Alias aliasTempEmptySource = tempEmptySource.getAlias();
@@ -1764,7 +1764,7 @@ public class RobertOCLParser implements RobertStmVisitor {
             caseResExpression.setElseExpression(new LongValue(0L));
 
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
 
             List<String> SVarsSource = VariableUtils.SVars(iteratorExp.getSource(), this);
 
@@ -1891,7 +1891,7 @@ public class RobertOCLParser implements RobertStmVisitor {
             countRes.setExpression(count);
 
             finalPlainSelect.setRes(countRes);
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
         } else {
             finalPlainSelect.setFromItem(tempSizeSource);
             Alias aliasTempSizeSource = tempSizeSource.getAlias();
@@ -1914,7 +1914,7 @@ public class RobertOCLParser implements RobertStmVisitor {
             caseResExpression.setElseExpression(count);
 
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
-            finalPlainSelect.setValAsTrue();
+            finalPlainSelect.createTrueValColumn();
 
             List<String> SVarsSource = VariableUtils.SVars(iteratorExp.getSource(), this);
 
