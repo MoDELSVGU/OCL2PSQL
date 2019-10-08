@@ -26,12 +26,12 @@ import java.util.List;
 
 import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
-import org.vgu.ocl2psql.ocl.context.DefaultOclContext;
-import org.vgu.ocl2psql.ocl.exception.OclParseException;
-import org.vgu.ocl2psql.ocl.expressions.IteratorSource;
-import org.vgu.ocl2psql.ocl.expressions.OclExpression;
-import org.vgu.ocl2psql.ocl.parse.SimpleParser;
-import org.vgu.ocl2psql.ocl.visitor.OCL2SQLParser;
+import org.vgu.ocl2psql.ocl.roberts.context.DefaultOclContext;
+import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
+import org.vgu.ocl2psql.ocl.roberts.expressions.IteratorSource;
+import org.vgu.ocl2psql.ocl.roberts.expressions.OclExpression;
+import org.vgu.ocl2psql.ocl.roberts.parse.SimpleParser;
+import org.vgu.ocl2psql.parser.RobertOCLParser;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
@@ -41,15 +41,15 @@ import org.vgu.ocl2psql.sql.utils.SQLAsStringUtils;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
 public class OCL2PSQL {
-    private OCL2SQLParser ocl2sqlParser;
+    private RobertOCLParser ocl2sqlParser;
     private Boolean descriptionMode;
     
-    public OCL2SQLParser getOcl2sqlParser() {
+    public RobertOCLParser getOcl2sqlParser() {
         return ocl2sqlParser;
     }
 
     public OCL2PSQL() {
-        ocl2sqlParser = new OCL2SQLParser();
+        ocl2sqlParser = new RobertOCLParser();
         this.setDescriptionMode(false);
     }
     
