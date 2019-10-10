@@ -33,12 +33,12 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.vgu.ocl2psql.main.parser.RobertOCLParser;
 import org.vgu.ocl2psql.ocl.roberts.context.DefaultOclContext;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
 import org.vgu.ocl2psql.ocl.roberts.expressions.IteratorSource;
 import org.vgu.ocl2psql.ocl.roberts.expressions.OclExpression;
-import org.vgu.ocl2psql.ocl.roberts.parse.SimpleParser;
+import org.vgu.ocl2psql.ocl.roberts.parser.RobertOCLParser;
+import org.vgu.ocl2psql.ocl.roberts.parser.RobertOcl2PojoParser;
 
 
 @Ignore
@@ -66,7 +66,7 @@ public class OCL2PSQLDBTest {
 			RobertOCLParser ocl2sql = new RobertOCLParser();
 			ocl2sql.setPlainUMLContext(context);
 			ocl2sql.setVisitorContext(new ArrayList<IteratorSource>());
-			OclExpression oclExp = SimpleParser.parse(exp, new DefaultOclContext());
+			OclExpression oclExp = RobertOcl2PojoParser.parse(exp, new DefaultOclContext());
 			oclExp.accept(ocl2sql);
 			String sql =  ocl2sql.getFinalSelect().toString();
 			Connection con = getConnection(db);

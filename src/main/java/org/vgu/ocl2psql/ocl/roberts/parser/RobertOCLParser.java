@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ***************************************************************************/
 
-package org.vgu.ocl2psql.main.parser;
+package org.vgu.ocl2psql.ocl.roberts.parser;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -177,6 +177,7 @@ public class RobertOCLParser implements RobertStmVisitor {
         Alias aliasSubSelectCurrentVar = new Alias("TEMP_obj");
         tempVar.setAlias(aliasSubSelectCurrentVar);
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.createTrueValColumn();
         genSQLCommentFromOCLExpressionToStatement(propertyCallExp, finalPlainSelect);
         String propertyName = propertyCallExp.getName().substring(propertyCallExp.getName().indexOf(":") + 1,
                 propertyCallExp.getName().length());
@@ -362,6 +363,7 @@ public class RobertOCLParser implements RobertStmVisitor {
     @Override
     public void visit(OperationCallExp operationCallExp) {
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.createTrueValColumn();
         genSQLCommentFromOCLExpressionToStatement(operationCallExp, finalPlainSelect);
 
         if ("allInstances".equals(operationCallExp.getName())) {
@@ -801,6 +803,7 @@ public class RobertOCLParser implements RobertStmVisitor {
     @Override
     public void visit(IteratorExp iteratorExp) {
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.createTrueValColumn();
         genSQLCommentFromOCLExpressionToStatement(iteratorExp, finalPlainSelect);
 
         switch (iteratorExp.kind) {
@@ -919,6 +922,7 @@ public class RobertOCLParser implements RobertStmVisitor {
     @Override
     public void visit(BooleanLiteralExp booleanLiteralExp) {
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.createTrueValColumn();
         genSQLCommentFromOCLExpressionToStatement(booleanLiteralExp, finalPlainSelect);
         ResSelectExpression resExpression = new ResSelectExpression(
                 new LongValue(booleanLiteralExp.isBooleanSymbol() ? "TRUE" : "FALSE"));
@@ -930,6 +934,7 @@ public class RobertOCLParser implements RobertStmVisitor {
     @Override
     public void visit(IntegerLiteralExp integerLiteralExp) {
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.createTrueValColumn();
         genSQLCommentFromOCLExpressionToStatement(integerLiteralExp, finalPlainSelect);
         ResSelectExpression resExpression = new ResSelectExpression(
                 new LongValue(integerLiteralExp.getIntegerSymbol()));
@@ -947,6 +952,7 @@ public class RobertOCLParser implements RobertStmVisitor {
     @Override
     public void visit(StringLiteralExp stringLiteralExp) {
         PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.createTrueValColumn();
         genSQLCommentFromOCLExpressionToStatement(stringLiteralExp, finalPlainSelect);
         ResSelectExpression resExpression = new ResSelectExpression(
                 new StringValue(stringLiteralExp.getStringSymbol()));
@@ -979,6 +985,7 @@ public class RobertOCLParser implements RobertStmVisitor {
         }
         if (iter == null) {
             PlainSelect finalPlainSelect = new PlainSelect();
+            finalPlainSelect.createTrueValColumn();
             ResSelectExpression item = new ResSelectExpression();
             item.setExpression(new Column(variableExp.getReferredVariable().getName()));
             finalPlainSelect.setRes(item);
@@ -1047,6 +1054,7 @@ public class RobertOCLParser implements RobertStmVisitor {
                 tempFlattenSource.setAlias(aliasTempFlattenSource);
 
                 PlainSelect sCollectvB = new PlainSelect();
+                sCollectvB.createTrueValColumn();
                 sCollectvB.setAllColumn();
                 sCollectvB.setFromItem(tempFlattenSource);
 
@@ -1199,6 +1207,7 @@ public class RobertOCLParser implements RobertStmVisitor {
         if (VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if (fVarsSource.isEmpty()) {
                 PlainSelect gBody = new PlainSelect();
+                gBody.createTrueValColumn();
                 gBody.setFromItem(tempSelectBody);
                 gBody.getSelectItems().clear();
                 gBody.addSelectItems(new AllColumns());
@@ -1234,6 +1243,7 @@ public class RobertOCLParser implements RobertStmVisitor {
                 finalPlainSelect.setFromItem(tempGBody);
             } else {
                 PlainSelect gBody = new PlainSelect();
+                gBody.createTrueValColumn();
                 gBody.setFromItem(tempSelectBody);
                 gBody.getSelectItems().clear();
                 gBody.addSelectItems(new AllColumns());
@@ -1406,6 +1416,7 @@ public class RobertOCLParser implements RobertStmVisitor {
                 tempVar.setAlias(aliasTempVar);
 
                 PlainSelect gBody = new PlainSelect();
+                gBody.createTrueValColumn();
                 gBody.setFromItem(tempExistsBody);
                 gBody.getSelectItems().clear();
 
@@ -1611,6 +1622,7 @@ public class RobertOCLParser implements RobertStmVisitor {
                 tempVar.setAlias(aliasTempVar);
 
                 PlainSelect gBody = new PlainSelect();
+                gBody.createTrueValColumn();
                 gBody.setFromItem(tempForAllBody);
 
                 SubSelect tempGBody = new SubSelect();
@@ -1788,6 +1800,7 @@ public class RobertOCLParser implements RobertStmVisitor {
         if (VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if (fVarsSource.isEmpty()) {
                 PlainSelect gBody = new PlainSelect();
+                gBody.createTrueValColumn();
                 gBody.setFromItem(tempSelectBody);
                 gBody.getSelectItems().clear();
                 gBody.addSelectItems(new AllColumns());
@@ -1817,6 +1830,7 @@ public class RobertOCLParser implements RobertStmVisitor {
                 finalPlainSelect.setFromItem(tempGBody);
             } else {
                 PlainSelect gBody = new PlainSelect();
+                gBody.createTrueValColumn();
                 gBody.setFromItem(tempSelectBody);
                 gBody.getSelectItems().clear();
                 gBody.addSelectItems(new AllColumns());

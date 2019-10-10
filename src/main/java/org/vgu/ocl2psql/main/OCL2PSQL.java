@@ -20,17 +20,20 @@ limitations under the License.
 package org.vgu.ocl2psql.main;
 
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.vgu.ocl2psql.main.parser.RobertOCLParser;
+import org.vgu.ocl2psql.ocl.parser.simple.SimpleOclParser;
 import org.vgu.ocl2psql.ocl.roberts.context.DefaultOclContext;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
 import org.vgu.ocl2psql.ocl.roberts.expressions.OclExpression;
-import org.vgu.ocl2psql.ocl.roberts.parse.SimpleParser;
+import org.vgu.ocl2psql.ocl.roberts.parser.RobertOCLParser;
+import org.vgu.ocl2psql.ocl.roberts.parser.RobertOcl2PojoParser;
 import org.vgu.ocl2psql.ocl.type.SingleType;
 import org.vgu.ocl2psql.ocl.type.Type;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
@@ -40,11 +43,19 @@ import org.vgu.ocl2psql.sql.statement.select.TypeSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.utils.SQLAsStringUtils;
 
+import com.vgu.se.jocl.expressions.OclExp;
+import com.vgu.se.jocl.parser.interfaces.Parser;
+import com.vgu.se.jocl.parser.simple.SimpleParser;
+
 import net.sf.jsqlparser.statement.select.SelectItem;
 
 public class OCL2PSQL {
     private RobertOCLParser ocl2sqlParser;
     private Boolean descriptionMode;
+
+    private SimpleOclParser ocl2PsqlParser = new SimpleOclParser();
+    private Parser parser;
+    private String filePath;
     
     public RobertOCLParser getOcl2sqlParser() {
         return ocl2sqlParser;
@@ -57,6 +68,7 @@ public class OCL2PSQL {
     
     public void setPlainUMLContextFromFile(String filePath) throws FileNotFoundException, IOException, ParseException {
         ocl2sqlParser.setPlainUMLContextFromFile(filePath);
+        this.filePath = filePath;
     }
     
     public void setPlainUMLContext(String UMLContext) throws ParseException {
@@ -74,11 +86,31 @@ public class OCL2PSQL {
     }
     
     public Select mapToSQL(String oclExpression) throws OclParseException {
+        
         ocl2sqlParser.resetLevelOfSet();
         ocl2sqlParser.resetVisitorContext();
-        OclExpression exp = SimpleParser.parse(oclExpression, new DefaultOclContext());
+        OclExpression exp = RobertOcl2PojoParser.parse(oclExpression, new DefaultOclContext());
         exp.accept(ocl2sqlParser);
-        return cookFinalStatement(ocl2sqlParser.getFinalSelect());
+        
+        
+        // Begin New parser
+        parser = new SimpleParser();
+        JSONArray ctx = null;
+        try {
+            ctx = (JSONArray) new JSONParser()
+                    .parse(new FileReader(filePath));
+        } catch (ParseException | IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        OclExp newExp = parser.parse(oclExpression, ctx);
+        newExp.accept(ocl2PsqlParser);
+        // End new parser
+
+//        return cookFinalStatement(ocl2sqlParser.getFinalSelect());
+        return cookFinalStatement(ocl2PsqlParser.getSelect());
     }
     
     private Select cookFinalStatement(Select finalStatement) {

@@ -35,147 +35,143 @@ public class OCL2PSQLManualTest {
         OCL2PSQL ocl2psql = new OCL2PSQL();
         File contextModel = new File("./src/main/resources/context-model/CarPerson_context.json");
         ocl2psql.setPlainUMLContextFromFile(contextModel.getAbsolutePath());
-        ocl2psql.setDescriptionMode(true);
+        ocl2psql.setDescriptionMode(false);
         
-        test(ocl2psql, "Car::allInstances()->collect(c|c)");
-        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->collect(p|p.Person:ownedCars)->flatten()->size()=1)");
-        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->select(p|p.Person:name.oclIsUndefined())->size()=0)");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()");
-        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->collect(p|p)->size() = 1)");
-        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color = 'no-color')->size()");
-        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:color <> 'no-color')");
-        test(ocl2psql, "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name = 'no-name'))->size()");
-        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->exists(p|p.Person:name = 'no-name'))");
-        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->forAll(p|p.Person:name = 'no-name'))");
-        
-        test(ocl2psql, "Car::allInstances()");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c)");
+//        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->collect(p|p.Person:ownedCars)->flatten()->size()=1)");
+//        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->select(p|p.Person:name.oclIsUndefined())->size()=0)");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()");
+//        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->collect(p|p)->size() = 1)");
+//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color = 'no-color')->size()");
+//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:color <> 'no-color')");
+//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name = 'no-name'))->size()");
+//        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->exists(p|p.Person:name = 'no-name'))");
+//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->forAll(p|p.Person:name = 'no-name'))");
+//        
+//        test(ocl2psql, "Car::allInstances()");
+//        test(ocl2psql, "true");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()");
+//
+//        test(ocl2psql, "Car::allInstances()->size()");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->size()");
+//        test(ocl2psql, "Person::allInstances()->collect(p|p.Person:ownedCars->size())");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()->size()");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->size()");
+//
+//        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->size() > 0)");
+//        test(ocl2psql, "Person::allInstances()->forAll(p|true)");
+//        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->size() < 10)");
+//        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->forAll(c|c.Car:color = 'no-color'))");
+//        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->exists(c|c.Car:color = 'no-color'))");
+//        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->forAll(c|c.Car:color = 'no-color'))");
+//        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->exists(c|c.Car:color = 'no-color'))");
+//
+//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color = 'no-color')");
+//        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->exists(c|c.Car:color <> 'no-color'))");
+//        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->forAll(c|c.Car:color <> 'no-color'))");
+//
+//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color.oclIsUndefined())");
+//        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->exists(c|c.Car:color.oclIsUndefined()))");
+//
+//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color = 'no-color')->size()");
+//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:color <> 'no-color')");
+//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name = 'no-name'))->size()");
+//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->forAll(p|p.Person:name = 'no-name'))");
+//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name.oclIsUndefined()))->size()");
+//        test(ocl2psql, "Car::allInstances()");
+//        test(ocl2psql, "true");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()");
+//
+//        test(ocl2psql, "Car::allInstances()->size()");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->size()");
+//        test(ocl2psql, "Person::allInstances()->collect(p|p.Person:ownedCars->size())");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()->size()");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->size()");
+//
+//        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->size() > 0)");
+//        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->size() = 10)");
+//        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->size() < 10)");
+//        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->forAll(c|c.Car:color = 'no-color'))");
+//        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->exists(c|c.Car:color = 'no-color'))");
+//        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->forAll(c|c.Car:color = 'no-color'))");
+//        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->exists(c|c.Car:color = 'no-color'))");
+//
+//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color = 'no-color')");
+//        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->exists(c|c.Car:color <> 'no-color'))");
+//        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->forAll(c|c.Car:color <> 'no-color'))");
+//
+//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color.oclIsUndefined())");
+//        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->exists(c|c.Car:color.oclIsUndefined()))");
+//
+//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color = 'no-color')->size()");
+//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:color <> 'no-color')");
+//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name = 'no-name'))->size()");
+//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->forAll(p|p.Person:name = 'no-name'))");
+//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name.oclIsUndefined()))->size()");
+//    
+//        test(ocl2psql, "Car::allInstances()->isEmpty()");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->isEmpty()");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners->isEmpty())");
+//        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->isEmpty())");
+//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->isEmpty())");
+//        
+//        test(ocl2psql, "Car::allInstances()->notEmpty()");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->notEmpty()");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners->notEmpty())");
+//        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->notEmpty())");
+//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->notEmpty())");
+//        
+//        test(ocl2psql, "Car::allInstances()->asSet()");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->asSet()");
+//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners->asSet())->flatten()");
+//
+//        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1.Car:color=c.Car:color)))");
+//        test(ocl2psql, "Car::allInstances()->forAll(c|'blue'=c.Car:color)");
+//        
+//        test(ocl2psql, "self");
+//        test(ocl2psql, "self = caller");
+//        test(ocl2psql, "self.Person:name");
+//        test(ocl2psql, "self.Person:name = 'Hoang'");
+//        test(ocl2psql, "self.Person:ownedCars");
+//        test(ocl2psql, "self.Person:ownedCars->size()");
+//        test(ocl2psql, "self.Person:ownedCars->exists(c|c.Car:color = 'black')");
+//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p = self))");
+//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p.Person:ownedCars->size() < self.Person:ownedCars->size()))");
+//    
+//        test(ocl2psql, "Car::allInstances()");
+//        test(ocl2psql, "Automobile::allInstances()");
+//        test(ocl2psql, "Vehicle::allInstances()");
+//        test(ocl2psql, "Automobile::allInstances()->collect(au|au)");
+//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.Vehicle:category)");
+////            test(ocl2psql, "Automobile::allInstances()->collect(au|au.Car:color)");
+//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Automobile))");
+//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Car))");
+//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Person))");
+//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Vehicle))");
+//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsKindOf(Automobile))");
+//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsKindOf(Car))");
+//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsKindOf(Person))");
+//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsKindOf(Vehicle))");
+//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Automobile))");
+//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Car))");
+//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Bus))");
+////            test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Person))");
+////            test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Vehicle))");
+//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Car).Car:color)");
         test(ocl2psql, "true");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()");
 
-        test(ocl2psql, "Car::allInstances()->size()");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->size()");
-        test(ocl2psql, "Person::allInstances()->collect(p|p.Person:ownedCars->size())");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()->size()");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->size()");
-
-        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->size() > 0)");
-        test(ocl2psql, "Person::allInstances()->forAll(p|true)");
-        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->size() < 10)");
-        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->forAll(c|c.Car:color = 'no-color'))");
-        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->exists(c|c.Car:color = 'no-color'))");
-        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->forAll(c|c.Car:color = 'no-color'))");
-        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->exists(c|c.Car:color = 'no-color'))");
-
-        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color = 'no-color')");
-        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->exists(c|c.Car:color <> 'no-color'))");
-        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->forAll(c|c.Car:color <> 'no-color'))");
-
-        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color.oclIsUndefined())");
-        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->exists(c|c.Car:color.oclIsUndefined()))");
-
-        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color = 'no-color')->size()");
-        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:color <> 'no-color')");
-        test(ocl2psql, "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name = 'no-name'))->size()");
-        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->forAll(p|p.Person:name = 'no-name'))");
-        test(ocl2psql, "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name.oclIsUndefined()))->size()");
-        test(ocl2psql, "Car::allInstances()");
-        test(ocl2psql, "true");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()");
-
-        test(ocl2psql, "Car::allInstances()->size()");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->size()");
-        test(ocl2psql, "Person::allInstances()->collect(p|p.Person:ownedCars->size())");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()->size()");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->size()");
-
-        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->size() > 0)");
-        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->size() = 10)");
-        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->size() < 10)");
-        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->forAll(c|c.Car:color = 'no-color'))");
-        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->exists(c|c.Car:color = 'no-color'))");
-        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->forAll(c|c.Car:color = 'no-color'))");
-        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->exists(c|c.Car:color = 'no-color'))");
-
-        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color = 'no-color')");
-        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->exists(c|c.Car:color <> 'no-color'))");
-        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->forAll(c|c.Car:color <> 'no-color'))");
-
-        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color.oclIsUndefined())");
-        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->exists(c|c.Car:color.oclIsUndefined()))");
-
-        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color = 'no-color')->size()");
-        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:color <> 'no-color')");
-        test(ocl2psql, "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name = 'no-name'))->size()");
-        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->forAll(p|p.Person:name = 'no-name'))");
-        test(ocl2psql, "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name.oclIsUndefined()))->size()");
-    
-        test(ocl2psql, "Car::allInstances()->isEmpty()");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->isEmpty()");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners->isEmpty())");
-        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->isEmpty())");
-        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->isEmpty())");
-        
-        test(ocl2psql, "Car::allInstances()->notEmpty()");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->notEmpty()");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners->notEmpty())");
-        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->notEmpty())");
-        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->notEmpty())");
-        
-        test(ocl2psql, "Car::allInstances()->asSet()");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->asSet()");
-        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners->asSet())->flatten()");
-
-        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1.Car:color=c.Car:color)))");
-        test(ocl2psql, "Car::allInstances()->forAll(c|'blue'=c.Car:color)");
-        
-        ocl2psql.setContextualType("Car");
-        
-        test(ocl2psql, "self");
-        test(ocl2psql, "self = caller");
-        
-        ocl2psql.setContextualType("Person");
-        test(ocl2psql, "self.Person:name");
-        test(ocl2psql, "self.Person:name = 'Hoang'");
-        test(ocl2psql, "self.Person:ownedCars");
-        test(ocl2psql, "self.Person:ownedCars->size()");
-        test(ocl2psql, "self.Person:ownedCars->exists(c|c.Car:color = 'black')");
-        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p = self))");
-        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p.Person:ownedCars->size() < self.Person:ownedCars->size()))");
-    
-        test(ocl2psql, "Car::allInstances()");
-        test(ocl2psql, "Automobile::allInstances()");
-        test(ocl2psql, "Vehicle::allInstances()");
-        test(ocl2psql, "Automobile::allInstances()->collect(au|au)");
-        test(ocl2psql, "Automobile::allInstances()->collect(au|au.Vehicle:category)");
-//            test(ocl2psql, "Automobile::allInstances()->collect(au|au.Car:color)");
-        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Automobile))");
-        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Car))");
-        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Person))");
-        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Vehicle))");
-        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsKindOf(Automobile))");
-        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsKindOf(Car))");
-        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsKindOf(Person))");
-        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsKindOf(Vehicle))");
-        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Automobile))");
-        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Car))");
-        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Bus))");
-//            test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Person))");
-//            test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Vehicle))");
-        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Car).Car:color)");
     }
 
     private static void test(OCL2PSQL ocl2psql, String oclExp) throws OclParseException {
-        System.out.println(oclExp);
         String finalStatementWithDescription = ocl2psql.mapToString(oclExp);
         System.out.println(finalStatementWithDescription);
-        System.out.println();
     }
 }

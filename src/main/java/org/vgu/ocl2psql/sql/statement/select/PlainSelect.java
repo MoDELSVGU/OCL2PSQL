@@ -15,7 +15,6 @@ public class PlainSelect extends net.sf.jsqlparser.statement.select.PlainSelect 
     
     public PlainSelect() {
         super();
-        this.createTrueValColumn();
     }
     
     public void setType(TypeSelectExpression type) {

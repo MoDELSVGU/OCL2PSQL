@@ -17,7 +17,7 @@ limitations under the License.
 ***************************************************************************/
 
 
-package org.vgu.ocl2psql.ocl.roberts.parse;
+package org.vgu.ocl2psql.ocl.roberts.parser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +47,7 @@ import org.vgu.ocl2psql.ocl.roberts.expressions.TypeExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.Variable;
 import org.vgu.ocl2psql.ocl.roberts.expressions.VariableExp;
 
-public class SimpleParser {
+public class RobertOcl2PojoParser {
 
     private static String trimBothSides(String input) {
         while (input.startsWith(" "))

@@ -41,6 +41,7 @@ public class MyIteratorSource extends IteratorSource{
             PlainSelect selectBody = (PlainSelect) statement.getSelectBody();
             if(selectBody.getFromItem() instanceof Table) {
                 PlainSelect finalPlainSelect = new PlainSelect();
+                finalPlainSelect.createTrueValColumn();
                 finalPlainSelect.getSelectItems().clear();
                 for(SelectItem item : selectBody.getSelectItems()) {
                     finalPlainSelect.addSelectItems(item);
@@ -68,6 +69,7 @@ public class MyIteratorSource extends IteratorSource{
                 Alias temp_dmn = new Alias("TEMP_dmn");
                 dmn.setAlias(temp_dmn);
                 PlainSelect finalPlainSelect = new PlainSelect();
+                finalPlainSelect.createTrueValColumn();
                 
                 VarSelectExpression varSelectExpression = new VarSelectExpression(this.getIterator().getName());
                 varSelectExpression.setRefExpression(new Column(temp_dmn.getName().concat(".res")));

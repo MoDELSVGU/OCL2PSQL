@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import org.vgu.ocl2psql.main.parser.RobertOCLParser;
 import org.vgu.ocl2psql.ocl.roberts.expressions.IteratorExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.IteratorKind;
 import org.vgu.ocl2psql.ocl.roberts.expressions.IteratorSource;
@@ -31,6 +30,7 @@ import org.vgu.ocl2psql.ocl.roberts.expressions.OperationCallExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.PropertyCallExp;
 import org.vgu.ocl2psql.ocl.roberts.expressions.Variable;
 import org.vgu.ocl2psql.ocl.roberts.expressions.VariableExp;
+import org.vgu.ocl2psql.ocl.roberts.parser.RobertOCLParser;
 import org.vgu.ocl2psql.ocl.roberts.visitor.RobertStmVisitor;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.RefSelectExpression;
