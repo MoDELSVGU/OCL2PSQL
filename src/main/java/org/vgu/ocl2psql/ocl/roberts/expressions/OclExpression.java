@@ -32,5 +32,16 @@ public abstract class OclExpression implements RobertStmVisitable{
             return type;
         return ((CollectionType<?>) type).getElementType();
     }
+    
+    public Type getLeafType() {
+        return getLeafType(type);
+    }
+
+    private Type getLeafType(Type type) {
+        if(type == null || type instanceof SingleType)
+            return type;
+        else
+            return getLeafType(((CollectionType<?>) type).getElementType());
+    }
 
 }

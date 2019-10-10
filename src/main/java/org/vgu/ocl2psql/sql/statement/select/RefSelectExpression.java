@@ -21,8 +21,20 @@ import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
 public class RefSelectExpression extends SelectExpressionItem{
+    
+    private String variableName;
+    
     public RefSelectExpression(String variableName) {
         super();
+        this.variableName = variableName;
         super.setAlias(new Alias("ref_".concat(variableName)));
+    }
+
+    public String getVariableName() {
+        return variableName;
+    }
+
+    public void setVariableName(String variableName) {
+        this.variableName = variableName;
     }
 }

@@ -1,9 +1,12 @@
 package org.vgu.ocl2psql.ocl.roberts.expressions;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.vgu.ocl2psql.ocl.roberts.utils.VariableUtils;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
+import org.vgu.ocl2psql.sql.statement.select.RefSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 import org.vgu.ocl2psql.sql.statement.select.SubSelect;
@@ -17,15 +20,19 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 
 public class MyIteratorSource extends IteratorSource{
     
-    private Select sourceWithoutIter;
     private OclExpression sourceExpression;
     
     public Select getSourceWithoutIter() {
-        return sourceWithoutIter;
-    }
-
-    public void setSourceWithoutIter(Select sourceWithoutIter) {
-        this.sourceWithoutIter = sourceWithoutIter;
+        Select newSelect = new Select();
+        newSelect.setSelectBody(this.getSource().getSelectBody());
+        PlainSelect newPlainSelect = (PlainSelect) newSelect.getSelectBody();
+        List<SelectItem> items = newPlainSelect.getSelectItems().stream()
+                .filter(i -> !(i instanceof RefSelectExpression 
+                        && this.getIterator().getName().equals(((RefSelectExpression) i).getVariableName())))
+                .collect(Collectors.toList());
+        newPlainSelect.getSelectItems().clear();
+        newPlainSelect.getSelectItems().addAll(items);
+        return newSelect;
     }
 
     @Override
@@ -52,7 +59,6 @@ public class MyIteratorSource extends IteratorSource{
                 
                 Select finalSelectWithoutIter = new Select();
                 finalSelectWithoutIter.setSelectBody(statement.getSelectBody());
-                this.setSourceWithoutIter(finalSelectWithoutIter);
                 super.setSource(finalSelect);
                 return;
             }
@@ -78,13 +84,11 @@ public class MyIteratorSource extends IteratorSource{
                 
                 Select finalSelectWithoutIter = new Select();
                 finalSelectWithoutIter.setSelectBody(statement.getSelectBody());
-                this.setSourceWithoutIter(finalSelectWithoutIter);
                 super.setSource(finalSelect);
                 return;
             }
         }
         super.setSource(statement);
-        this.setSourceWithoutIter(statement);
     }
 
     public OclExpression getSourceExpression() {

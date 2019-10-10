@@ -8,9 +8,6 @@
  */
 package org.vgu.ocl2psql.ocl.roberts.expressions;
 
-import org.vgu.ocl2psql.ocl.roberts.context.OclContext;
-import org.vgu.ocl2psql.ocl.roberts.exception.OclEvaluationException;
-
 /**
  * Class Variable
  */

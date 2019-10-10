@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
@@ -93,6 +94,8 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.GroupByElement;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
 
 public class RobertOCLParser implements RobertStmVisitor {
     private List<IteratorSource> context = new LinkedList<IteratorSource>();
@@ -100,6 +103,30 @@ public class RobertOCLParser implements RobertStmVisitor {
     private int levelOfSets = 0;
     private Select finalSelect = new Select();
     private OclExpressionDeParser deParser = new OclExpressionDeParser();
+    private MyIteratorSource self;
+    private Type contextualType;
+    
+    public RobertOCLParser() {
+        createSelfVariable();
+        context.add(self);
+    }
+
+    private void createSelfVariable() {
+        self = new MyIteratorSource();
+        PlainSelect finalPlainSelect = new PlainSelect();
+        finalPlainSelect.createTrueValColumn();
+        ResSelectExpression item = new ResSelectExpression();
+        item.setExpression(new Column("self"));
+        finalPlainSelect.setRes(item);
+        RefSelectExpression ref = new RefSelectExpression("self");
+        ref.setExpression(new Column("self"));
+        finalPlainSelect.addSelectItems(ref);
+        Select finalSelect = new Select();
+        finalSelect.setSelectBody(finalPlainSelect);
+        self.setSource(finalSelect);
+        self.setIterator(new Variable("self"));
+        setContextualTypeToSelf();
+    }
     
     public List<IteratorSource> getVisitorContext() {
         return this.context;
@@ -156,11 +183,12 @@ public class RobertOCLParser implements RobertStmVisitor {
         String propertyClass = propertyCallExp.getName().substring(0, propertyCallExp.getName().indexOf(":"));
 
         Type varType = propertyCallExp.getSource().getType();
-        
-        if(!UMLContextUtils.isSuperClassOf(this.getPlainUMLContext(), propertyClass, Optional.ofNullable(varType).map(Type::getTypeName).orElse(null))) {
+
+        if (!UMLContextUtils.isSuperClassOf(this.getPlainUMLContext(), propertyClass,
+                Optional.ofNullable(varType).map(Type::getTypeName).orElse(null))) {
             throw new OclConformanceException("Invalid operation on type ".concat(varType.getTypeName()));
         }
-        
+
         ResSelectExpression resSelectExpression = new ResSelectExpression();
         resSelectExpression.setExpression(new Column(propertyName));
 
@@ -170,24 +198,24 @@ public class RobertOCLParser implements RobertStmVisitor {
 
             String tableRefColumn = propertyClass.concat(".").concat(propertyClass).concat("_id");
 
-            String propertyType = UMLContextUtils.getAttributeType(this.getPlainUMLContext(), propertyClass, propertyName);
+            String propertyType = UMLContextUtils.getAttributeType(this.getPlainUMLContext(), propertyClass,
+                    propertyName);
             propertyCallExp.setType(new SingleType(propertyType));
             finalPlainSelect.setType(new TypeSelectExpression(propertyCallExp));
-            
+
             table.setName(propertyClass);
-            
+
             if (VariableUtils.isSourceAClassAllInstances(tempVar.getSelectBody(), propertyClass)) {
                 finalPlainSelect.setRes(resSelectExpression);
                 finalPlainSelect.setFromItem(table);
                 VarSelectExpression newVar = new VarSelectExpression(currentVariable.getName());
                 newVar.setRefExpression(new Column(table.getName().concat("_id")));
                 finalPlainSelect.addVar(newVar);
-            }
-            else {
+            } else {
                 BinaryExpression bexpr = new EqualsTo();
                 bexpr.setLeftExpression(new Column(tableRefColumn));
-                bexpr.setRightExpression(
-                        new Column(aliasSubSelectCurrentVar.getName().concat(".ref_").concat(currentVariable.getName())));
+                bexpr.setRightExpression(new Column(
+                        aliasSubSelectCurrentVar.getName().concat(".ref_").concat(currentVariable.getName())));
 
                 BinaryExpression varEx = new EqualsTo();
                 varEx.setLeftExpression(new Column(aliasSubSelectCurrentVar.getName().concat(".val")));
@@ -220,8 +248,10 @@ public class RobertOCLParser implements RobertStmVisitor {
             String assocClass = UMLContextUtils.getAssociation(this.getPlainUMLContext(), propertyClass, propertyName);
             String oppositeEnd = UMLContextUtils.getAssociationOpposite(this.getPlainUMLContext(), propertyClass,
                     propertyName);
-            
-            String oppositeClassName = UMLContextUtils.getAssociationOppositeClassName(this.getPlainUMLContext(), assocClass, propertyClass);
+
+            String oppositeClassName = UMLContextUtils.getAssociationOppositeClassName(this.getPlainUMLContext(),
+                    assocClass, propertyClass);
+            //TODO: This is working because we flatten every single time.
             propertyCallExp.setType(new SingleType(oppositeClassName));
 
             table.setName(assocClass);
@@ -249,7 +279,7 @@ public class RobertOCLParser implements RobertStmVisitor {
                 caseValExpression.setWhenClauses(Arrays.asList(whenValClause));
                 caseValExpression.setElseExpression(new LongValue(1L));
                 finalPlainSelect.setVal(new ValSelectExpression(caseValExpression));
-                
+
                 CaseExpression caseTypeExpression = new CaseExpression();
                 WhenClause whenTypeClause = new WhenClause();
                 whenTypeClause.setWhenExpression(isOppEndNull);
@@ -257,18 +287,17 @@ public class RobertOCLParser implements RobertStmVisitor {
                 caseTypeExpression.setWhenClauses(Arrays.asList(whenTypeClause));
                 caseTypeExpression.setElseExpression(new StringValue(propertyCallExp.getType().getTypeName()));
                 finalPlainSelect.setType(new TypeSelectExpression(caseTypeExpression));
-                
 
                 VarSelectExpression newVar = new VarSelectExpression(currentVariable.getName());
                 newVar.setRefExpression(new Column(tableName.concat("_id")));
                 finalPlainSelect.addVar(newVar);
             }
-            
+
             else {
                 BinaryExpression bexpr = new EqualsTo();
                 bexpr.setLeftExpression(new Column(assocClass.concat(".").concat(oppositeEnd)));
-                bexpr.setRightExpression(
-                        new Column(aliasSubSelectCurrentVar.getName().concat(".ref_").concat(currentVariable.getName())));
+                bexpr.setRightExpression(new Column(
+                        aliasSubSelectCurrentVar.getName().concat(".ref_").concat(currentVariable.getName())));
 
                 BinaryExpression varEx = new EqualsTo();
                 varEx.setLeftExpression(new Column(aliasSubSelectCurrentVar.getName().concat(".val")));
@@ -284,7 +313,7 @@ public class RobertOCLParser implements RobertStmVisitor {
                 whenValClause.setThenExpression(new LongValue(0L));
                 caseValExpression.setWhenClauses(Arrays.asList(whenValClause));
                 caseValExpression.setElseExpression(new LongValue(1L));
-                
+
                 CaseExpression caseTypeExpression = new CaseExpression();
                 WhenClause whenTypeClause = new WhenClause();
                 whenTypeClause.setWhenExpression(isOppEndNull);
@@ -292,7 +321,6 @@ public class RobertOCLParser implements RobertStmVisitor {
                 caseTypeExpression.setWhenClauses(Arrays.asList(whenTypeClause));
                 caseTypeExpression.setElseExpression(new StringValue(propertyCallExp.getType().getTypeName()));
                 finalPlainSelect.setType(new TypeSelectExpression(caseTypeExpression));
-                
 
                 Join join = new Join();
                 join.setLeft(true);
@@ -384,15 +412,14 @@ public class RobertOCLParser implements RobertStmVisitor {
             finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasSource.getName().concat(".val"))));
 
             finalPlainSelect.setType(new TypeSelectExpression(operationCallExp));
-            
+
             List<String> sVarsSource = VariableUtils.SVars(operationCallExp.getSource(), this);
             for (String s : sVarsSource) {
                 VarSelectExpression varExp = new VarSelectExpression(s);
                 varExp.setRefExpression(new Column(aliasSource.getName().concat(".ref_").concat(s)));
                 finalPlainSelect.addVar(varExp);
             }
-        }
-        else if("oclIsTypeOf".equals(operationCallExp.getName())) {
+        } else if ("oclIsTypeOf".equals(operationCallExp.getName())) {
             String classType = ((VariableExp) operationCallExp.getArguments().get(0)).getReferredVariable().getName();
             operationCallExp.setType(new SingleType("Boolean"));
             operationCallExp.getSource().accept(this);
@@ -401,13 +428,13 @@ public class RobertOCLParser implements RobertStmVisitor {
             tempSource.setSelectBody(select.getSelectBody());
             Alias aliasSource = new Alias("TEMP_src");
             tempSource.setAlias(aliasSource);
-            
+
             finalPlainSelect.setFromItem(tempSource);
-            
+
             BinaryExpression valEq = new EqualsTo();
             valEq.setLeftExpression(new Column(aliasSource.getName().concat(".val")));
             valEq.setRightExpression(new LongValue(0L));
-            
+
             CaseExpression caseResExpression = new CaseExpression();
             WhenClause whenResClause = new WhenClause();
             whenResClause.setWhenExpression(valEq);
@@ -415,65 +442,64 @@ public class RobertOCLParser implements RobertStmVisitor {
             caseResExpression.setWhenClauses(Arrays.asList(whenResClause));
 
             BinaryExpression typeEq = new EqualsTo();
-            typeEq.setLeftExpression( new Column(aliasSource.getName().concat(".type")) );
-            typeEq.setRightExpression( new StringValue(classType) );
+            typeEq.setLeftExpression(new Column(aliasSource.getName().concat(".type")));
+            typeEq.setRightExpression(new StringValue(classType));
             caseResExpression.setElseExpression(typeEq);
 
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
-            
+
             finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasSource.getName().concat(".val"))));
-            
+
             finalPlainSelect.setType(new TypeSelectExpression(operationCallExp));
-            
+
             List<String> sVarsSource = VariableUtils.SVars(operationCallExp.getSource(), this);
-            for(String s : sVarsSource) {
+            for (String s : sVarsSource) {
                 VarSelectExpression varExp = new VarSelectExpression(s);
                 varExp.setRefExpression(new Column(aliasSource.getName().concat(".ref_").concat(s)));
                 finalPlainSelect.addVar(varExp);
             }
-        }
-        else if("oclIsKindOf".equals(operationCallExp.getName())) {
+        } else if ("oclIsKindOf".equals(operationCallExp.getName())) {
             String classType = ((VariableExp) operationCallExp.getArguments().get(0)).getReferredVariable().getName();
             operationCallExp.setType(new SingleType("Boolean"));
-            operationCallExp.getSource().accept(this);;
+            operationCallExp.getSource().accept(this);
+            ;
             Select select = this.getFinalSelect();
             SubSelect tempSource = new SubSelect();
             tempSource.setSelectBody(select.getSelectBody());
             Alias aliasSource = new Alias("TEMP_src");
             tempSource.setAlias(aliasSource);
-            
+
             Type sourceType = operationCallExp.getSource().getType();
-            boolean isKindOf = UMLContextUtils.isSuperClassOf(this.getPlainUMLContext(), classType, Optional.ofNullable(sourceType).map(Type::getTypeName).orElse(null));
-            
+            boolean isKindOf = UMLContextUtils.isSuperClassOf(this.getPlainUMLContext(), classType,
+                    Optional.ofNullable(sourceType).map(Type::getTypeName).orElse(null));
+
             finalPlainSelect.setFromItem(tempSource);
-            
+
             BinaryExpression valEq = new EqualsTo();
             valEq.setLeftExpression(new Column(aliasSource.getName().concat(".val")));
             valEq.setRightExpression(new LongValue(0L));
-            
+
             CaseExpression caseResExpression = new CaseExpression();
             WhenClause whenResClause = new WhenClause();
             whenResClause.setWhenExpression(valEq);
             whenResClause.setThenExpression(new NullValue());
             caseResExpression.setWhenClauses(Arrays.asList(whenResClause));
 
-            caseResExpression.setElseExpression(
-                    new LongValue(isKindOf? "TRUE" : "FALSE"));
+            caseResExpression.setElseExpression(new LongValue(isKindOf ? "TRUE" : "FALSE"));
 
             finalPlainSelect.setRes(new ResSelectExpression(caseResExpression));
-            
+
             finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasSource.getName().concat(".val"))));
-            
+
             finalPlainSelect.setType(new TypeSelectExpression(operationCallExp));
-            
+
             List<String> sVarsSource = VariableUtils.SVars(operationCallExp.getSource(), this);
-            for(String s : sVarsSource) {
+            for (String s : sVarsSource) {
                 VarSelectExpression varExp = new VarSelectExpression(s);
                 varExp.setRefExpression(new Column(aliasSource.getName().concat(".ref_").concat(s)));
                 finalPlainSelect.addVar(varExp);
             }
-        }
-        else if("oclAsType".equals(operationCallExp.getName())) {
+        } else if ("oclAsType".equals(operationCallExp.getName())) {
             String classType = ((VariableExp) operationCallExp.getArguments().get(0)).getReferredVariable().getName();
             operationCallExp.getSource().accept(this);
             Select select = this.getFinalSelect();
@@ -481,37 +507,36 @@ public class RobertOCLParser implements RobertStmVisitor {
             tempSource.setSelectBody(select.getSelectBody());
             Alias aliasSource = new Alias("TEMP_src");
             tempSource.setAlias(aliasSource);
-            
+
             Type sourceType = operationCallExp.getSource().getType();
-            boolean isKindOf = UMLContextUtils.isSuperClassOf(this.getPlainUMLContext(), sourceType.getTypeName(), classType);
-            
-            if(!isKindOf) {
-                throw new OclConformanceException(sourceType.getTypeName().concat(" does not conform to ").concat(classType));
-            }
-            else {
+            boolean isKindOf = UMLContextUtils.isSuperClassOf(this.getPlainUMLContext(), sourceType.getTypeName(),
+                    classType);
+
+            if (!isKindOf) {
+                throw new OclConformanceException(
+                        sourceType.getTypeName().concat(" does not conform to ").concat(classType));
+            } else {
                 operationCallExp.setType(new SingleType(classType));
                 finalPlainSelect.setFromItem(tempSource);
-                
+
                 BinaryExpression valEq = new EqualsTo();
                 valEq.setLeftExpression(new Column(aliasSource.getName().concat(".val")));
                 valEq.setRightExpression(new LongValue(0L));
-                
+
                 finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasSource.getName().concat(".res"))));
-                
+
                 finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasSource.getName().concat(".val"))));
-                
+
                 CaseExpression caseTypeExpression = new CaseExpression();
                 WhenClause whenTypeClause = new WhenClause();
                 whenTypeClause.setWhenExpression(valEq);
                 whenTypeClause.setThenExpression(new NullValue());
                 caseTypeExpression.setWhenClauses(Arrays.asList(whenTypeClause));
                 caseTypeExpression.setElseExpression(new StringValue(classType));
-                
+
                 finalPlainSelect.setType(new TypeSelectExpression(caseTypeExpression));
-                
-                if(! (classType.equals("String") 
-                        || classType.equals("Integer") 
-                        || classType.equals("Boolean")
+
+                if (!(classType.equals("String") || classType.equals("Integer") || classType.equals("Boolean")
                         || classType.equals(sourceType.getTypeName()))) {
                     Join join = new Join();
                     join.setRightItem(new Table(classType));
@@ -523,16 +548,15 @@ public class RobertOCLParser implements RobertStmVisitor {
                     join.setOnExpression(idEqual);
                     finalPlainSelect.setJoins(Arrays.asList(join));
                 }
-                
+
                 List<String> sVarsSource = VariableUtils.SVars(operationCallExp.getSource(), this);
-                for(String s : sVarsSource) {
+                for (String s : sVarsSource) {
                     VarSelectExpression varExp = new VarSelectExpression(s);
                     varExp.setRefExpression(new Column(aliasSource.getName().concat(".ref_").concat(s)));
                     finalPlainSelect.addVar(varExp);
                 }
             }
-        }
-        else {
+        } else {
             operationCallExp.setType(new SingleType("Boolean"));
             SubSelect tempLeft = new SubSelect();
             operationCallExp.getSource().accept(this);
@@ -552,7 +576,7 @@ public class RobertOCLParser implements RobertStmVisitor {
             List<String> sVarsRight = VariableUtils.SVars(operationCallExp.getArguments().get(0), this);
 
             finalPlainSelect.setType(new TypeSelectExpression(operationCallExp));
-            
+
             if (fVarsLeft.isEmpty() && fVarsRight.isEmpty()) {
                 ResSelectExpression resExp = new ResSelectExpression();
                 BinaryExpression eqExp = generateBinaryExpression(operationCallExp.getName(),
@@ -778,7 +802,7 @@ public class RobertOCLParser implements RobertStmVisitor {
     public void visit(IteratorExp iteratorExp) {
         PlainSelect finalPlainSelect = new PlainSelect();
         genSQLCommentFromOCLExpressionToStatement(iteratorExp, finalPlainSelect);
-        
+
         switch (iteratorExp.kind) {
         case isEmpty:
             emptyMap(iteratorExp, finalPlainSelect);
@@ -969,13 +993,19 @@ public class RobertOCLParser implements RobertStmVisitor {
             newFreeIteratorSource.setIterator(new Variable(var_name));
             newFreeIteratorSource.setSource(finalSelect);
             this.getVisitorContext().add(newFreeIteratorSource);
+            genSQLCommentFromOCLExpressionToStatement(variableExp, finalPlainSelect);
+            return;
+        } else {
+            if("self".equals(var_name)) {
+                variableExp.setType(this.contextualType);
+            } else {
+                variableExp.setType(iter.getSourceExpression().getElementType());
+            }
+            finalSelect.setSelectBody(iter.getSource().getSelectBody());
+            PlainSelect finalPlainSelect = (PlainSelect) finalSelect.getSelectBody();
+            genSQLCommentFromOCLExpressionToStatement(variableExp, finalPlainSelect);
             return;
         }
-        variableExp.setType(iter.getSourceExpression().getElementType());
-        finalSelect.setSelectBody(iter.getSource().getSelectBody());
-        PlainSelect finalPlainSelect = (PlainSelect) finalSelect.getSelectBody();
-        genSQLCommentFromOCLExpressionToStatement(variableExp, finalPlainSelect);
-        return;
     }
 
     public Select getFinalSelect() {
@@ -1070,7 +1100,7 @@ public class RobertOCLParser implements RobertStmVisitor {
                 finalPlainSelect.setRes(new ResSelectExpression(caseResVExpression));
                 finalPlainSelect.setVal(new ValSelectExpression(caseValVExpression));
                 finalPlainSelect.setType(new TypeSelectExpression(caseTypeExpression));
-                
+
                 List<String> sVarsSource = VariableUtils.SVars(iteratorExp.getSource(), this);
                 BinaryExpression onCondition = null;
 
@@ -1092,11 +1122,11 @@ public class RobertOCLParser implements RobertStmVisitor {
                     }
                 }
                 join.setOnExpression(onCondition);
-                
+
                 iteratorExp.setType(iteratorExp.getSource().getType());
 
                 this.decreaseLevelOfSet();
-                
+
             }
             finalSelect.setSelectBody(finalPlainSelect);
             return;
@@ -1193,7 +1223,7 @@ public class RobertOCLParser implements RobertStmVisitor {
                         new Column(aliasTempGBody.getName().concat(".ref_").concat(currentIter))));
                 finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasTempGBody.getName().concat(".val"))));
                 finalPlainSelect.setType(new TypeSelectExpression(iteratorExp.getSource()));
-                
+
                 List<String> SVarsSource = VariableUtils.SVars(iteratorExp.getSource(), this);
                 for (String v : SVarsSource) {
                     VarSelectExpression newVar = new VarSelectExpression(v);
@@ -1235,13 +1265,14 @@ public class RobertOCLParser implements RobertStmVisitor {
                 caseValExpression.setWhenClauses(Arrays.asList(whenValClause));
                 caseValExpression.setElseExpression(new LongValue(1L));
                 finalPlainSelect.setVal(new ValSelectExpression(caseValExpression));
-                
+
                 CaseExpression caseTypeExpression = new CaseExpression();
                 WhenClause whenTypeClause = new WhenClause();
                 whenTypeClause.setWhenExpression(caseBinExp);
                 whenTypeClause.setThenExpression(new StringValue("EmptyCol"));
                 caseTypeExpression.setWhenClauses(Arrays.asList(whenTypeClause));
-                caseTypeExpression.setElseExpression(new StringValue(iteratorExp.getSource().getElementType().getTypeName()));
+                caseTypeExpression
+                        .setElseExpression(new StringValue(iteratorExp.getSource().getElementType().getTypeName()));
                 finalPlainSelect.setType(new TypeSelectExpression(caseTypeExpression));
 
                 BinaryExpression onCondition = new EqualsTo();
@@ -1307,7 +1338,7 @@ public class RobertOCLParser implements RobertStmVisitor {
         finalPlainSelect.setRes(new ResSelectExpression(new Column("TEMP_src.res")));
         finalPlainSelect.setVal(new ValSelectExpression(new Column("TEMP_src.val")));
         finalPlainSelect.setType(new TypeSelectExpression(new Column("TEMP_src.type")));
-        
+
         iteratorExp.setType(iteratorExp.getSource().getType());
     }
 
@@ -1547,7 +1578,7 @@ public class RobertOCLParser implements RobertStmVisitor {
         List<String> fVarsSource = VariableUtils.FVars(iteratorExp.getSource());
         List<String> fVarsBody = VariableUtils.FVars(iteratorExp.getBody());
         finalPlainSelect.setType(new TypeSelectExpression(iteratorExp));
-        
+
         if (VariableUtils.isVariableOf(fVarsBody, currentIter)) {
             if (fVarsSource.isEmpty() && fVarsBody.size() == 1) {
                 finalPlainSelect.createTrueValColumn();
@@ -1775,7 +1806,7 @@ public class RobertOCLParser implements RobertStmVisitor {
                         new Column(aliasTempGBody.getName().concat(".ref_").concat(currentIter))));
                 finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasTempGBody.getName().concat(".val"))));
                 finalPlainSelect.setType(new TypeSelectExpression(iteratorExp.getSource()));
-                
+
                 List<String> SVarsSource = VariableUtils.SVars(iteratorExp.getSource(), this);
                 for (String v : SVarsSource) {
                     VarSelectExpression newVar = new VarSelectExpression(v);
@@ -1817,13 +1848,14 @@ public class RobertOCLParser implements RobertStmVisitor {
                 caseValExpression.setWhenClauses(Arrays.asList(whenValClause));
                 caseValExpression.setElseExpression(new LongValue(1L));
                 finalPlainSelect.setVal(new ValSelectExpression(caseValExpression));
-                
+
                 CaseExpression caseTypeExpression = new CaseExpression();
                 WhenClause whenTypeClause = new WhenClause();
                 whenTypeClause.setWhenExpression(caseBinExp);
                 whenTypeClause.setThenExpression(new StringValue("EmptyCol"));
                 caseTypeExpression.setWhenClauses(Arrays.asList(whenTypeClause));
-                caseTypeExpression.setElseExpression(new StringValue(iteratorExp.getSource().getElementType().getTypeName()));
+                caseTypeExpression
+                        .setElseExpression(new StringValue(iteratorExp.getSource().getElementType().getTypeName()));
                 finalPlainSelect.setType(new TypeSelectExpression(caseTypeExpression));
 
                 BinaryExpression onCondition = new EqualsTo();
@@ -2038,11 +2070,11 @@ public class RobertOCLParser implements RobertStmVisitor {
         tempCollectBody.setSelectBody(this.getFinalSelect().getSelectBody());
         Alias aliasTempCollectBody = new Alias("TEMP_body");
         tempCollectBody.setAlias(aliasTempCollectBody);
-        
+
         iteratorExp.setType(iteratorExp.getBody().getType());
 
         String currentIter = iteratorExp.getIterator().getName();
-        
+
         @SuppressWarnings("unused")
         List<String> fVarsSource = VariableUtils.FVars(iteratorExp.getSource());
         List<String> fVarsBody = VariableUtils.FVars(iteratorExp.getBody());
@@ -2051,7 +2083,8 @@ public class RobertOCLParser implements RobertStmVisitor {
             finalPlainSelect.setRes(
                     new ResSelectExpression(new Column(aliasTempCollectBody.getName().concat(".").concat("res"))));
             finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasTempCollectBody.getName().concat(".val"))));
-            finalPlainSelect.setType(new TypeSelectExpression(new Column(aliasTempCollectBody.getName().concat(".type"))));
+            finalPlainSelect
+                    .setType(new TypeSelectExpression(new Column(aliasTempCollectBody.getName().concat(".type"))));
             finalPlainSelect.setFromItem(tempCollectBody);
 
             List<String> SVarsBody = VariableUtils.SVars(iteratorExp.getBody(), this);
@@ -2065,7 +2098,8 @@ public class RobertOCLParser implements RobertStmVisitor {
         } else {
             finalPlainSelect.setRes(new ResSelectExpression(new Column(aliasTempCollectBody.getName().concat(".res"))));
             finalPlainSelect.setVal(new ValSelectExpression(new Column(aliasTempCollectBody.getName().concat(".val"))));
-            finalPlainSelect.setType(new TypeSelectExpression(new Column(aliasTempCollectBody.getName().concat(".type"))));
+            finalPlainSelect
+                    .setType(new TypeSelectExpression(new Column(aliasTempCollectBody.getName().concat(".type"))));
             finalPlainSelect.setFromItem(tempCollectSource);
             Join join = new Join();
             join.setRightItem(tempCollectBody);
@@ -2171,5 +2205,27 @@ public class RobertOCLParser implements RobertStmVisitor {
 
         this.decreaseLevelOfSet();
 
+    }
+
+    public void setContextualType(Type contextualType) {
+        this.contextualType = contextualType;
+        setContextualTypeToSelf();
+    }
+
+    private void setContextualTypeToSelf() {
+        TypeSelectExpression type = new TypeSelectExpression(Optional.ofNullable(contextualType).map(Type::getTypeName).orElse("Unknown"));
+        Select finalSelect = self.getSource();
+        PlainSelect finalPlainSelect = (PlainSelect) finalSelect.getSelectBody();
+        finalPlainSelect.setType(type);
+        Variable holder = new Variable(self.getIterator().getName());
+        self.setIterator(null);
+        self.setSource(finalSelect);
+        self.setIterator(holder);
+    }
+
+    public void resetVisitorContext() {
+        context.clear();
+        createSelfVariable();
+        context.add(self);
     }
 }

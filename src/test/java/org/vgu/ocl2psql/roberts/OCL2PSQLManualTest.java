@@ -136,8 +136,12 @@ public class OCL2PSQLManualTest {
         test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1.Car:color=c.Car:color)))");
         test(ocl2psql, "Car::allInstances()->forAll(c|'blue'=c.Car:color)");
         
+        ocl2psql.setContextualType("Car");
+        
         test(ocl2psql, "self");
         test(ocl2psql, "self = caller");
+        
+        ocl2psql.setContextualType("Person");
         test(ocl2psql, "self.Person:name");
         test(ocl2psql, "self.Person:name = 'Hoang'");
         test(ocl2psql, "self.Person:ownedCars");

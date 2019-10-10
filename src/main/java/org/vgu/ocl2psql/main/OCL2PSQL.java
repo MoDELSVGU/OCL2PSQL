@@ -29,9 +29,10 @@ import org.json.simple.parser.ParseException;
 import org.vgu.ocl2psql.main.parser.RobertOCLParser;
 import org.vgu.ocl2psql.ocl.roberts.context.DefaultOclContext;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
-import org.vgu.ocl2psql.ocl.roberts.expressions.IteratorSource;
 import org.vgu.ocl2psql.ocl.roberts.expressions.OclExpression;
 import org.vgu.ocl2psql.ocl.roberts.parse.SimpleParser;
+import org.vgu.ocl2psql.ocl.type.SingleType;
+import org.vgu.ocl2psql.ocl.type.Type;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
@@ -74,7 +75,7 @@ public class OCL2PSQL {
     
     public Select mapToSQL(String oclExpression) throws OclParseException {
         ocl2sqlParser.resetLevelOfSet();
-        ocl2sqlParser.setVisitorContext(new ArrayList<IteratorSource>());
+        ocl2sqlParser.resetVisitorContext();
         OclExpression exp = SimpleParser.parse(oclExpression, new DefaultOclContext());
         exp.accept(ocl2sqlParser);
         return cookFinalStatement(ocl2sqlParser.getFinalSelect());
@@ -105,5 +106,10 @@ public class OCL2PSQL {
 
     public void setDescriptionMode(Boolean descriptionMode) {
         this.descriptionMode = descriptionMode;
+    }
+    
+    public void setContextualType (String typeName) {
+        Type type = new SingleType(typeName);
+        ocl2sqlParser.setContextualType(type);
     }
 }
