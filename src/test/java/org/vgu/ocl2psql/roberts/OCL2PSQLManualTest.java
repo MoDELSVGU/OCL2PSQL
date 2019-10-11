@@ -35,7 +35,7 @@ public class OCL2PSQLManualTest {
         OCL2PSQL ocl2psql = new OCL2PSQL();
         File contextModel = new File("./src/main/resources/context-model/CarPerson_context.json");
         ocl2psql.setPlainUMLContextFromFile(contextModel.getAbsolutePath());
-        ocl2psql.setDescriptionMode(false);
+        ocl2psql.setDescriptionMode(true);
         
 //        test(ocl2psql, "Car::allInstances()->collect(c|c)");
 //        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->collect(p|p.Person:ownedCars)->flatten()->size()=1)");
@@ -166,7 +166,8 @@ public class OCL2PSQLManualTest {
 ////            test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Person))");
 ////            test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Vehicle))");
 //        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Car).Car:color)");
-        test(ocl2psql, "true");
+        test(ocl2psql, "1");
+        
 
     }
 

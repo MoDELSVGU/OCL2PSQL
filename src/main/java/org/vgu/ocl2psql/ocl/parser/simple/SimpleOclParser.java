@@ -19,6 +19,7 @@ limitations under the License.
 
 package org.vgu.ocl2psql.ocl.parser.simple;
 
+import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 
 import com.vgu.se.jocl.expressions.AssociationClassCallExp;
@@ -36,12 +37,19 @@ import com.vgu.se.jocl.visit.ParserVisitor;
 public class SimpleOclParser implements ParserVisitor {
     
     private Select select;
+
     public Select getSelect() {
         return this.select;
     }
     
     public void setSelect(Select select) {
         this.select = select;
+    }
+    
+    public <E extends OclExp> void addComment(E exp, Select select){
+        ((PlainSelect) select.getSelectBody())
+                .setCorrespondOCLExpression(exp.getOclStr());
+        ;
     }
     
     @Override
@@ -91,14 +99,19 @@ public class SimpleOclParser implements ParserVisitor {
         BooleanLiteralExpParser parser = new BooleanLiteralExpParser();
         booleanLiteralExp.accept(parser);
 
-        this.select = parser.getSelect();
+        addComment(booleanLiteralExp, parser.getSelect());
 
+        this.select = parser.getSelect();
     }
 
     @Override
     public void visit(IntegerLiteralExp integerLiteralExp) {
-        // TODO Auto-generated method stub
-        
+        IntegerLiteralExpParser parser = new IntegerLiteralExpParser();
+        integerLiteralExp.accept(parser);
+
+        addComment(integerLiteralExp, parser.getSelect());
+
+        this.select = parser.getSelect();
     }
 
     @Override

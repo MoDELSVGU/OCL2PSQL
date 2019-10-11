@@ -23,30 +23,29 @@ import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 import org.vgu.ocl2psql.sql.statement.select.TypeSelectExpression;
 
-import com.vgu.se.jocl.expressions.BooleanLiteralExp;
+import com.vgu.se.jocl.expressions.IntegerLiteralExp;
 
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.select.SelectBody;
 
-public class BooleanLiteralExpParser extends SimpleOclParser {
+public class IntegerLiteralExpParser extends SimpleOclParser {
 
     private PlainSelect plainSelect;
 
-    public BooleanLiteralExpParser() {
+    public IntegerLiteralExpParser() {
         super();
         this.plainSelect = new PlainSelect();
     }
 
     @Override
-    public void visit(BooleanLiteralExp booleanLiteralExp) {
+    public void visit(IntegerLiteralExp integerLiteralExp) {
         plainSelect.createTrueValColumn();
 
         ResSelectExpression res = new ResSelectExpression(
-                new Column(booleanLiteralExp.getValue().toString()));
+                new Column(integerLiteralExp.getValue().toString()));
         plainSelect.setRes(res);
 
         TypeSelectExpression type = new TypeSelectExpression(
-                booleanLiteralExp.getType().getReferredType());
+                integerLiteralExp.getType().getReferredType());
         plainSelect.setType(type);
 
         Select select = new Select();
