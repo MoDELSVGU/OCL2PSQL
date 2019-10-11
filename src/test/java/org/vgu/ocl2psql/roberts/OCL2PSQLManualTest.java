@@ -166,7 +166,7 @@ public class OCL2PSQLManualTest {
 ////            test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Person))");
 ////            test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Vehicle))");
 //        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Car).Car:color)");
-        test(ocl2psql, "1");
+        test(ocl2psql, "'Hoang'");
         
 
     }

@@ -90,8 +90,12 @@ public class SimpleOclParser implements ParserVisitor {
 
     @Override
     public void visit(StringLiteralExp stringLiteralExp) {
-        // TODO Auto-generated method stub
-        
+        StringLiteralExpParser parser = new StringLiteralExpParser();
+        stringLiteralExp.accept(parser);
+
+        addComment(stringLiteralExp, parser.getSelect());
+
+        this.select = parser.getSelect();
     }
 
     @Override
@@ -116,8 +120,12 @@ public class SimpleOclParser implements ParserVisitor {
 
     @Override
     public void visit(RealLiteralExp realLiteralExp) {
-        // TODO Auto-generated method stub
-        
+        RealLiteralExpParser parser = new RealLiteralExpParser();
+        realLiteralExp.accept(parser);
+
+        addComment(realLiteralExp, parser.getSelect());
+
+        this.select = parser.getSelect();
     }
 
 }
