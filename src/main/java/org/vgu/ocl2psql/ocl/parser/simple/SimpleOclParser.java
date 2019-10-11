@@ -66,8 +66,12 @@ public class SimpleOclParser implements ParserVisitor {
 
     @Override
     public void visit(OperationCallExp operationCallExp) {
-        // TODO Auto-generated method stub
-        
+        OperationCallExpParser parser = new OperationCallExpParser();
+        operationCallExp.accept(parser);
+
+        addComment(operationCallExp, parser.getSelect());
+
+        this.select = parser.getSelect();
     }
 
     @Override

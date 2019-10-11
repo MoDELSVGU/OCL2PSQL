@@ -16,9 +16,11 @@ limitations under the License.
 package org.vgu.ocl2psql.roberts;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.json.simple.parser.ParseException;
 import org.vgu.ocl2psql.main.OCL2PSQL;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
 
@@ -166,12 +168,12 @@ public class OCL2PSQLManualTest {
 ////            test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Person))");
 ////            test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Vehicle))");
 //        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Car).Car:color)");
-        test(ocl2psql, "'Hoang'");
         
-
+        ocl2psql.setNewParser(false);
+        test(ocl2psql, "Car::allInstances()");
     }
 
-    private static void test(OCL2PSQL ocl2psql, String oclExp) throws OclParseException {
+    private static void test(OCL2PSQL ocl2psql, String oclExp) throws OclParseException, ParseException, IOException {
         String finalStatementWithDescription = ocl2psql.mapToString(oclExp);
         System.out.println(finalStatementWithDescription);
     }

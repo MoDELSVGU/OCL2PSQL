@@ -57,6 +57,8 @@ public class OCL2PSQL {
     private Parser parser;
     private String filePath;
     
+    private boolean isNewParser;
+    
     public RobertOCLParser getOcl2sqlParser() {
         return ocl2sqlParser;
     }
@@ -75,7 +77,11 @@ public class OCL2PSQL {
         ocl2sqlParser.setPlainUMLContextFromString(UMLContext);
     }
     
-    public String mapToString(String oclExpression) throws OclParseException {
+    public void setNewParser(boolean isNewParser) {
+        this.isNewParser = isNewParser;
+    }
+
+    public String mapToString(String oclExpression) throws OclParseException, ParseException, IOException {
         Select finalStatement = this.mapToSQL(oclExpression);
         if(this.descriptionMode) {
             String finalStatementString = finalStatement.toStringWithDescription();
@@ -85,32 +91,26 @@ public class OCL2PSQL {
         }
     }
     
-    public Select mapToSQL(String oclExpression) throws OclParseException {
+    public Select mapToSQL(String oclExpression) throws OclParseException, ParseException, IOException {
         
+        if (this.isNewParser) {
+            parser = new SimpleParser();
+            JSONArray ctx = null;
+            ctx = (JSONArray) new JSONParser()
+                    .parse(new FileReader(filePath));
+
+            OclExp newExp = parser.parse(oclExpression, ctx);
+            newExp.accept(ocl2PsqlParser);
+
+            return cookFinalStatement(ocl2PsqlParser.getSelect());
+        }
+
         ocl2sqlParser.resetLevelOfSet();
         ocl2sqlParser.resetVisitorContext();
         OclExpression exp = RobertOcl2PojoParser.parse(oclExpression, new DefaultOclContext());
         exp.accept(ocl2sqlParser);
         
-        
-        // Begin New parser
-        parser = new SimpleParser();
-        JSONArray ctx = null;
-        try {
-            ctx = (JSONArray) new JSONParser()
-                    .parse(new FileReader(filePath));
-        } catch (ParseException | IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        OclExp newExp = parser.parse(oclExpression, ctx);
-        newExp.accept(ocl2PsqlParser);
-        // End new parser
-
-//        return cookFinalStatement(ocl2sqlParser.getFinalSelect());
-        return cookFinalStatement(ocl2PsqlParser.getSelect());
+        return cookFinalStatement(ocl2sqlParser.getFinalSelect());
     }
     
     private Select cookFinalStatement(Select finalStatement) {
