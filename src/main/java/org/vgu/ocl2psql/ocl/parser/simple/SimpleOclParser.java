@@ -46,7 +46,7 @@ public class SimpleOclParser implements ParserVisitor {
         this.select = select;
     }
     
-    public <E extends OclExp> void addComment(E exp, Select select){
+    private void addComment(OclExp exp, Select select) {
         ((PlainSelect) select.getSelectBody())
                 .setCorrespondOCLExpression(exp.getOclStr());
         ;

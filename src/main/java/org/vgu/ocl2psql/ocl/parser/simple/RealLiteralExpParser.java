@@ -30,6 +30,7 @@ import net.sf.jsqlparser.schema.Column;
 
 public class RealLiteralExpParser extends SimpleOclParser {
 
+    private Select select;
     private PlainSelect plainSelect;
 
     public RealLiteralExpParser() {
@@ -52,7 +53,7 @@ public class RealLiteralExpParser extends SimpleOclParser {
         Select select = new Select();
         select.setSelectBody(plainSelect);
 
-        super.setSelect(select);
+        this.setSelect(select);
     }
 
 }
