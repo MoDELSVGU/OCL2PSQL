@@ -170,7 +170,7 @@ public class OCL2PSQLManualTest {
 //        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Car).Car:color)");
         
         ocl2psql.setNewParser(true);
-        test(ocl2psql, "true");
+        test(ocl2psql, "Car.allInstances()");
     }
 
     private static void test(OCL2PSQL ocl2psql, String oclExp) throws OclParseException, ParseException, IOException {

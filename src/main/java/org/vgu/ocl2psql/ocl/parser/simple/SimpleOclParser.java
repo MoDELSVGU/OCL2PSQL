@@ -16,11 +16,12 @@ limitations under the License.
 @author: thian
 ***************************************************************************/
 
-
 package org.vgu.ocl2psql.ocl.parser.simple;
 
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
+import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
+import org.vgu.ocl2psql.sql.statement.select.TypeSelectExpression;
 
 import com.vgu.se.jocl.expressions.AssociationClassCallExp;
 import com.vgu.se.jocl.expressions.BooleanLiteralExp;
@@ -34,102 +35,195 @@ import com.vgu.se.jocl.expressions.RealLiteralExp;
 import com.vgu.se.jocl.expressions.StringLiteralExp;
 import com.vgu.se.jocl.visit.ParserVisitor;
 
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
+
 public class SimpleOclParser implements ParserVisitor {
-    
+
     private Select select;
 
     public Select getSelect() {
         return this.select;
     }
-    
+
     public void setSelect(Select select) {
         this.select = select;
     }
-    
-    private void addComment(OclExp exp, Select select) {
-        ((PlainSelect) select.getSelectBody())
-                .setCorrespondOCLExpression(exp.getOclStr());
-        ;
+
+    private void addComment(OclExp exp, PlainSelect plainSelect) {
+        plainSelect.setCorrespondOCLExpression(exp.getOclStr());
     }
-    
+
     @Override
     public void visit(OclExp oclExp) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void visit(IteratorExp iteratorExp) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void visit(OperationCallExp operationCallExp) {
-        OperationCallExpParser parser = new OperationCallExpParser();
-        operationCallExp.accept(parser);
+        PlainSelect plainSelect = parse(operationCallExp);
 
-        addComment(operationCallExp, parser.getSelect());
+        addComment(operationCallExp, plainSelect);
 
-        this.select = parser.getSelect();
+        this.select = new Select();
+        this.select.setSelectBody(plainSelect);
     }
 
     @Override
     public void visit(LiteralExp literalExp) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void visit(PropertyCallExp propertyCallExp) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void visit(AssociationClassCallExp associationClassCallExp) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void visit(StringLiteralExp stringLiteralExp) {
-        StringLiteralExpParser parser = new StringLiteralExpParser();
-        stringLiteralExp.accept(parser);
+        PlainSelect plainSelect = parse(stringLiteralExp);
 
-        addComment(stringLiteralExp, parser.getSelect());
+        addComment(stringLiteralExp, plainSelect);
 
-        this.select = parser.getSelect();
+        this.select = new Select();
+        this.select.setSelectBody(plainSelect);
     }
 
     @Override
     public void visit(BooleanLiteralExp booleanLiteralExp) {
-        BooleanLiteralExpParser parser = new BooleanLiteralExpParser();
-        booleanLiteralExp.accept(parser);
+        PlainSelect plainSelect = parse(booleanLiteralExp);
 
-        addComment(booleanLiteralExp, parser.getSelect());
+        addComment(booleanLiteralExp, plainSelect);
 
-        this.select = parser.getSelect();
+        this.select = new Select();
+        this.select.setSelectBody(plainSelect);
     }
 
     @Override
     public void visit(IntegerLiteralExp integerLiteralExp) {
-        IntegerLiteralExpParser parser = new IntegerLiteralExpParser();
-        integerLiteralExp.accept(parser);
+        PlainSelect plainSelect = parse(integerLiteralExp);
 
-        addComment(integerLiteralExp, parser.getSelect());
+        addComment(integerLiteralExp, plainSelect);
 
-        this.select = parser.getSelect();
+        this.select = new Select();
+        this.select.setSelectBody(plainSelect);
     }
 
     @Override
     public void visit(RealLiteralExp realLiteralExp) {
-        RealLiteralExpParser parser = new RealLiteralExpParser();
-        realLiteralExp.accept(parser);
+        PlainSelect plainSelect = parse(realLiteralExp);
 
-        addComment(realLiteralExp, parser.getSelect());
+        addComment(realLiteralExp, plainSelect);
 
-        this.select = parser.getSelect();
+        this.select = new Select();
+        this.select.setSelectBody(plainSelect);
+    }
+    
+    //***********************************************
+    //* Helpers
+    //***********************************************
+
+    private PlainSelect parse(BooleanLiteralExp exp) {
+        PlainSelect plainSelect = new PlainSelect();
+        plainSelect.createTrueValColumn();
+
+        ResSelectExpression res = new ResSelectExpression(
+                new Column(exp.getValue().toString()));
+        plainSelect.setRes(res);
+
+        TypeSelectExpression type = new TypeSelectExpression(
+                exp.getType().getReferredType());
+        plainSelect.setType(type);
+
+        return plainSelect;
     }
 
+    private PlainSelect parse(IntegerLiteralExp exp) {
+        PlainSelect plainSelect = new PlainSelect();
+        plainSelect.createTrueValColumn();
+
+        ResSelectExpression res = new ResSelectExpression(
+                new LongValue(exp.getValue().toString()));
+        plainSelect.setRes(res);
+
+        TypeSelectExpression type = new TypeSelectExpression(
+                exp.getType().getReferredType());
+        plainSelect.setType(type);
+
+        return plainSelect;
+    }
+
+    private PlainSelect parse(RealLiteralExp exp) {
+        PlainSelect plainSelect = new PlainSelect();
+        plainSelect.createTrueValColumn();
+
+        ResSelectExpression res = new ResSelectExpression(
+                new LongValue(exp.getValue().toString()));
+        plainSelect.setRes(res);
+
+        TypeSelectExpression type = new TypeSelectExpression(
+                exp.getType().getReferredType());
+        plainSelect.setType(type);
+
+        return plainSelect;
+    }
+
+    private PlainSelect parse(StringLiteralExp exp) {
+        PlainSelect plainSelect = new PlainSelect();
+        plainSelect.createTrueValColumn();
+
+        ResSelectExpression res = new ResSelectExpression(
+                new StringValue(exp.getValue().toString()));
+        plainSelect.setRes(res);
+
+        TypeSelectExpression type = new TypeSelectExpression(
+                exp.getType().getReferredType());
+        plainSelect.setType(type);
+
+        return plainSelect;
+    }
+
+    private PlainSelect parse(OperationCallExp exp) {
+
+        switch (exp.getReferredOperation().getName()) {
+        case "allInstances":
+            return parseOpCallAllInstances(exp);
+        default:
+            return null;
+        }
+    }
+
+    private PlainSelect parseOpCallAllInstances(OperationCallExp exp) {
+        PlainSelect plainSelect = new PlainSelect();
+        plainSelect.createTrueValColumn();
+
+        String tableName = exp.getSource().getType().getReferredType();
+
+        ResSelectExpression res = new ResSelectExpression(
+                new Column(tableName.concat("_id")));
+        plainSelect.setRes(res);
+
+        TypeSelectExpression type = new TypeSelectExpression(tableName);
+        plainSelect.setType(type);
+
+        Table table = new Table(tableName);
+        plainSelect.setFromItem(table);
+
+        return plainSelect;
+    }
 }
