@@ -1,0 +1,57 @@
+/**************************************************************************
+Copyright 2019 Vietnamese-German-University
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+@author: thian
+***************************************************************************/
+
+package org.vgu.ocl2psql.ocl.parser;
+
+import java.io.IOException;
+
+import org.json.simple.JSONArray;
+import org.json.simple.parser.ParseException;
+import org.vgu.ocl2psql.sql.statement.select.Select;
+
+public abstract class O2P {
+
+    protected O2PApi api;
+
+    protected O2P() {
+
+    }
+
+    protected O2P(O2PApi api) {
+        this.api = api;
+    }
+
+    public abstract String mapToString(String oclExp);
+
+    public abstract Select mapToSQL(String oclExp);
+
+    public abstract void setPlainUMLContextFromFile(String filePath)
+            throws IOException, ParseException;
+
+    public abstract void setPlainUMLContext(String umlCtx)
+            throws ParseException;
+
+    public abstract void setContext(JSONArray ctx);
+
+    public abstract void setContextualType(String typeName);
+
+    public abstract boolean getDescriptionMode();
+
+    public abstract void setDescriptionMode(Boolean descriptionMode);
+
+}

@@ -22,7 +22,13 @@ import java.util.Properties;
 
 import org.json.simple.parser.ParseException;
 import org.vgu.ocl2psql.main.OCL2PSQL;
+import org.vgu.ocl2psql.ocl.parser.O2P;
+import org.vgu.ocl2psql.ocl.parser.O2PParser;
+import org.vgu.ocl2psql.ocl.parser.simple.SimpleO2P;
+import org.vgu.ocl2psql.ocl.parser.simple.SimpleO2PApi;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
+import org.vgu.ocl2psql.ocl.roberts.parser.LegacyO2P;
+import org.vgu.ocl2psql.ocl.roberts.parser.LegacyO2PApi;
 
 
 public class OCL2PSQLManualTest {
@@ -35,9 +41,19 @@ public class OCL2PSQLManualTest {
             throws Exception {
 
         OCL2PSQL ocl2psql = new OCL2PSQL();
-        File contextModel = new File("./src/main/resources/context-model/CarPerson_context.json");
+        File contextModel = new File("src/main/resources/context-model/CarPerson_context.json");
         ocl2psql.setPlainUMLContextFromFile(contextModel.getAbsolutePath());
         ocl2psql.setDescriptionMode(true);
+        
+        O2P robertO2P = new LegacyO2P(new LegacyO2PApi());
+        robertO2P.setPlainUMLContextFromFile(
+                contextModel.getAbsolutePath());
+        robertO2P.setDescriptionMode(true);
+
+        O2P simpleO2P = new SimpleO2P(new SimpleO2PApi());
+        simpleO2P.setPlainUMLContextFromFile(
+                contextModel.getAbsolutePath());
+        simpleO2P.setDescriptionMode(true);
         
 //        test(ocl2psql, "Car::allInstances()->collect(c|c)");
 //        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->collect(p|p.Person:ownedCars)->flatten()->size()=1)");
@@ -169,12 +185,20 @@ public class OCL2PSQLManualTest {
 ////            test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Vehicle))");
 //        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Car).Car:color)");
         
-        ocl2psql.setNewParser(true);
-        test(ocl2psql, "Car.allInstances()");
+//        ocl2psql.setNewParser(true);
+//        test(ocl2psql, "Car.allInstances()");
+        
+        test(robertO2P, "1");
+        test(simpleO2P, "Car.allInstances()");
     }
 
     private static void test(OCL2PSQL ocl2psql, String oclExp) throws OclParseException, ParseException, IOException {
         String finalStatementWithDescription = ocl2psql.mapToString(oclExp);
+        System.out.println(finalStatementWithDescription);
+    }
+
+    private static void test(O2P o2p, String oclExp) {
+        String finalStatementWithDescription = o2p.mapToString(oclExp);
         System.out.println(finalStatementWithDescription);
     }
 }
