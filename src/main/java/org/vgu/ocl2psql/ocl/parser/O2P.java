@@ -18,40 +18,43 @@ limitations under the License.
 
 package org.vgu.ocl2psql.ocl.parser;
 
+import java.io.FileReader;
 import java.io.IOException;
 
 import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 
 public abstract class O2P {
+    
+    protected Boolean descriptionMode = false;
 
-    protected O2PApi api;
-
-    protected O2P() {
-
+    public void setPlainUMLContextFromFile(String filePath)
+            throws IOException, ParseException {
+        setContext((JSONArray) new JSONParser()
+                .parse(new FileReader(filePath)));
     }
 
-    protected O2P(O2PApi api) {
-        this.api = api;
+    public void setPlainUMLContext(String umlCtx)
+            throws ParseException {
+        setContext((JSONArray) new JSONParser().parse(umlCtx));
+    }
+
+    public boolean getDescriptionMode() {
+        return this.getDescriptionMode();
+    }
+
+    public void setDescriptionMode(Boolean descriptionMode) {
+        this.descriptionMode = descriptionMode;
     }
 
     public abstract String mapToString(String oclExp);
 
     public abstract Select mapToSQL(String oclExp);
 
-    public abstract void setPlainUMLContextFromFile(String filePath)
-            throws IOException, ParseException;
-
-    public abstract void setPlainUMLContext(String umlCtx)
-            throws ParseException;
-
     public abstract void setContext(JSONArray ctx);
 
     public abstract void setContextualType(String typeName);
-
-    public abstract boolean getDescriptionMode();
-
-    public abstract void setDescriptionMode(Boolean descriptionMode);
 
 }

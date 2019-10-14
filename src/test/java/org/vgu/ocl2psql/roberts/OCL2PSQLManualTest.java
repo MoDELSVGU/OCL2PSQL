@@ -23,11 +23,8 @@ import java.util.Properties;
 import org.json.simple.parser.ParseException;
 import org.vgu.ocl2psql.main.OCL2PSQL;
 import org.vgu.ocl2psql.ocl.parser.O2P;
-import org.vgu.ocl2psql.ocl.parser.O2PParser;
-import org.vgu.ocl2psql.ocl.parser.simple.SimpleO2P;
 import org.vgu.ocl2psql.ocl.parser.simple.SimpleO2PApi;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
-import org.vgu.ocl2psql.ocl.roberts.parser.LegacyO2P;
 import org.vgu.ocl2psql.ocl.roberts.parser.LegacyO2PApi;
 
 
@@ -40,17 +37,18 @@ public class OCL2PSQLManualTest {
     public static void main(String[] args)
             throws Exception {
 
-        OCL2PSQL ocl2psql = new OCL2PSQL();
         File contextModel = new File("src/main/resources/context-model/CarPerson_context.json");
+
+        OCL2PSQL ocl2psql = new OCL2PSQL();
         ocl2psql.setPlainUMLContextFromFile(contextModel.getAbsolutePath());
         ocl2psql.setDescriptionMode(true);
         
-        O2P robertO2P = new LegacyO2P(new LegacyO2PApi());
+        O2P robertO2P = new LegacyO2PApi();
         robertO2P.setPlainUMLContextFromFile(
                 contextModel.getAbsolutePath());
         robertO2P.setDescriptionMode(true);
 
-        O2P simpleO2P = new SimpleO2P(new SimpleO2PApi());
+        O2P simpleO2P = new SimpleO2PApi();
         simpleO2P.setPlainUMLContextFromFile(
                 contextModel.getAbsolutePath());
         simpleO2P.setDescriptionMode(true);
@@ -188,7 +186,7 @@ public class OCL2PSQLManualTest {
 //        ocl2psql.setNewParser(true);
 //        test(ocl2psql, "Car.allInstances()");
         
-        test(robertO2P, "1");
+        test(robertO2P, "Car::allInstances()->size()");
         test(simpleO2P, "Car.allInstances()");
     }
 

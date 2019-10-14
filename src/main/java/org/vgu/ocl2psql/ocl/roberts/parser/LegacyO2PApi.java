@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.json.simple.JSONArray;
-import org.vgu.ocl2psql.ocl.parser.O2PApi;
+import org.vgu.ocl2psql.ocl.parser.O2P;
 import org.vgu.ocl2psql.ocl.roberts.context.DefaultOclContext;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
 import org.vgu.ocl2psql.ocl.roberts.expressions.OclExpression;
@@ -37,11 +37,9 @@ import org.vgu.ocl2psql.sql.utils.SQLAsStringUtils;
 
 import net.sf.jsqlparser.statement.select.SelectItem;
 
-public class LegacyO2PApi implements O2PApi {
+public class LegacyO2PApi extends O2P {
 
     private JSONArray ctx;
-    private String contextualType;
-    private boolean descriptionMode;
 
     private RobertOCLParser ocl2sqlParser = new RobertOCLParser();
 
@@ -85,16 +83,6 @@ public class LegacyO2PApi implements O2PApi {
     public void setContextualType(String typeName) {
         Type type = new SingleType(typeName);
         ocl2sqlParser.setContextualType(type);
-    }
-
-    @Override
-    public boolean getDescriptionMode() {
-        return this.getDescriptionMode();
-    }
-
-    @Override
-    public void setDescriptionMode(Boolean descriptionMode) {
-        this.descriptionMode = descriptionMode;
     }
 
     private Select cookFinalStatement(Select finalStatement) {

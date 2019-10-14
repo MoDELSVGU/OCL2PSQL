@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
-import org.vgu.ocl2psql.ocl.parser.O2PApi;
+import org.vgu.ocl2psql.ocl.parser.O2P;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
@@ -35,16 +35,14 @@ import com.vgu.se.jocl.parser.simple.SimpleParser;
 
 import net.sf.jsqlparser.statement.select.SelectItem;
 
-public class SimpleO2PApi implements O2PApi {
+public class SimpleO2PApi extends O2P {
 
     private JSONArray ctx;
     private String contextualType;
-    private boolean descriptionMode;
     
     private SimpleParser parser = new SimpleParser();
     private SimpleOclParser o2pParser = new SimpleOclParser();
 
-    @Override
     public String mapToString(String oclExp) {
         Select finalStatement = this.mapToSQL(oclExp);
 
@@ -77,16 +75,6 @@ public class SimpleO2PApi implements O2PApi {
     public void setContextualType(String typeName) {
         this.contextualType = typeName;
         parser.setAdhocCtx(contextualType);
-    }
-
-    @Override
-    public boolean getDescriptionMode() {
-        return this.descriptionMode;
-    }
-
-    @Override
-    public void setDescriptionMode(Boolean descriptionMode) {
-        this.descriptionMode = descriptionMode;
     }
 
     private Select cookFinalStatement(Select finalStatement) {
