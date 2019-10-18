@@ -41,7 +41,7 @@ public class SQLAsStringUtils {
             else {
                 lineAfterIndent = getIndent(indentRate).concat(line);
             }
-            indentedSQLString = indentedSQLString.concat(lineAfterIndent).concat("\r\n");
+            indentedSQLString = indentedSQLString.concat(lineAfterIndent).concat("\n");
         }
         return indentedSQLString;
     }

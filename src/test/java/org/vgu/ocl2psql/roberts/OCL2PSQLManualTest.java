@@ -16,6 +16,7 @@ limitations under the License.
 package org.vgu.ocl2psql.roberts;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -37,12 +38,9 @@ public class OCL2PSQLManualTest {
     public static void main(String[] args)
             throws Exception {
 
-        File contextModel = new File("src/main/resources/context-model/CarPerson_context.json");
+        File contextModel = new File(
+                "src/main/resources/context-model/CarPerson_context.json");
 
-        OCL2PSQL ocl2psql = new OCL2PSQL();
-        ocl2psql.setPlainUMLContextFromFile(contextModel.getAbsolutePath());
-        ocl2psql.setDescriptionMode(true);
-        
         O2P robertO2P = new LegacyO2PApi();
         robertO2P.setPlainUMLContextFromFile(
                 contextModel.getAbsolutePath());
@@ -53,150 +51,217 @@ public class OCL2PSQLManualTest {
                 contextModel.getAbsolutePath());
         simpleO2P.setDescriptionMode(true);
         
-//        test(ocl2psql, "Car::allInstances()->collect(c|c)");
-//        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->collect(p|p.Person:ownedCars)->flatten()->size()=1)");
-//        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->select(p|p.Person:name.oclIsUndefined())->size()=0)");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()");
-//        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->collect(p|p)->size() = 1)");
-//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color = 'no-color')->size()");
-//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:color <> 'no-color')");
-//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name = 'no-name'))->size()");
-//        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->exists(p|p.Person:name = 'no-name'))");
-//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->forAll(p|p.Person:name = 'no-name'))");
-//        
-//        test(ocl2psql, "Car::allInstances()");
-//        test(ocl2psql, "true");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()");
+        String resFile = "src/test/resources/bothResult.txt";
+        try (FileWriter resWr = new FileWriter(resFile)) {
+
+            for (int i = 0; i < legacyCases.length; i++) {
+                resWr.append("\n\n================ ~ BEGIN ROBERT ~ ================\n\n");
+                resWr.append(legacyCases[i]);
+                resWr.append("\n\n===========================================");
+
+                resWr.append("\n================ ~ Robert ~ ================\n\n");
+                String robert = test(robertO2P, legacyCases[i]);
+                resWr.append(robert);
+
+                resWr.append("\n================ ~ //END ROBERT ~ ================\n\n");
+            }
+
+//            for (int i = 0; i < simpleCases.length; i++) {
+//                resWr.append("\n\n================ ~ BEGIN SIMPLE ~ ================\n\n");
+//                resWr.append(simpleCases[i]);
+//                resWr.append("\n\n===========================================");
 //
-//        test(ocl2psql, "Car::allInstances()->size()");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->size()");
-//        test(ocl2psql, "Person::allInstances()->collect(p|p.Person:ownedCars->size())");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()->size()");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->size()");
+//                resWr.append("\n\n================ ~ Simple ~ ================\n\n");
+//                String simple = test(simpleO2P, simpleCases[i]);
+//                resWr.append(simple);
 //
-//        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->size() > 0)");
-//        test(ocl2psql, "Person::allInstances()->forAll(p|true)");
-//        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->size() < 10)");
-//        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->forAll(c|c.Car:color = 'no-color'))");
-//        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->exists(c|c.Car:color = 'no-color'))");
-//        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->forAll(c|c.Car:color = 'no-color'))");
-//        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->exists(c|c.Car:color = 'no-color'))");
-//
-//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color = 'no-color')");
-//        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->exists(c|c.Car:color <> 'no-color'))");
-//        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->forAll(c|c.Car:color <> 'no-color'))");
-//
-//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color.oclIsUndefined())");
-//        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->exists(c|c.Car:color.oclIsUndefined()))");
-//
-//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color = 'no-color')->size()");
-//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:color <> 'no-color')");
-//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name = 'no-name'))->size()");
-//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->forAll(p|p.Person:name = 'no-name'))");
-//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name.oclIsUndefined()))->size()");
-//        test(ocl2psql, "Car::allInstances()");
-//        test(ocl2psql, "true");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()");
-//
-//        test(ocl2psql, "Car::allInstances()->size()");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->size()");
-//        test(ocl2psql, "Person::allInstances()->collect(p|p.Person:ownedCars->size())");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->flatten()->size()");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners)->size()");
-//
-//        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->size() > 0)");
-//        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->size() = 10)");
-//        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->size() < 10)");
-//        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->forAll(c|c.Car:color = 'no-color'))");
-//        test(ocl2psql, "Person::allInstances()->forAll(p|p.Person:ownedCars->exists(c|c.Car:color = 'no-color'))");
-//        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->forAll(c|c.Car:color = 'no-color'))");
-//        test(ocl2psql, "Person::allInstances()->exists(p|p.Person:ownedCars->exists(c|c.Car:color = 'no-color'))");
-//
-//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color = 'no-color')");
-//        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->exists(c|c.Car:color <> 'no-color'))");
-//        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->forAll(c|c.Car:color <> 'no-color'))");
-//
-//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color.oclIsUndefined())");
-//        test(ocl2psql, "Person::allInstances()->select(p|p.Person:ownedCars->exists(c|c.Car:color.oclIsUndefined()))");
-//
-//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:color = 'no-color')->size()");
-//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:color <> 'no-color')");
-//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name = 'no-name'))->size()");
-//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->forAll(p|p.Person:name = 'no-name'))");
-//        test(ocl2psql, "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name.oclIsUndefined()))->size()");
-//    
-//        test(ocl2psql, "Car::allInstances()->isEmpty()");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->isEmpty()");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners->isEmpty())");
-//        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->isEmpty())");
-//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->isEmpty())");
-//        
-//        test(ocl2psql, "Car::allInstances()->notEmpty()");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->notEmpty()");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners->notEmpty())");
-//        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->notEmpty())");
-//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->notEmpty())");
-//        
-//        test(ocl2psql, "Car::allInstances()->asSet()");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:color)->asSet()");
-//        test(ocl2psql, "Car::allInstances()->collect(c|c.Car:owners->asSet())->flatten()");
-//
-//        test(ocl2psql, "Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1.Car:color=c.Car:color)))");
-//        test(ocl2psql, "Car::allInstances()->forAll(c|'blue'=c.Car:color)");
-//        
-//        test(ocl2psql, "self");
-//        test(ocl2psql, "self = caller");
-//        test(ocl2psql, "self.Person:name");
-//        test(ocl2psql, "self.Person:name = 'Hoang'");
-//        test(ocl2psql, "self.Person:ownedCars");
-//        test(ocl2psql, "self.Person:ownedCars->size()");
-//        test(ocl2psql, "self.Person:ownedCars->exists(c|c.Car:color = 'black')");
-//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p = self))");
-//        test(ocl2psql, "Car::allInstances()->exists(c|c.Car:owners->exists(p|p.Person:ownedCars->size() < self.Person:ownedCars->size()))");
-//    
-//        test(ocl2psql, "Car::allInstances()");
-//        test(ocl2psql, "Automobile::allInstances()");
-//        test(ocl2psql, "Vehicle::allInstances()");
-//        test(ocl2psql, "Automobile::allInstances()->collect(au|au)");
-//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.Vehicle:category)");
-////            test(ocl2psql, "Automobile::allInstances()->collect(au|au.Car:color)");
-//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Automobile))");
-//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Car))");
-//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Person))");
-//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Vehicle))");
-//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsKindOf(Automobile))");
-//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsKindOf(Car))");
-//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsKindOf(Person))");
-//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclIsKindOf(Vehicle))");
-//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Automobile))");
-//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Car))");
-//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Bus))");
-////            test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Person))");
-////            test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Vehicle))");
-//        test(ocl2psql, "Automobile::allInstances()->collect(au|au.oclAsType(Car).Car:color)");
-        
-//        ocl2psql.setNewParser(true);
-//        test(ocl2psql, "Car.allInstances()");
-        
-        test(robertO2P, "Car::allInstances()->size()");
-        test(simpleO2P, "Car.allInstances()");
+//                resWr.append("\n================ ~ //END SIMPLE ~ ================\n\n");
+//            }
+            
+            resWr.flush();
+        }
     }
 
-    private static void test(OCL2PSQL ocl2psql, String oclExp) throws OclParseException, ParseException, IOException {
+    private static void test(OCL2PSQL ocl2psql, String oclExp)
+            throws OclParseException, ParseException, IOException {
         String finalStatementWithDescription = ocl2psql.mapToString(oclExp);
         System.out.println(finalStatementWithDescription);
     }
 
-    private static void test(O2P o2p, String oclExp) {
+    private static String test(O2P o2p, String oclExp) {
         String finalStatementWithDescription = o2p.mapToString(oclExp);
         System.out.println(finalStatementWithDescription);
+        return finalStatementWithDescription;
     }
+    
+    private static String[] legacyCases = { 
+//                "Car::allInstances()",
+//                "Car::allInstances()->size()",
+//                "Car::allInstances()->collect(c|c.Car:color)",
+//                "Car::allInstances()->collect(c|c.Car:owners->size())",
+                "Car::allInstances()->collect(c|c.Car:color = 'blue')",
+
+//                "Automobile::allInstances()",
+//                "Automobile::allInstances()->collect(au|au)",
+//                "Automobile::allInstances()->collect(au|au.Car:color)",
+//                "Automobile::allInstances()->collect(au|au.Vehicle:category)",
+//                "Automobile::allInstances()->collect(au|au.oclAsType(Automobile))",
+//                "Automobile::allInstances()->collect(au|au.oclAsType(Bus))",
+//                "Automobile::allInstances()->collect(au|au.oclAsType(Car))",
+//                "Automobile::allInstances()->collect(au|au.oclAsType(Car).Car:color)",
+//                "Automobile::allInstances()->collect(au|au.oclAsType(Person))",
+//                "Automobile::allInstances()->collect(au|au.oclAsType(Vehicle))",
+//                "Automobile::allInstances()->collect(au|au.oclIsKindOf(Automobile))",
+//                "Automobile::allInstances()->collect(au|au.oclIsKindOf(Car))",
+//                "Automobile::allInstances()->collect(au|au.oclIsKindOf(Person))",
+//                "Automobile::allInstances()->collect(au|au.oclIsKindOf(Vehicle))",
+//                "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Automobile))",
+//                "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Car))",
+//                "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Person))",
+//                "Automobile::allInstances()->collect(au|au.oclIsTypeOf(Vehicle))",
+//                "Car::allInstances()",
+//                "Car::allInstances()->asSet()",
+//                "Car::allInstances()->collect(c|c)",
+//                "Car::allInstances()->collect(c|c.Car:color)",
+//                "Car::allInstances()->collect(c|c.Car:color)->asSet()",
+//                "Car::allInstances()->collect(c|c.Car:color)->isEmpty()",
+//                "Car::allInstances()->collect(c|c.Car:color)->notEmpty()",
+//                "Car::allInstances()->collect(c|c.Car:color)->size()",
+//                "Car::allInstances()->collect(c|c.Car:owners)",
+//                "Car::allInstances()->collect(c|c.Car:owners)->flatten()",
+//                "Car::allInstances()->collect(c|c.Car:owners)->flatten()->size()",
+//                "Car::allInstances()->collect(c|c.Car:owners)->size()",
+//                "Car::allInstances()->collect(c|c.Car:owners->asSet())->flatten()",
+//                "Car::allInstances()->collect(c|c.Car:owners->isEmpty())",
+//                "Car::allInstances()->collect(c|c.Car:owners->notEmpty())",
+//                "Car::allInstances()->exists(c|c.Car:color <> 'no-color')",
+//                "Car::allInstances()->exists(c|c.Car:owners->exists(p|p = self))",
+//                "Car::allInstances()->exists(c|c.Car:owners->exists(p|p.Person:ownedCars->size() < self.Person:ownedCars->size()))",
+//                "Car::allInstances()->exists(c|c.Car:owners->forAll(p|p.Person:name = 'no-name'))",
+//                "Car::allInstances()->exists(c|c.Car:owners->isEmpty())",
+//                "Car::allInstances()->exists(c|c.Car:owners->notEmpty())",
+//                "Car::allInstances()->forAll(c|'blue'=c.Car:color)",
+//                "Car::allInstances()->forAll(c|c.Car:owners->collect(p|p)->size() = 1)",
+//                "Car::allInstances()->forAll(c|c.Car:owners->collect(p|p.Person:ownedCars)->flatten()->size()=1)",
+//                "Car::allInstances()->forAll(c|c.Car:owners->exists(p|p.Person:name = 'no-name'))",
+//                "Car::allInstances()->forAll(c|c.Car:owners->forAll(p|p.Person:ownedCars->forAll(c1|c1.Car:color=c.Car:color)))",
+//                "Car::allInstances()->forAll(c|c.Car:owners->isEmpty())",
+//                "Car::allInstances()->forAll(c|c.Car:owners->notEmpty())",
+//                "Car::allInstances()->forAll(c|c.Car:owners->select(p|p.Person:name.oclIsUndefined())->size()=0)",
+//                "Car::allInstances()->isEmpty()",
+//                "Car::allInstances()->notEmpty()",
+//                "Car::allInstances()->select(c|c.Car:color = 'no-color')",
+//                "Car::allInstances()->select(c|c.Car:color = 'no-color')->size()",
+//                "Car::allInstances()->select(c|c.Car:color.oclIsUndefined())",
+//                "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name = 'no-name'))->size()",
+//                "Car::allInstances()->select(c|c.Car:owners->exists(p|p.Person:name.oclIsUndefined()))->size()",
+//                "Car::allInstances()->size()",
+//                "Person::allInstances()->collect(p|p.Person:ownedCars->size())",
+//                "Person::allInstances()->exists(p|p.Person:ownedCars->exists(c|c.Car:color = 'no-color'))",
+//                "Person::allInstances()->exists(p|p.Person:ownedCars->forAll(c|c.Car:color = 'no-color'))",
+//                "Person::allInstances()->exists(p|p.Person:ownedCars->size() < 10)",
+//                "Person::allInstances()->exists(p|p.Person:ownedCars->size() = 10)",
+//                "Person::allInstances()->forAll(p|p.Person:ownedCars->exists(c|c.Car:color = 'no-color'))",
+//                "Person::allInstances()->forAll(p|p.Person:ownedCars->forAll(c|c.Car:color = 'no-color'))",
+//                "Person::allInstances()->forAll(p|p.Person:ownedCars->size() > 0)",
+//                "Person::allInstances()->forAll(p|true)",
+//                "Person::allInstances()->select(p|p.Person:ownedCars->exists(c|c.Car:color <> 'no-color'))",
+//                "Person::allInstances()->select(p|p.Person:ownedCars->exists(c|c.Car:color.oclIsUndefined()))",
+//                "Person::allInstances()->select(p|p.Person:ownedCars->forAll(c|c.Car:color <> 'no-color'))",
+//                "Vehicle::allInstances()",
+//                "self = caller",
+//                "self",
+//                "self.Person:name = 'Hoang'",
+//                "self.Person:name",
+//                "self.Person:ownedCars",
+//                "self.Person:ownedCars->exists(c|c.Car:color = 'black')",
+//                "self.Person:ownedCars->size()",
+//                "true",
+    };
+
+    private static String[] simpleCases = { 
+//                "Car.allInstances()",
+//                "Car.allInstances()->size()",
+//                "Car.allInstances()->collect(c|c.color)",
+//                "Car.allInstances()->collect(c|c.owners->size())",
+                "Car.allInstances()->collect(c|c.owners->size())",
+
+//                "Automobile.allInstances()",
+//                "Automobile.allInstances()->collect(au|au)",
+//                "Automobile.allInstances()->collect(au|au.color)",
+//                "Automobile.allInstances()->collect(au|au.category)",
+//                "Automobile.allInstances()->collect(au|au.oclAsType(Automobile))",
+//                "Automobile.allInstances()->collect(au|au.oclAsType(Bus))",
+//                "Automobile.allInstances()->collect(au|au.oclAsType(Car))",
+//                "Automobile.allInstances()->collect(au|au.oclAsType(Car).Car:color)",
+//                "Automobile.allInstances()->collect(au|au.oclAsType(Person))",
+//                "Automobile.allInstances()->collect(au|au.oclAsType(Vehicle))",
+//                "Automobile.allInstances()->collect(au|au.oclIsKindOf(Automobile))",
+//                "Automobile.allInstances()->collect(au|au.oclIsKindOf(Car))",
+//                "Automobile.allInstances()->collect(au|au.oclIsKindOf(Person))",
+//                "Automobile.allInstances()->collect(au|au.oclIsKindOf(Vehicle))",
+//                "Automobile.allInstances()->collect(au|au.oclIsTypeOf(Automobile))",
+//                "Automobile.allInstances()->collect(au|au.oclIsTypeOf(Car))",
+//                "Automobile.allInstances()->collect(au|au.oclIsTypeOf(Person))",
+//                "Automobile.allInstances()->collect(au|au.oclIsTypeOf(Vehicle))",
+//                "Car.allInstances()",
+//                "Car.allInstances()->asSet()",
+//                "Car.allInstances()->collect(c|c)",
+//                "Car.allInstances()->collect(c|c.color)",
+//                "Car.allInstances()->collect(c|c.color)->asSet()",
+//                "Car.allInstances()->collect(c|c.color)->isEmpty()",
+//                "Car.allInstances()->collect(c|c.color)->notEmpty()",
+//                "Car.allInstances()->collect(c|c.color)->size()",
+//                "Car.allInstances()->collect(c|c.owners)",
+//                "Car.allInstances()->collect(c|c.owners)->flatten()",
+//                "Car.allInstances()->collect(c|c.owners)->flatten()->size()",
+//                "Car.allInstances()->collect(c|c.owners)->size()",
+//                "Car.allInstances()->collect(c|c.owners->asSet())->flatten()",
+//                "Car.allInstances()->collect(c|c.owners->isEmpty())",
+//                "Car.allInstances()->collect(c|c.owners->notEmpty())",
+//                "Car.allInstances()->exists(c|c.color <> 'no-color')",
+//                "Car.allInstances()->exists(c|c.owners->exists(p|p = self))",
+//                "Car.allInstances()->exists(c|c.owners->exists(p|p.ownedCars->size() < self.ownedCars->size()))",
+//                "Car.allInstances()->exists(c|c.owners->forAll(p|p.name = 'no-name'))",
+//                "Car.allInstances()->exists(c|c.owners->isEmpty())",
+//                "Car.allInstances()->exists(c|c.owners->notEmpty())",
+//                "Car.allInstances()->forAll(c|'blue'=c.color)",
+//                "Car.allInstances()->forAll(c|c.owners->collect(p|p)->size() = 1)",
+//                "Car.allInstances()->forAll(c|c.owners->collect(p|p.ownedCars)->flatten()->size()=1)",
+//                "Car.allInstances()->forAll(c|c.owners->exists(p|p.name = 'no-name'))",
+//                "Car.allInstances()->forAll(c|c.owners->forAll(p|p.ownedCars->forAll(c1|c1.color=c.color)))",
+//                "Car.allInstances()->forAll(c|c.owners->isEmpty())",
+//                "Car.allInstances()->forAll(c|c.owners->notEmpty())",
+//                "Car.allInstances()->forAll(c|c.owners->select(p|p.name.oclIsUndefined())->size()=0)",
+//                "Car.allInstances()->isEmpty()",
+//                "Car.allInstances()->notEmpty()",
+//                "Car.allInstances()->select(c|c.color = 'no-color')",
+//                "Car.allInstances()->select(c|c.color = 'no-color')->size()",
+//                "Car.allInstances()->select(c|c.color.oclIsUndefined())",
+//                "Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name'))->size()",
+//                "Car.allInstances()->select(c|c.owners->exists(p|p.name.oclIsUndefined()))->size()",
+//                "Car.allInstances()->size()",
+//                "Person.allInstances()->collect(p|p.ownedCars->size())",
+//                "Person.allInstances()->exists(p|p.ownedCars->exists(c|c.color = 'no-color'))",
+//                "Person.allInstances()->exists(p|p.ownedCars->forAll(c|c.color = 'no-color'))",
+//                "Person.allInstances()->exists(p|p.ownedCars->size() < 10)",
+//                "Person.allInstances()->exists(p|p.ownedCars->size() = 10)",
+//                "Person.allInstances()->forAll(p|p.ownedCars->exists(c|c.color = 'no-color'))",
+//                "Person.allInstances()->forAll(p|p.ownedCars->forAll(c|c.color = 'no-color'))",
+//                "Person.allInstances()->forAll(p|p.ownedCars->size() > 0)",
+//                "Person.allInstances()->forAll(p|true)",
+//                "Person.allInstances()->select(p|p.ownedCars->exists(c|c.color <> 'no-color'))",
+//                "Person.allInstances()->select(p|p.ownedCars->exists(c|c.color.oclIsUndefined()))",
+//                "Person.allInstances()->select(p|p.ownedCars->forAll(c|c.color <> 'no-color'))",
+//                "Vehicle.allInstances()",
+//                "self = caller",
+//                "self",
+//                "self.name = 'Hoang'",
+//                "self.name",
+//                "self.ownedCars",
+//                "self.ownedCars->exists(c|c.color = 'black')",
+//                "self.ownedCars->size()",
+//                "true",
+    };
+
 }

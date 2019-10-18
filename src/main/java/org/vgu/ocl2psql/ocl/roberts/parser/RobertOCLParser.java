@@ -2132,9 +2132,11 @@ public class RobertOCLParser implements RobertStmVisitor {
                 BinaryExpression onExp = null;
                 for (String v : sVarsIntercept) {
                     BinaryExpression holderExp = new EqualsTo();
+                    // TEMP_src = TEMP_src ??
                     holderExp.setLeftExpression(new Column(aliasTempCollectSource.getName().concat(".ref_").concat(v)));
                     holderExp
                             .setRightExpression(new Column(aliasTempCollectSource.getName().concat(".ref_").concat(v)));
+                    //???????????????????????
                     VarSelectExpression newVar = new VarSelectExpression(v);
                     newVar.setRefExpression(new Column(aliasTempCollectSource.getName().concat(".ref_").concat(v)));
                     finalPlainSelect.addVar(newVar);
