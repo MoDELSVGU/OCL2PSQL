@@ -64,19 +64,19 @@ public class OCL2PSQLManualTest {
                 resWr.append(robert);
 
                 resWr.append("\n================ ~ //END ROBERT ~ ================\n\n");
-            }
-
-//            for (int i = 0; i < simpleCases.length; i++) {
-//                resWr.append("\n\n================ ~ BEGIN SIMPLE ~ ================\n\n");
-//                resWr.append(simpleCases[i]);
-//                resWr.append("\n\n===========================================");
-//
-//                resWr.append("\n\n================ ~ Simple ~ ================\n\n");
-//                String simple = test(simpleO2P, simpleCases[i]);
-//                resWr.append(simple);
-//
-//                resWr.append("\n================ ~ //END SIMPLE ~ ================\n\n");
 //            }
+//
+//            for (int i = 0; i < simpleCases.length; i++) {
+                resWr.append("\n\n================ ~ BEGIN SIMPLE ~ ================\n\n");
+                resWr.append(simpleCases[i]);
+                resWr.append("\n\n===========================================");
+
+                resWr.append("\n\n================ ~ Simple ~ ================\n\n");
+                String simple = test(simpleO2P, simpleCases[i]);
+                resWr.append(simple);
+
+                resWr.append("\n================ ~ //END SIMPLE ~ ================\n\n");
+            }
             
             resWr.flush();
         }
@@ -95,11 +95,14 @@ public class OCL2PSQLManualTest {
     }
     
     private static String[] legacyCases = { 
+//            "1",
 //                "Car::allInstances()",
 //                "Car::allInstances()->size()",
-//                "Car::allInstances()->collect(c|c.Car:color)",
+//                "Car::allInstances()->collect(c|c.Car:color->size())",
 //                "Car::allInstances()->collect(c|c.Car:owners->size())",
-                "Car::allInstances()->collect(c|c.Car:color = 'blue')",
+//                "Car::allInstances()->collect(c| false)",
+                "Car::allInstances()->collect(c| 1 = 1)",
+//                "Car::allInstances()->collect(c|c.Car:color <> 'blue')",
 
 //                "Automobile::allInstances()",
 //                "Automobile::allInstances()->collect(au|au)",
@@ -180,11 +183,14 @@ public class OCL2PSQLManualTest {
     };
 
     private static String[] simpleCases = { 
+//            "1",
 //                "Car.allInstances()",
 //                "Car.allInstances()->size()",
-//                "Car.allInstances()->collect(c|c.color)",
+//                "Car.allInstances()->collect(c|c.color->size())",
 //                "Car.allInstances()->collect(c|c.owners->size())",
-                "Car.allInstances()->collect(c|c.owners->size())",
+//                "Car.allInstances()->collect(c| false)",
+                "Car.allInstances()->collect(c| 1 = 1)",
+//                "Car.allInstances()->collect(c|c.color <> 'blue')",
 
 //                "Automobile.allInstances()",
 //                "Automobile.allInstances()->collect(au|au)",

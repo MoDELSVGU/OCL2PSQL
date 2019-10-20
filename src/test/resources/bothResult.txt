@@ -2,32 +2,76 @@
 
 ================ ~ BEGIN ROBERT ~ ================
 
-Car::allInstances()->collect(c|c.Car:color = 'blue')
+Car::allInstances()->collect(c| 1 = 1)
 
 ===========================================
 ================ ~ Robert ~ ================
 
 
-/*** BEGIN: Car::allInstances()->collect(c|c.Car:color = 'blue') ***/
+/*** BEGIN: Car::allInstances()->collect(c|1 = 1) ***/
 SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
 FROM (
-    /*** BEGIN: c.Car:color = 'blue' ***/
-    SELECT CASE WHEN TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 THEN 0 ELSE 1 END AS val, 'Boolean' AS type, TEMP_LEFT.res = TEMP_RIGHT.res AS res, TEMP_LEFT.ref_c AS ref_c
+    /*** BEGIN: Car::allInstances() ***/
+    SELECT 1 AS val, Car_id AS res, 'Car' AS type
+    FROM Car
+    /*** END: Car::allInstances() ***/
+) AS TEMP_src
+JOIN (
+    /*** BEGIN: 1 = 1 ***/
+    SELECT 1 AS val, 'Boolean' AS type, TEMP_LEFT.res = TEMP_RIGHT.res AS res
     FROM (
-        /*** BEGIN: c.Car:color ***/
-        SELECT 1 AS val, 'String' AS type, color AS res, Car_id AS ref_c
-        FROM Car
-        /*** END: c.Car:color ***/
-    ) AS TEMP_LEFT
-    JOIN (
-        /*** BEGIN: 'blue' ***/
-        SELECT 1 AS val, 'blue' AS res, 'String' AS type
-        /*** END: 'blue' ***/
+        /*** BEGIN: 1 ***/
+        SELECT 1 AS val, 1 AS res, 'Integer' AS type
+        /*** END: 1 ***/
+    ) AS TEMP_LEFT,
+    (
+        /*** BEGIN: 1 ***/
+        SELECT 1 AS val, 1 AS res, 'Integer' AS type
+        /*** END: 1 ***/
     ) AS TEMP_RIGHT
-    /*** END: c.Car:color = 'blue' ***/
+    /*** END: 1 = 1 ***/
 ) AS TEMP_body
-/*** END: Car::allInstances()->collect(c|c.Car:color = 'blue') ***/
+/*** END: Car::allInstances()->collect(c|1 = 1) ***/
 ;
 
 ================ ~ //END ROBERT ~ ================
+
+
+
+================ ~ BEGIN SIMPLE ~ ================
+
+Car.allInstances()->collect(c| 1 = 1)
+
+===========================================
+
+================ ~ Simple ~ ================
+
+
+/*** BEGIN: Car.allInstances()->collect(c| 1 = 1) ***/
+SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+FROM (
+    /*** BEGIN: Car.allInstances() ***/
+    SELECT 1 AS val, Car_id AS res, 'Car' AS type
+    FROM Car
+    /*** END: Car.allInstances() ***/
+) AS TEMP_source
+JOIN (
+    /*** BEGIN: 1 = 1 ***/
+    SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'boolean' AS type, 1 AS val
+    FROM (
+        /*** BEGIN: 1 ***/
+        SELECT 1 AS val, 1 AS res, 'Integer' AS type
+        /*** END: 1 ***/
+    ) AS TEMP_LEFT
+    JOIN (
+        /*** BEGIN: 1 ***/
+        SELECT 1 AS val, 1 AS res, 'Integer' AS type
+        /*** END: 1 ***/
+    ) AS TEMP_RIGHT
+    /*** END: 1 = 1 ***/
+) AS TEMP_body
+/*** END: Car.allInstances()->collect(c| 1 = 1) ***/
+;
+
+================ ~ //END SIMPLE ~ ================
 

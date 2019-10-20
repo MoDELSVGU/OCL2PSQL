@@ -160,10 +160,7 @@ public class VariableUtils {
     
     public static List<Variable> getComplement(List<Variable> A,
             List<Variable> B) {
-        List<Variable> res = new ArrayList<Variable>();
-
-        System.arraycopy(B, 0, res, 0, B.size());
-
+        List<Variable> res = new ArrayList<Variable>(B);
         res.removeAll(A);
 
         return res;
