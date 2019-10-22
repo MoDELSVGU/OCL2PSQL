@@ -33,6 +33,7 @@ import com.vgu.se.jocl.expressions.PropertyCallExp;
 import com.vgu.se.jocl.expressions.Variable;
 import com.vgu.se.jocl.expressions.VariableExp;
 
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
 
 public class VariableUtils {
@@ -98,9 +99,8 @@ public class VariableUtils {
         }
 
         if (src instanceof AssociationClassCallExp) {
-            return FVarsAux(
-                    ((AssociationClassCallExp) src).getNavigationSource(),
-                    fVars);
+            return FVarsAux(((AssociationClassCallExp) src)
+                    .getNavigationSource(), fVars);
         }
 
         if (src instanceof VariableExp) {
@@ -157,7 +157,7 @@ public class VariableUtils {
 
         return SVars;
     }
-    
+
     public static List<Variable> getComplement(List<Variable> A,
             List<Variable> B) {
         List<Variable> res = new ArrayList<Variable>(B);
@@ -165,21 +165,34 @@ public class VariableUtils {
 
         return res;
     }
-    
+
     public static void addVar(List<Variable> vList,
             PlainSelect plainSelect, String tableAlias) {
-        
+
         for (Variable v : vList) {
             VarSelectExpression varExp = new VarSelectExpression(
                     v.getName());
 
-            Column refCol = new Column(Arrays.asList(
-                    tableAlias,
+            Column refCol = new Column(Arrays.asList(tableAlias,
                     varExp.getRef().getAlias().getName()));
 
             varExp.setRefExpression(refCol);
             plainSelect.addVar(varExp);
         }
 
+    }
+
+    public static void addVarToList(List<Variable> vList,
+            List<Expression> expressions, String tableAlias) {
+
+        for (Variable v : vList) {
+            VarSelectExpression varExp = new VarSelectExpression(
+                    v.getName());
+
+            Expression refCol = new Column(Arrays.asList(tableAlias,
+                    varExp.getRef().getAlias().getName()));
+
+            expressions.add(refCol);
+        }
     }
 }

@@ -105,7 +105,9 @@ public class OCL2PSQLManualTest {
 //                "Car::allInstances()->collect(c|c.Car:color <> 'blue')",
 //                "Car::allInstances()->select(c|c.Car:color = 'blue')",
 //   !!!??!!!     "Car::allInstances()->collect(c|c.Car:owners->select(p|p.Person:name = 'Hoang'))",
-                "Car::allInstances()->select(c| true )",
+//                "Car::allInstances()->select(c| true )",
+//                "Car::allInstances()->forAll(c| c.Car:color = 'blue' )",
+                "Car::allInstances()->exists(c| c.Car:color = 'blue' )",
 
 //                "Automobile::allInstances()",
 //                "Automobile::allInstances()->collect(au|au)",
@@ -196,7 +198,9 @@ public class OCL2PSQLManualTest {
 //                "Car.allInstances()->collect(c|c.color <> 'blue')",
 //                "Car.allInstances()->select(c|c.color = 'blue')",
 //   !!!??!!!     "Car.allInstances()->collect(c|c.owners->select(p|p.name = 'Hoang'))",
-                "Car.allInstances()->select(c| true )",
+//                "Car.allInstances()->select(c| true )",
+//                "Car.allInstances()->forAll(c| c.color = 'blue' )",
+                "Car.allInstances()->exists(c| c.color = 'blue' )",
 
 //                "Automobile.allInstances()",
 //                "Automobile.allInstances()->collect(au|au)",
