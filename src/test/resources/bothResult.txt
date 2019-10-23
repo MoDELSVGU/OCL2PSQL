@@ -1,56 +1,22 @@
 
 
-================ ~ BEGIN ROBERT ~ ================
-
-Car::allInstances()->exists(c| c.Car:color = 'blue' )
-
-===========================================
-================ ~ Robert ~ ================
-
-
-/*** BEGIN: Car::allInstances()->exists(c|c.Car:color = 'blue') ***/
-SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
-FROM (
-    /*** BEGIN: c.Car:color = 'blue' ***/
-    SELECT CASE WHEN TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 THEN 0 ELSE 1 END AS val, 'Boolean' AS type, TEMP_LEFT.res = TEMP_RIGHT.res AS res, TEMP_LEFT.ref_c AS ref_c
-    FROM (
-        /*** BEGIN: c.Car:color ***/
-        SELECT 1 AS val, 'String' AS type, color AS res, Car_id AS ref_c
-        FROM Car
-        /*** END: c.Car:color ***/
-    ) AS TEMP_LEFT
-    JOIN (
-        /*** BEGIN: 'blue' ***/
-        SELECT 1 AS val, 'blue' AS res, 'String' AS type
-        /*** END: 'blue' ***/
-    ) AS TEMP_RIGHT
-    /*** END: c.Car:color = 'blue' ***/
-) AS TEMP_body
-WHERE TEMP_body.res = 1
-/*** END: Car::allInstances()->exists(c|c.Car:color = 'blue') ***/
-;
-
-================ ~ //END ROBERT ~ ================
-
-
-
 ================ ~ BEGIN SIMPLE ~ ================
 
-Car.allInstances()->exists(c| c.color = 'blue' )
+Car.allInstances()->collect(c|c.owners->collect(p|p.ownedCars)->flatten())
 
 ===========================================
 
 ================ ~ Simple ~ ================
 
 
-/*** BEGIN: Car.allInstances()->exists(c| c.color = 'blue') ***/
-SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+/*** BEGIN: Car.allInstances()->collect(c|c.owners->collect(p|p.ownedCars)->flatten()) ***/
+SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
 FROM (
-    /*** BEGIN: c.color = 'blue' ***/
-    SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c
+    /*** BEGIN: c.owners->collect(p|p.ownedCars)->flatten() ***/
+    SELECT CASE TEMP_FLATTEN.val IS NULL WHEN 1 THEN 0 ELSE TEMP_FLATTEN.val END AS val, CASE TEMP_FLATTEN.val IS NULL WHEN 1 THEN NULL ELSE TEMP_FLATTEN.res END AS res, TEMP_SOURCE.type AS type, TEMP_FLATTEN.ref_c AS ref_c
     FROM (
-        /*** BEGIN: c.color ***/
-        SELECT TEMP_obj.val AS val, 'String' AS type, Car.color AS res, TEMP_obj.ref_c AS ref_c
+        /*** BEGIN: c.owners ***/
+        SELECT CASE Ownership.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Ownership.owners AS res, CASE Ownership.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_obj.ref_c AS ref_c
         FROM (
             /*** BEGIN: c ***/
             SELECT TEMP_dmn.val AS val, 'Car' AS type, TEMP_dmn.res AS res, TEMP_dmn.res AS ref_c
@@ -62,19 +28,51 @@ FROM (
             ) AS TEMP_dmn
             /*** END: c ***/
         ) AS TEMP_obj
-        LEFT JOIN Car
-        ON TEMP_obj.ref_c = Car.Car_id AND TEMP_obj.val = 1
-        /*** END: c.color ***/
-    ) AS TEMP_LEFT
-    JOIN (
-        /*** BEGIN: 'blue' ***/
-        SELECT 1 AS val, 'blue' AS res, 'String' AS type
-        /*** END: 'blue' ***/
-    ) AS TEMP_RIGHT
-    /*** END: c.color = 'blue' ***/
-) AS TEMP_BODY
-WHERE TEMP_BODY.res = 1
-/*** END: Car.allInstances()->exists(c| c.color = 'blue') ***/
+        LEFT JOIN Ownership
+        ON TEMP_obj.ref_c = Ownership.ownedCars AND TEMP_obj.val = 1
+        /*** END: c.owners ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT *
+    FROM (
+        /*** BEGIN: c.owners->collect(p|p.ownedCars) ***/
+        SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type, TEMP_body.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: p.ownedCars ***/
+            SELECT CASE Ownership.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Ownership.ownedCars AS res, CASE Ownership.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_obj.ref_p AS ref_p, TEMP_obj.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: p ***/
+                SELECT TEMP_dmn.val AS val, 'Person' AS type, TEMP_dmn.res AS res, TEMP_dmn.res AS ref_p, TEMP_dmn.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: c.owners ***/
+                    SELECT CASE Ownership.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Ownership.owners AS res, CASE Ownership.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_obj.ref_c AS ref_c
+                    FROM (
+                        /*** BEGIN: c ***/
+                        SELECT TEMP_dmn.val AS val, 'Car' AS type, TEMP_dmn.res AS res, TEMP_dmn.res AS ref_c
+                        FROM (
+                            /*** BEGIN: Car.allInstances() ***/
+                            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                            FROM Car
+                            /*** END: Car.allInstances() ***/
+                        ) AS TEMP_dmn
+                        /*** END: c ***/
+                    ) AS TEMP_obj
+                    LEFT JOIN Ownership
+                    ON TEMP_obj.ref_c = Ownership.ownedCars AND TEMP_obj.val = 1
+                    /*** END: c.owners ***/
+                ) AS TEMP_dmn
+                /*** END: p ***/
+            ) AS TEMP_obj
+            LEFT JOIN Ownership
+            ON TEMP_obj.ref_p = Ownership.owners AND TEMP_obj.val = 1
+            /*** END: p.ownedCars ***/
+        ) AS TEMP_body
+        /*** END: c.owners->collect(p|p.ownedCars) ***/
+    ) AS TEMP
+    WHERE TEMP.val = 1) AS TEMP_FLATTEN
+    ON TEMP_SOURCE.ref_c = TEMP_FLATTEN.ref_c
+    /*** END: c.owners->collect(p|p.ownedCars)->flatten() ***/
+) AS TEMP_body
+/*** END: Car.allInstances()->collect(c|c.owners->collect(p|p.ownedCars)->flatten()) ***/
 ;
 
 ================ ~ //END SIMPLE ~ ================

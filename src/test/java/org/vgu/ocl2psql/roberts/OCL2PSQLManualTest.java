@@ -54,19 +54,19 @@ public class OCL2PSQLManualTest {
         String resFile = "src/test/resources/bothResult.txt";
         try (FileWriter resWr = new FileWriter(resFile)) {
 
-            for (int i = 0; i < legacyCases.length; i++) {
-                resWr.append("\n\n================ ~ BEGIN ROBERT ~ ================\n\n");
-                resWr.append(legacyCases[i]);
-                resWr.append("\n\n===========================================");
-
-                resWr.append("\n================ ~ Robert ~ ================\n\n");
-                String robert = test(robertO2P, legacyCases[i]);
-                resWr.append(robert);
-
-                resWr.append("\n================ ~ //END ROBERT ~ ================\n\n");
-//            }
+//            for (int i = 0; i < legacyCases.length; i++) {
+//                resWr.append("\n\n================ ~ BEGIN ROBERT ~ ================\n\n");
+//                resWr.append(legacyCases[i]);
+//                resWr.append("\n\n===========================================");
 //
-//            for (int i = 0; i < simpleCases.length; i++) {
+//                resWr.append("\n================ ~ Robert ~ ================\n\n");
+//                String robert = test(robertO2P, legacyCases[i]);
+//                resWr.append(robert);
+//
+//                resWr.append("\n================ ~ //END ROBERT ~ ================\n\n");
+//            }
+
+            for (int i = 0; i < simpleCases.length; i++) {
                 resWr.append("\n\n================ ~ BEGIN SIMPLE ~ ================\n\n");
                 resWr.append(simpleCases[i]);
                 resWr.append("\n\n===========================================");
@@ -107,7 +107,9 @@ public class OCL2PSQLManualTest {
 //   !!!??!!!     "Car::allInstances()->collect(c|c.Car:owners->select(p|p.Person:name = 'Hoang'))",
 //                "Car::allInstances()->select(c| true )",
 //                "Car::allInstances()->forAll(c| c.Car:color = 'blue' )",
-                "Car::allInstances()->exists(c| c.Car:color = 'blue' )",
+//                "Car::allInstances()->exists(c| c.Car:color = 'blue' )",
+//                "Car::allInstances()->exists(c| c.Car.oclIsUndefined())",
+                "Car::allInstances()->collect(c| c.Car:owners)->flatten()",
 
 //                "Automobile::allInstances()",
 //                "Automobile::allInstances()->collect(au|au)",
@@ -191,16 +193,18 @@ public class OCL2PSQLManualTest {
 //            "1",
 //                "Car.allInstances()",
 //                "Car.allInstances()->size()",
+//                "Car.allInstances()->collect(c|c.owners)",
 //                "Car.allInstances()->collect(c|c.color->size())",
 //                "Car.allInstances()->collect(c|c.owners->size())",
 //                "Car.allInstances()->collect(c| false)",
 //                "Car.allInstances()->collect(c| 1 = 1)",
 //                "Car.allInstances()->collect(c|c.color <> 'blue')",
 //                "Car.allInstances()->select(c|c.color = 'blue')",
-//   !!!??!!!     "Car.allInstances()->collect(c|c.owners->select(p|p.name = 'Hoang'))",
 //                "Car.allInstances()->select(c| true )",
 //                "Car.allInstances()->forAll(c| c.color = 'blue' )",
-                "Car.allInstances()->exists(c| c.color = 'blue' )",
+//                "Car.allInstances()->exists(c| c.color = 'blue' )",
+//                "Car.allInstances()->exists(c| c.color.oclIsUndefined())",
+                "Car.allInstances()->collect(c|c.owners->collect(p|p.ownedCars)->flatten())",
 
 //                "Automobile.allInstances()",
 //                "Automobile.allInstances()->collect(au|au)",
