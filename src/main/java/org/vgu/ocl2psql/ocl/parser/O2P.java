@@ -55,6 +55,10 @@ public abstract class O2P {
 
     public abstract void setContext(JSONArray ctx);
 
-    public abstract void setContextualType(String typeName);
+    public void setContextualType(String varName) {
+        
+    }
+
+    public abstract void setContextualType(String varName, String varType);
 
 }

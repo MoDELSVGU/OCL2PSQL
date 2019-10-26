@@ -23,6 +23,7 @@ import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
 import org.vgu.ocl2psql.ocl.parser.O2P;
+import org.vgu.ocl2psql.ocl.roberts.expressions.TypeExp;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
@@ -31,14 +32,15 @@ import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.utils.SQLAsStringUtils;
 
 import com.vgu.se.jocl.expressions.OclExp;
+import com.vgu.se.jocl.expressions.Variable;
 import com.vgu.se.jocl.parser.simple.SimpleParser;
+import com.vgu.se.jocl.types.Type;
 
 import net.sf.jsqlparser.statement.select.SelectItem;
 
 public class SimpleO2PApi extends O2P {
 
     private JSONArray ctx;
-    private String contextualType;
     
     private SimpleParser parser = new SimpleParser();
     private SimpleOclParser o2pParser = new SimpleOclParser();
@@ -72,9 +74,9 @@ public class SimpleO2PApi extends O2P {
     }
 
     @Override
-    public void setContextualType(String typeName) {
-        this.contextualType = typeName;
-        parser.setAdhocCtx(contextualType);
+    public void setContextualType(String varName, String varType) {
+        parser.putAdhocContextualSet(
+                new Variable(varName, new Type(varType)));
     }
 
     private Select cookFinalStatement(Select finalStatement) {
