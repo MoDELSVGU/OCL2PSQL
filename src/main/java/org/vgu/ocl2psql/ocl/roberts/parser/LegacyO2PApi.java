@@ -100,4 +100,10 @@ public class LegacyO2PApi extends O2P {
         finalPlainSelect.getSelectItems().addAll(newSelectItems);
         return finalStatement;
     }
+
+    @Override
+    public void setContextualType(String varName, String varType) {
+        // TODO Auto-generated method stub
+        
+    }
 }
