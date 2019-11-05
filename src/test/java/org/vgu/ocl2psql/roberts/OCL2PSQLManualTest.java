@@ -26,7 +26,7 @@ import java.util.Properties;
 
 import org.json.simple.parser.ParseException;
 import org.vgu.ocl2psql.main.OCL2PSQL;
-import org.vgu.ocl2psql.ocl.parser.O2P;
+import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
 import org.vgu.ocl2psql.ocl.parser.simple.SimpleO2PApi;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
 import org.vgu.ocl2psql.ocl.roberts.parser.LegacyO2PApi;
@@ -45,13 +45,13 @@ public class OCL2PSQLManualTest {
 //                "src/main/resources/context-model/alice_context.json");
                 "src/main/resources/context-model/CarPerson_context.json");
 
-        O2P robertO2P = new LegacyO2PApi();
+        Ocl2PsqlSvc robertO2P = new LegacyO2PApi();
         robertO2P.setPlainUMLContextFromFile(
                 contextModel.getAbsolutePath());
         robertO2P.setDescriptionMode(true);
         robertO2P.setContextualType("Car");
 
-        O2P simpleO2P = new SimpleO2PApi();
+        Ocl2PsqlSvc simpleO2P = new SimpleO2PApi();
         simpleO2P.setPlainUMLContextFromFile(
                 contextModel.getAbsolutePath());
         simpleO2P.setDescriptionMode(true);
@@ -98,7 +98,7 @@ public class OCL2PSQLManualTest {
         System.out.println(finalStatementWithDescription);
     }
 
-    private static String test(O2P o2p, String oclExp) {
+    private static String test(Ocl2PsqlSvc o2p, String oclExp) {
         String finalStatementWithDescription = o2p.mapToString(oclExp);
         System.out.println(finalStatementWithDescription);
         return finalStatementWithDescription;

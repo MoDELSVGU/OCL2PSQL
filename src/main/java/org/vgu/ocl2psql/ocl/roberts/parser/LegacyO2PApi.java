@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.json.simple.JSONArray;
-import org.vgu.ocl2psql.ocl.parser.O2P;
+import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
 import org.vgu.ocl2psql.ocl.roberts.context.DefaultOclContext;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
 import org.vgu.ocl2psql.ocl.roberts.expressions.OclExpression;
@@ -37,7 +37,7 @@ import org.vgu.ocl2psql.sql.utils.SQLAsStringUtils;
 
 import net.sf.jsqlparser.statement.select.SelectItem;
 
-public class LegacyO2PApi extends O2P {
+public class LegacyO2PApi extends Ocl2PsqlSvc {
 
     private JSONArray ctx;
 
@@ -99,11 +99,5 @@ public class LegacyO2PApi extends O2P {
         finalPlainSelect.getSelectItems().clear();
         finalPlainSelect.getSelectItems().addAll(newSelectItems);
         return finalStatement;
-    }
-
-    @Override
-    public void setContextualType(String varName, String varType) {
-        // TODO Auto-generated method stub
-        
     }
 }

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
-import org.vgu.ocl2psql.ocl.parser.O2P;
+import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
 import org.vgu.ocl2psql.ocl.roberts.expressions.TypeExp;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
@@ -38,7 +38,7 @@ import com.vgu.se.jocl.types.Type;
 
 import net.sf.jsqlparser.statement.select.SelectItem;
 
-public class SimpleO2PApi extends O2P {
+public class SimpleO2PApi extends Ocl2PsqlSvc {
 
     private JSONArray ctx;
     

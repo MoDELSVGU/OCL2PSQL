@@ -26,7 +26,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 
-public abstract class O2P {
+public abstract class Ocl2PsqlSvc {
     
     protected Boolean descriptionMode = false;
 
@@ -36,9 +36,15 @@ public abstract class O2P {
                 .parse(new FileReader(filePath)));
     }
 
-    public void setPlainUMLContext(String umlCtx)
+    public void setPlainUMLContextFromString(String umlCtx)
+            throws IOException, ParseException {
+        setContext((JSONArray) new JSONParser()
+                .parse(umlCtx));
+    }
+
+    public void setPlainUMLContext(JSONArray plainUmlCtx)
             throws ParseException {
-        setContext((JSONArray) new JSONParser().parse(umlCtx));
+        setContext(plainUmlCtx);
     }
 
     public boolean getDescriptionMode() {
@@ -55,10 +61,8 @@ public abstract class O2P {
 
     public abstract void setContext(JSONArray ctx);
 
-    public void setContextualType(String varName) {
-        
-    }
+    public void setContextualType(String varName) {};
 
-    public abstract void setContextualType(String varName, String varType);
+    public void setContextualType(String varName, String varType) {};
 
 }
