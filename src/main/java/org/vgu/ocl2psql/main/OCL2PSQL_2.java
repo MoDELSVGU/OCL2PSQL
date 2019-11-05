@@ -33,12 +33,6 @@ public class OCL2PSQL_2 {
 
     private Ocl2PsqlSvc ocl2PsqlSvc;
 
-    private RobertOCLParser ocl2sqlParser;
-
-    public RobertOCLParser getOcl2sqlParser() {
-        return ocl2sqlParser;
-    }
-
     public OCL2PSQL_2() {
         this(null);
     }
