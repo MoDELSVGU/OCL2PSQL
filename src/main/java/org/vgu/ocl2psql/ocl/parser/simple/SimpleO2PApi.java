@@ -63,6 +63,8 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
     public Select mapToSQL(String oclExp) {
 
         OclExp newExp = parser.parse(oclExp, ctx);
+
+        o2pParser.setCtx(ctx);
         newExp.accept(o2pParser);
 
         return cookFinalStatement(o2pParser.getSelect());

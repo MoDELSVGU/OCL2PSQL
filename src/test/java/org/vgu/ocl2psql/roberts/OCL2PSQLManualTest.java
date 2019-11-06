@@ -42,8 +42,8 @@ public class OCL2PSQLManualTest {
             throws Exception {
 
         File contextModel = new File(
-                "src/main/resources/context-model/alice_context.json");
-//                "src/main/resources/context-model/CarPerson_context.json");
+//                "src/main/resources/context-model/alice_context.json");
+                "src/main/resources/context-model/CarPerson_context.json");
 
         Ocl2PsqlSvc robertO2P = new LegacyO2PApi();
         robertO2P.setPlainUMLContextFromFile(
@@ -239,7 +239,7 @@ public class OCL2PSQLManualTest {
 //                "Car.allInstances()->select(c| true)",
 //                "Car.allInstances()->size() = 5",
 //                "Car.allInstances()->size()",
-                "(kself = kcaller) or (kself.salary < 60000) or (kself.age < 30)",
+//                "(kself = kcaller) or (kself.salary < 60000) or (kself.age < 30)",
 //                "kself = kcaller or kself.salary < 60000",
 //                "kself = kcaller or kself.age < 30",
 
@@ -251,7 +251,7 @@ public class OCL2PSQLManualTest {
 //                "Automobile.allInstances()->collect(au|au.oclAsType(Automobile))",
 //                "Automobile.allInstances()->collect(au|au.oclAsType(Bus))",
 //                "Automobile.allInstances()->collect(au|au.oclAsType(Car))",
-//                "Automobile.allInstances()->collect(au|au.oclAsType(Car).Car:color)",
+                "Automobile.allInstances()->collect(au|au.oclAsType(Car).color)",
 //                "Automobile.allInstances()->collect(au|au.oclAsType(Person))",
 //                "Automobile.allInstances()->collect(au|au.oclAsType(Vehicle))",
 //                "Automobile.allInstances()->collect(au|au.oclIsKindOf(Automobile))",
