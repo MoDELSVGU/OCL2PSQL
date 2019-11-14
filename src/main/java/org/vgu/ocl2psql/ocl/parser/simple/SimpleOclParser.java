@@ -942,12 +942,12 @@ public class SimpleOclParser implements ParserVisitor {
         }
 
         // Case 2
-//        if (!isEmptyFvLeft && isSubsetSvRightOfSvLeft) {
-//            VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
-//
-//            plainSelect.setFromItem(tmpLeft);
-//            join.setRightItem(tmpRight);
-//        }
+        if (!isEmptyFvLeft && isSubsetSvRightOfSvLeft) {
+            VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
+
+            plainSelect.setFromItem(tmpLeft);
+            join.setRightItem(tmpRight);
+        }
         // case 3
         else if (!isEmptyFvRight && isSubsetSvLeftOfSvRight) {
             VariableUtils.addVar(sVarsRight, plainSelect,
