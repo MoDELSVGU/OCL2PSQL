@@ -42,8 +42,9 @@ public class OCL2PSQLManualTest {
             throws Exception {
 
         File contextModel = new File(
+                "src/main/resources/context-model/alice_context_1.json");
 //                "src/main/resources/context-model/alice_context.json");
-                "src/main/resources/context-model/CarPerson_context.json");
+//                "src/main/resources/context-model/CarPerson_context.json");
 
         Ocl2PsqlSvc robertO2P = new LegacyO2PApi();
         robertO2P.setPlainUMLContextFromFile(
@@ -56,8 +57,8 @@ public class OCL2PSQLManualTest {
                 contextModel.getAbsolutePath());
         simpleO2P.setDescriptionMode(true);
         simpleO2P.setContextualType("self", "Car");
-        simpleO2P.setContextualType("kself", "Employee");
-        simpleO2P.setContextualType("kcaller", "Employee");
+        simpleO2P.setContextualType("kself", "Staff");
+        simpleO2P.setContextualType("kcaller", "Staff");
        
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyMMddHHmmss");
         String now = df.format(LocalDateTime.now());
@@ -244,14 +245,15 @@ public class OCL2PSQLManualTest {
 //                "Car.allInstances()->forAll(c| c.owners->isEmpty())",
 //                "Car.allInstances()->notEmpty()",
 //                "Car.allInstances()->forAll(c| c.owners->notEmpty())",
-                "Car.allInstances()->isUnique()",
-                "Car.allInstances()->forAll(c| c.owners->isUnique())",
+//                "Car.allInstances()->isUnique()",
+//                "Car.allInstances()->forAll(c| c.owners->isUnique())",
 //                "Car.allInstances()->size() = 5",
 //                "Car.allInstances()->size()",
 //                "Car.allInstances()->forAll(c| c.owners-> select(p| p.ownedCars->exists(c1|c1.oclIsUndefined()))->size()=5)",
 //                "(kself = kcaller) or (kself.salary < 60000) or (kself.age < 30)",
 //                "kself = kcaller or kself.salary < 60000",
 //                "kself = kcaller or kself.age < 30",
+                "(kself = kcaller) or (kself.employer->exists(boss|boss = kcaller or boss.employer->exists(bboss|bboss = kcaller)))",
 
 
 //                "Automobile.allInstances()",

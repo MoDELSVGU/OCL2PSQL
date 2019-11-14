@@ -140,11 +140,15 @@ public class VariableUtils {
         for (Variable var : FVars) {
             OclExp srcVarExpression = var.getSource();
 
-            if (SVars.contains(var) || srcVarExpression == null) {
+            if (SVars.contains(var)) {
                 continue;
             }
 
             SVars.add(var);
+
+            if (srcVarExpression == null) {
+                continue;
+            }
 
             for (Variable srcVar : SVars(srcVarExpression)) {
                 if (SVars.contains(srcVar)) {
