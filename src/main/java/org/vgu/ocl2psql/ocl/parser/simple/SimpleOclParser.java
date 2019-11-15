@@ -21,6 +21,7 @@ package org.vgu.ocl2psql.ocl.parser.simple;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.json.simple.JSONArray;
@@ -1772,7 +1773,11 @@ public class SimpleOclParser implements ParserVisitor {
         // .END preparation
 
         String tmpSourceAlias = "TEMP_SOURCE";
-        OclExp sourceExp = exp.getSource();
+        //Hoang: I fast fixed the issue by using shortcuts. Sorry anh An, I explained later...
+        VariableExp outerVarExp = exp.getSource() instanceof AssociationClassCallExp 
+                ? (VariableExp) ((AssociationClassCallExp) exp.getSource()).getNavigationSource()
+                : null;
+        OclExp sourceExp = Optional.ofNullable((OclExp) outerVarExp).orElse(exp.getSource());
         sourceExp.accept(this);
 
         Select sourceMap = this.getSelect();
@@ -1824,6 +1829,7 @@ public class SimpleOclParser implements ParserVisitor {
             // Preparation for Case 2, 4
             List<Variable> sVarsSrc = VariableUtils.SVars(sourceExp);
             List<Variable> sVarsBody = VariableUtils.SVars(bodyExp);
+            Variable outerVar = outerVarExp.getVariable();
 
             List<Variable> sVarsComplement = new ArrayList<Variable>(
                     sVarsBody);
@@ -1835,7 +1841,7 @@ public class SimpleOclParser implements ParserVisitor {
 
             IsNullExpression isNullSrcRef = new IsNullExpression();
             isNullSrcRef.setLeftExpression(new Column(Arrays.asList(
-                    tmpSourceAlias, "ref_".concat(v.getName()))));
+                    tmpBodyAlias, "ref_".concat(outerVar.getName()))));
 
             resCase.setSwitchExpression(isNullSrcRef);
 
@@ -1874,7 +1880,7 @@ public class SimpleOclParser implements ParserVisitor {
             ResSelectExpression resInJoin = new ResSelectExpression(
                     countAllEq0);
             plainSelectInJoin.setRes(resInJoin);
-
+            
             List<Variable> sVarsBodyLessV = new ArrayList<Variable>(
                     sVarsBody);
             sVarsBodyLessV.remove(v);
@@ -1959,8 +1965,15 @@ public class SimpleOclParser implements ParserVisitor {
         // .END preparation
 
         String tmpSourceAlias = "TEMP_SOURCE";
-        OclExp sourceExp = exp.getSource();
+//        OclExp sourceExp = exp.getSource();
+        //Hoang: I fast fixed the issue by using shortcuts. Sorry anh An, I explained later...
+        VariableExp outerVarExp = exp.getSource() instanceof AssociationClassCallExp 
+                ? (VariableExp) ((AssociationClassCallExp) exp.getSource()).getNavigationSource()
+                : null;
+        OclExp sourceExp = Optional.ofNullable((OclExp) outerVarExp).orElse(exp.getSource());
         sourceExp.accept(this);
+        
+        
 
         Select sourceMap = this.getSelect();
         SubSelect tmpSource = new SubSelect(sourceMap.getSelectBody(),
@@ -2011,6 +2024,7 @@ public class SimpleOclParser implements ParserVisitor {
             // Preparation for Case 2, 4
             List<Variable> sVarsSrc = VariableUtils.SVars(sourceExp);
             List<Variable> sVarsBody = VariableUtils.SVars(bodyExp);
+            Variable outerVar = outerVarExp.getVariable();
 
             List<Variable> sVarsComplement = new ArrayList<Variable>(
                     sVarsBody);
@@ -2022,15 +2036,15 @@ public class SimpleOclParser implements ParserVisitor {
 
             IsNullExpression isNullSrcRef = new IsNullExpression();
             isNullSrcRef.setLeftExpression(new Column(Arrays.asList(
-                    tmpSourceAlias, "ref_".concat(v.getName()))));
+                    tmpBodyAlias, "ref_".concat(outerVar.getName()))));
 
             resCase.setSwitchExpression(isNullSrcRef);
 
-            WhenClause when1Then1 = new WhenClause();
-            when1Then1.setWhenExpression(new LongValue(1L));
-            when1Then1.setThenExpression(new LongValue(1L));
+            WhenClause when1Then0 = new WhenClause();
+            when1Then0.setWhenExpression(new LongValue(1L));
+            when1Then0.setThenExpression(new LongValue(0L));
 
-            resCase.setWhenClauses(Arrays.asList(when1Then1));
+            resCase.setWhenClauses(Arrays.asList(when1Then0));
 
             resCase.setElseExpression(
                     new Column(Arrays.asList(tmpBodyAlias, "res")));
@@ -2065,8 +2079,8 @@ public class SimpleOclParser implements ParserVisitor {
             List<Variable> sVarsBodyLessV = new ArrayList<Variable>(
                     sVarsBody);
             sVarsBodyLessV.remove(v);
-
-            VariableUtils.addVar(sVarsBodyLessV, plainSelectInJoin,
+            
+            VariableUtils.addVar(sVarsBodyLessV, plainSelectInJoin, 
                     tmpBodyAlias);
 
             plainSelectInJoin.setFromItem(tmpBody);
@@ -2074,7 +2088,7 @@ public class SimpleOclParser implements ParserVisitor {
             BinaryExpression whereCond = buildBinExp("=",
                     new Column(Arrays.asList(tmpBodyAlias, "res")),
                     new LongValue(1L));
-            plainSelect.setWhere(whereCond);
+            plainSelectInJoin.setWhere(whereCond);
 
             List<Expression> groupByExps = new ArrayList<Expression>();
             VariableUtils.addVarToList(sVarsBodyLessV, groupByExps,
