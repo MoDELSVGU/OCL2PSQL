@@ -50,13 +50,13 @@ public class VariableUtils {
      * @return the set of variables that occurs free in ?
      * @since 1.0
      */
-    public static List<Variable> FVars(OclExp src) {
+    public static List<Variable> FVars(com.vgu.se.jocl.expressions.Expression src) {
         ArrayList<Variable> fVars = new ArrayList<Variable>();
 
         return FVarsAux(src, fVars);
     }
 
-    private static List<Variable> FVarsAux(OclExp src,
+    private static List<Variable> FVarsAux(com.vgu.se.jocl.expressions.Expression src,
             List<Variable> fVars) {
 
         if (src instanceof IteratorExp) {
@@ -128,7 +128,7 @@ public class VariableUtils {
      * @return the set of variables which e' depends on
      * @since 1.0
      */
-    public static List<Variable> SVars(OclExp ePrime) {
+    public static List<Variable> SVars(com.vgu.se.jocl.expressions.Expression ePrime) {
         List<Variable> FVars = FVars(ePrime);
 
         if (FVars.isEmpty()) {
@@ -138,7 +138,7 @@ public class VariableUtils {
         List<Variable> SVars = new ArrayList<Variable>();
 
         for (Variable var : FVars) {
-            OclExp srcVarExpression = var.getSource();
+            com.vgu.se.jocl.expressions.Expression srcVarExpression = var.getSource();
 
             if (SVars.contains(var)) {
                 continue;

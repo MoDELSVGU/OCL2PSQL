@@ -51,6 +51,8 @@ import com.vgu.se.jocl.expressions.StringLiteralExp;
 import com.vgu.se.jocl.expressions.TypeExp;
 import com.vgu.se.jocl.expressions.Variable;
 import com.vgu.se.jocl.expressions.VariableExp;
+import com.vgu.se.jocl.expressions.sql.SqlExp;
+import com.vgu.se.jocl.expressions.sql.SqlFunctionExp;
 import com.vgu.se.jocl.visit.ParserVisitor;
 
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -102,8 +104,19 @@ public class SimpleOclParser implements ParserVisitor {
     }
 
     @Override
+    public void visit(com.vgu.se.jocl.expressions.Expression exp) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
     public void visit(OclExp oclExp) {
         // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void visit(SqlExp sqlExp) {
+        // TODO Auto-generated method stub
+        
     }
 
     @Override
@@ -306,6 +319,22 @@ public class SimpleOclParser implements ParserVisitor {
         this.select = new Select();
         this.select.setSelectBody(plainSelect);
     }
+
+    @Override
+    public void visit(SqlFunctionExp sqlFunctionExp) {
+        PlainSelect plainSelect = new PlainSelect();
+        plainSelect.createTrueValColumn();
+        String fnStr = sqlFunctionExp.getName();
+        
+        Function fn = new Function();
+        fn.setName(fnStr.replaceAll("(\\w+)\\(.*", "$1"));
+
+        ResSelectExpression res = new ResSelectExpression(fn);
+        plainSelect.setRes(res);
+
+        this.select = new Select();
+        this.select.setSelectBody(plainSelect);
+    }
     // ***********************************************
     // * Helpers
     // ***********************************************
@@ -376,7 +405,8 @@ public class SimpleOclParser implements ParserVisitor {
         String tmpDmnAlias = "TEMP_DMN";
         String varName = exp.getVariable().getName();
 
-        OclExp sourceExp = exp.getVariable().getSource();
+        com.vgu.se.jocl.expressions.Expression sourceExp = exp
+                .getVariable().getSource();
 
         if (sourceExp == null) {
             plainSelect.createTrueValColumn();
@@ -439,7 +469,7 @@ public class SimpleOclParser implements ParserVisitor {
         String tmpObjAlias = "TEMP_OBJ";
 
 //        VariableExp varExp = (VariableExp) exp.getNavigationSource();
-        OclExp srcExp = exp.getNavigationSource();
+        com.vgu.se.jocl.expressions.Expression srcExp = exp.getNavigationSource();
 
         String srcType = srcExp.getType().getReferredType();
         srcType.replaceAll("Col\\((\\w+)\\)", srcType);
@@ -542,7 +572,7 @@ public class SimpleOclParser implements ParserVisitor {
         TypeSelectExpression type = new TypeSelectExpression(caseType);
         plainSelect.setType(type);
 
-        OclExp sourceExp = exp.getNavigationSource();
+        com.vgu.se.jocl.expressions.Expression sourceExp = exp.getNavigationSource();
 
         List<Variable> sVarsV = VariableUtils.SVars(sourceExp);
 
@@ -601,7 +631,7 @@ public class SimpleOclParser implements ParserVisitor {
 
         String tmpSourceAlias = "TEMP_SOURCE";
 
-        OclExp srcExp = exp.getSource();
+        com.vgu.se.jocl.expressions.Expression srcExp = exp.getSource();
         srcExp.accept(this);
 
         Select sourceMap = this.getSelect();
@@ -651,7 +681,7 @@ public class SimpleOclParser implements ParserVisitor {
         PlainSelect plainSelect = new PlainSelect();
 
         // Begin Preparation
-        OclExp src = exp.getSource();
+        com.vgu.se.jocl.expressions.Expression src = exp.getSource();
         src.accept(this);
 
         String tmpSrcAlias = "TMP_SOURCE";
@@ -659,7 +689,8 @@ public class SimpleOclParser implements ParserVisitor {
         SubSelect tmpSrc = new SubSelect(srcMap.getSelectBody(),
                 tmpSrcAlias);
 
-        OclExp argExp = exp.getArguments().get(0);
+        com.vgu.se.jocl.expressions.Expression argExp = exp
+                .getArguments().get(0);
 
         String typeToCheck = "";
         if (argExp instanceof TypeExp) {
@@ -711,7 +742,7 @@ public class SimpleOclParser implements ParserVisitor {
         PlainSelect plainSelect = new PlainSelect();
 
         // Begin Preparation
-        OclExp src = exp.getSource();
+        com.vgu.se.jocl.expressions.Expression src = exp.getSource();
         src.accept(this);
 
         String tmpSrcAlias = "TMP_SOURCE";
@@ -719,7 +750,8 @@ public class SimpleOclParser implements ParserVisitor {
         SubSelect tmpSrc = new SubSelect(srcMap.getSelectBody(),
                 tmpSrcAlias);
 
-        OclExp argExp = exp.getArguments().get(0);
+        com.vgu.se.jocl.expressions.Expression argExp = exp
+                .getArguments().get(0);
 
         String typeToCheck = "";
         if (argExp instanceof TypeExp) {
@@ -771,7 +803,7 @@ public class SimpleOclParser implements ParserVisitor {
         PlainSelect plainSelect = new PlainSelect();
 
         // Begin Preparation
-        OclExp src = exp.getSource();
+        com.vgu.se.jocl.expressions.Expression src = exp.getSource();
         src.accept(this);
 
         String tmpSrcAlias = "TMP_SOURCE";
@@ -837,8 +869,10 @@ public class SimpleOclParser implements ParserVisitor {
     private PlainSelect mapBinary(OperationCallExp exp) {
         PlainSelect plainSelect = new PlainSelect();
 
-        OclExp leftExp = exp.getSource();
-        OclExp rightExp = exp.getArguments().get(0);
+        com.vgu.se.jocl.expressions.Expression leftExp = exp
+                .getSource();
+        com.vgu.se.jocl.expressions.Expression rightExp = exp
+                .getArguments().get(0);
 
         String tmpLeftAlias = "TEMP_LEFT";
         String tmpRightAlias = "TEMP_RIGHT";
@@ -1144,7 +1178,7 @@ public class SimpleOclParser implements ParserVisitor {
         // Begin preparation
 
         String tmpSrcAlias = "TEMP_SRC";
-        OclExp srcExp = exp.getSource();
+        com.vgu.se.jocl.expressions.Expression srcExp = exp.getSource();
         srcExp.accept(this);
 
         Select srcMap = this.getSelect();
@@ -1225,7 +1259,7 @@ public class SimpleOclParser implements ParserVisitor {
         // Begin preparation
 
         String tmpSrcAlias = "TEMP_SRC";
-        OclExp srcExp = exp.getSource();
+        com.vgu.se.jocl.expressions.Expression srcExp = exp.getSource();
         srcExp.accept(this);
 
         Select srcMap = this.getSelect();
@@ -1306,7 +1340,7 @@ public class SimpleOclParser implements ParserVisitor {
         // Begin preparation
         String tmpSrcAlias = "TEMP_SRC";
 
-        OclExp srcExp = exp.getSource();
+        com.vgu.se.jocl.expressions.Expression srcExp = exp.getSource();
         srcExp.accept(this);
 
         Select srcMap = this.getSelect();
@@ -1324,9 +1358,8 @@ public class SimpleOclParser implements ParserVisitor {
         Function countRes = new Function();
         countRes.setName("COUNT");
         ExpressionList expLs = new ExpressionList(
-            new Column(Arrays.asList(tmpSrcAlias, "res")));
+                new Column(Arrays.asList(tmpSrcAlias, "res")));
         countRes.setParameters(expLs);
-                
 
         Function countDistinctRes = new Function();
         countDistinctRes.setName("COUNT");
@@ -1365,7 +1398,7 @@ public class SimpleOclParser implements ParserVisitor {
             resCase.setWhenClauses(Arrays.asList(whenClause));
 
             resCase.setElseExpression(countExp);
-            
+
             ResSelectExpression res = new ResSelectExpression(resCase);
             plainSelect.setRes(res);
 
@@ -1380,9 +1413,9 @@ public class SimpleOclParser implements ParserVisitor {
                 groupByList.add(new Column(Arrays.asList(tmpSrcAlias,
                         "ref_".concat(v.getName()))));
             }
-            
+
             groupBy.setGroupByExpressions(groupByList);
-            
+
             plainSelect.setGroupByElement(groupBy);
         }
 
@@ -1394,7 +1427,7 @@ public class SimpleOclParser implements ParserVisitor {
 
         // Beign Preparation
         String tmpBodyAlias = "TMP_BODY";
-        OclExp bodyExp = exp.getBody();
+        com.vgu.se.jocl.expressions.Expression bodyExp = exp.getBody();
         bodyExp.accept(this);
 
         Select bodyMap = this.getSelect();
@@ -1402,7 +1435,7 @@ public class SimpleOclParser implements ParserVisitor {
                 tmpBodyAlias);
 
         String tmpSrcAlias = "TMP_SOURCE";
-        OclExp srcExp = exp.getSource();
+        com.vgu.se.jocl.expressions.Expression srcExp = exp.getSource();
         srcExp.accept(this);
 
         String srcType = srcExp.getType().getReferredType()
@@ -1571,7 +1604,7 @@ public class SimpleOclParser implements ParserVisitor {
         // Preparation
         String tmpBodyAlias = "TEMP_BODY";
 
-        OclExp bodyExp = exp.getBody();
+        com.vgu.se.jocl.expressions.Expression bodyExp = exp.getBody();
 
         bodyExp.accept(this);
         Select bodyMap = this.getSelect();
@@ -1580,7 +1613,8 @@ public class SimpleOclParser implements ParserVisitor {
 
         String tmpSourceAlias = "TEMP_SOURCE";
 
-        OclExp sourceExp = exp.getSource();
+        com.vgu.se.jocl.expressions.Expression sourceExp = exp
+                .getSource();
 
         sourceExp.accept(this);
         Select sourceMap = this.getSelect();
@@ -1773,11 +1807,17 @@ public class SimpleOclParser implements ParserVisitor {
         // .END preparation
 
         String tmpSourceAlias = "TEMP_SOURCE";
-        //Hoang: I fast fixed the issue by using shortcuts. Sorry anh An, I explained later...
-        VariableExp outerVarExp = exp.getSource() instanceof AssociationClassCallExp 
-                ? (VariableExp) ((AssociationClassCallExp) exp.getSource()).getNavigationSource()
-                : null;
-        OclExp sourceExp = Optional.ofNullable((OclExp) outerVarExp).orElse(exp.getSource());
+        // Hoang: I fast fixed the issue by using shortcuts. Sorry anh
+        // An, I explained later...
+        VariableExp outerVarExp = exp
+                .getSource() instanceof AssociationClassCallExp
+                        ? (VariableExp) ((AssociationClassCallExp) exp
+                                .getSource()).getNavigationSource()
+                        : null;
+        com.vgu.se.jocl.expressions.Expression sourceExp = Optional
+                .ofNullable(
+                        (com.vgu.se.jocl.expressions.Expression) outerVarExp)
+                .orElse(exp.getSource());
         sourceExp.accept(this);
 
         Select sourceMap = this.getSelect();
@@ -1785,7 +1825,7 @@ public class SimpleOclParser implements ParserVisitor {
                 tmpSourceAlias);
 
         String tmpBodyAlias = "TEMP_BODY";
-        OclExp bodyExp = exp.getBody();
+        com.vgu.se.jocl.expressions.Expression bodyExp = exp.getBody();
         bodyExp.accept(this);
 
         Select bodyMap = this.getSelect();
@@ -1880,7 +1920,7 @@ public class SimpleOclParser implements ParserVisitor {
             ResSelectExpression resInJoin = new ResSelectExpression(
                     countAllEq0);
             plainSelectInJoin.setRes(resInJoin);
-            
+
             List<Variable> sVarsBodyLessV = new ArrayList<Variable>(
                     sVarsBody);
             sVarsBodyLessV.remove(v);
@@ -1966,21 +2006,25 @@ public class SimpleOclParser implements ParserVisitor {
 
         String tmpSourceAlias = "TEMP_SOURCE";
 //        OclExp sourceExp = exp.getSource();
-        //Hoang: I fast fixed the issue by using shortcuts. Sorry anh An, I explained later...
-        VariableExp outerVarExp = exp.getSource() instanceof AssociationClassCallExp 
-                ? (VariableExp) ((AssociationClassCallExp) exp.getSource()).getNavigationSource()
-                : null;
-        OclExp sourceExp = Optional.ofNullable((OclExp) outerVarExp).orElse(exp.getSource());
+        // Hoang: I fast fixed the issue by using shortcuts. Sorry anh
+        // An, I explained later...
+        VariableExp outerVarExp = exp
+                .getSource() instanceof AssociationClassCallExp
+                        ? (VariableExp) ((AssociationClassCallExp) exp
+                                .getSource()).getNavigationSource()
+                        : null;
+        com.vgu.se.jocl.expressions.Expression sourceExp = Optional
+                .ofNullable(
+                        (com.vgu.se.jocl.expressions.Expression) outerVarExp)
+                .orElse(exp.getSource());
         sourceExp.accept(this);
-        
-        
 
         Select sourceMap = this.getSelect();
         SubSelect tmpSource = new SubSelect(sourceMap.getSelectBody(),
                 tmpSourceAlias);
 
         String tmpBodyAlias = "TEMP_BODY";
-        OclExp bodyExp = exp.getBody();
+        com.vgu.se.jocl.expressions.Expression bodyExp = exp.getBody();
         bodyExp.accept(this);
 
         Select bodyMap = this.getSelect();
@@ -2079,8 +2123,8 @@ public class SimpleOclParser implements ParserVisitor {
             List<Variable> sVarsBodyLessV = new ArrayList<Variable>(
                     sVarsBody);
             sVarsBodyLessV.remove(v);
-            
-            VariableUtils.addVar(sVarsBodyLessV, plainSelectInJoin, 
+
+            VariableUtils.addVar(sVarsBodyLessV, plainSelectInJoin,
                     tmpBodyAlias);
 
             plainSelectInJoin.setFromItem(tmpBody);
@@ -2172,8 +2216,8 @@ public class SimpleOclParser implements ParserVisitor {
 
             Variable v = ((IteratorExp) exp.getSource()).getIterator();
 
-            OclExp srcOfSrcExp = ((IteratorExp) exp.getSource())
-                    .getSource();
+            com.vgu.se.jocl.expressions.Expression srcOfSrcExp = ((IteratorExp) exp
+                    .getSource()).getSource();
             srcOfSrcExp.accept(this);
             Select srcOfSrcMap = this.getSelect();
             SubSelect tmpSourceOfSource = new SubSelect(
@@ -2321,4 +2365,5 @@ public class SimpleOclParser implements ParserVisitor {
 
         return binExp;
     }
+
 }

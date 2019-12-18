@@ -43,6 +43,7 @@ import org.vgu.ocl2psql.sql.statement.select.TypeSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.utils.SQLAsStringUtils;
 
+import com.vgu.se.jocl.expressions.Expression;
 import com.vgu.se.jocl.expressions.OclExp;
 import com.vgu.se.jocl.parser.interfaces.Parser;
 import com.vgu.se.jocl.parser.simple.SimpleParser;
@@ -99,7 +100,7 @@ public class OCL2PSQL {
             ctx = (JSONArray) new JSONParser()
                     .parse(new FileReader(filePath));
 
-            OclExp newExp = parser.parse(oclExpression, ctx);
+            Expression newExp = parser.parse(oclExpression, ctx);
             newExp.accept(ocl2PsqlParser);
 
             return cookFinalStatement(ocl2PsqlParser.getSelect());

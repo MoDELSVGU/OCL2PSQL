@@ -42,9 +42,9 @@ public class OCL2PSQLManualTest {
             throws Exception {
 
         File contextModel = new File(
-                "src/main/resources/context-model/alice_context_1.json");
+//                "src/main/resources/context-model/alice_context_1.json");
 //                "src/main/resources/context-model/alice_context.json");
-//                "src/main/resources/context-model/CarPerson_context.json");
+                "src/main/resources/context-model/CarPerson_context.json");
 
         Ocl2PsqlSvc robertO2P = new LegacyO2PApi();
         robertO2P.setPlainUMLContextFromFile(
@@ -253,7 +253,9 @@ public class OCL2PSQLManualTest {
 //                "(kself = kcaller) or (kself.salary < 60000) or (kself.age < 30)",
 //                "kself = kcaller or kself.salary < 60000",
 //                "kself = kcaller or kself.age < 30",
-                "(kself = kcaller) or (kself.employer->exists(boss|boss = kcaller or boss.employer->exists(bboss|bboss = kcaller)))",
+//                "(kself = kcaller) or (kself.employer->exists(boss|boss = kcaller or boss.employer->exists(bboss|bboss = kcaller)))",
+//                "Car.allInstances()->collect(c| c.color < @SQL(CURDATE()))",
+                "@SQL(CURDATE())",
 
 
 //                "Automobile.allInstances()",

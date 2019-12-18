@@ -31,6 +31,7 @@ import org.vgu.ocl2psql.sql.statement.select.TypeSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.utils.SQLAsStringUtils;
 
+import com.vgu.se.jocl.expressions.Expression;
 import com.vgu.se.jocl.expressions.OclExp;
 import com.vgu.se.jocl.expressions.Variable;
 import com.vgu.se.jocl.parser.simple.SimpleParser;
@@ -62,7 +63,7 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
     @Override
     public Select mapToSQL(String oclExp) {
 
-        OclExp newExp = parser.parse(oclExp, ctx);
+        Expression newExp = parser.parse(oclExp, ctx);
 
         o2pParser.setCtx(ctx);
         newExp.accept(o2pParser);
