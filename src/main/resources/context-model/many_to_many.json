@@ -1,0 +1,36 @@
+[
+    {
+        "class": "Room",
+        "attributes": [
+            {
+                "name": "name",
+                "type": "String"
+            }
+        ],
+        "ends": [
+            {
+                "name": "exams",
+                "target": "Exam",
+                "opp": "rooms",
+                "mult": "*"
+            }
+        ]
+    },
+    {
+        "class": "Exam",
+        "attributes": [
+            {
+                "name": "name",
+                "type": "String"
+            }
+        ],
+        "ends": [
+            {
+                "name": "rooms",
+                "target": "Room",
+                "opp": "exams",
+                "mult": "*"
+            }
+        ]
+    }
+]

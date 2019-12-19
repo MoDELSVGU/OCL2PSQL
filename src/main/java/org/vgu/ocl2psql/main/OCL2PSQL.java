@@ -44,7 +44,6 @@ import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.utils.SQLAsStringUtils;
 
 import com.vgu.se.jocl.expressions.Expression;
-import com.vgu.se.jocl.expressions.OclExp;
 import com.vgu.se.jocl.parser.interfaces.Parser;
 import com.vgu.se.jocl.parser.simple.SimpleParser;
 

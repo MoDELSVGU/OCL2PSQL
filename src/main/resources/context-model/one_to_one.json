@@ -1,0 +1,36 @@
+[
+    {
+        "class": "Module_Period",
+        "attributes": [
+            {
+                "name": "name",
+                "type": "String"
+            }
+        ],
+        "ends": [
+            {
+                "name": "exam",
+                "target": "Exam",
+                "opp": "module_period",
+                "mult": "1"
+            }
+        ]
+    },
+    {
+        "class": "Exam",
+        "attributes": [
+            {
+                "name": "name",
+                "type": "String"
+            }
+        ],
+        "ends": [
+            {
+                "name": "module_period",
+                "target": "Module_Period",
+                "opp": "exam",
+                "mult": "1"
+            }
+        ]
+    }
+]

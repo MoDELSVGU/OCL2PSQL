@@ -18,12 +18,11 @@ limitations under the License.
 
 package org.vgu.ocl2psql.ocl.parser.simple;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.simple.JSONArray;
 import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
-import org.vgu.ocl2psql.ocl.roberts.expressions.TypeExp;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
@@ -32,7 +31,6 @@ import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.utils.SQLAsStringUtils;
 
 import com.vgu.se.jocl.expressions.Expression;
-import com.vgu.se.jocl.expressions.OclExp;
 import com.vgu.se.jocl.expressions.Variable;
 import com.vgu.se.jocl.parser.simple.SimpleParser;
 import com.vgu.se.jocl.types.Type;

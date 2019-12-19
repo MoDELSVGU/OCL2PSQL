@@ -1,0 +1,36 @@
+[
+    {
+        "class": "University",
+        "attributes": [
+            {
+                "name": "name",
+                "type": "String"
+            }
+        ],
+        "ends": [
+            {
+                "name": "programs",
+                "target": "Program",
+                "opp": "university",
+                "mult": "*"
+            }
+        ]
+    },
+    {
+        "class": "Program",
+        "attributes": [
+            {
+                "name": "name",
+                "type": "String"
+            }
+        ],
+        "ends": [
+            {
+                "name": "university",
+                "target": "University",
+                "opp": "program",
+                "mult": "1"
+            }
+        ]
+    }
+]

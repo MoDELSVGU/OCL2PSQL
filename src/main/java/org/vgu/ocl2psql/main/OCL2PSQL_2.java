@@ -26,7 +26,6 @@ import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
 import org.vgu.ocl2psql.ocl.parser.simple.SimpleO2PApi;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
 import org.vgu.ocl2psql.ocl.roberts.parser.LegacyO2PApi;
-import org.vgu.ocl2psql.ocl.roberts.parser.RobertOCLParser;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 
 public class OCL2PSQL_2 {

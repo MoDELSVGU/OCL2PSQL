@@ -44,7 +44,11 @@ public class OCL2PSQLManualTest {
         File contextModel = new File(
 //                "src/main/resources/context-model/alice_context_1.json");
 //                "src/main/resources/context-model/alice_context.json");
-                "src/main/resources/context-model/CarPerson_context.json");
+                "src/main/resources/context-model/old-CarPerson_context.json");
+            //This is for the new model
+//                "src/main/resources/context-model/many_to_many.json");
+//                "src/main/resources/context-model/many_to_one.json");
+//                "src/main/resources/context-model/one_to_one.json");
 
         Ocl2PsqlSvc robertO2P = new LegacyO2PApi();
         robertO2P.setPlainUMLContextFromFile(
@@ -56,9 +60,9 @@ public class OCL2PSQLManualTest {
         simpleO2P.setPlainUMLContextFromFile(
                 contextModel.getAbsolutePath());
         simpleO2P.setDescriptionMode(true);
-        simpleO2P.setContextualType("self", "Car");
-        simpleO2P.setContextualType("kself", "Staff");
-        simpleO2P.setContextualType("kcaller", "Staff");
+//        simpleO2P.setContextualType("self", "Car");
+//        simpleO2P.setContextualType("kself", "Staff");
+//        simpleO2P.setContextualType("kcaller", "Staff");
        
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyMMddHHmmss");
         String now = df.format(LocalDateTime.now());
@@ -255,7 +259,11 @@ public class OCL2PSQLManualTest {
 //                "kself = kcaller or kself.age < 30",
 //                "(kself = kcaller) or (kself.employer->exists(boss|boss = kcaller or boss.employer->exists(bboss|bboss = kcaller)))",
 //                "Car.allInstances()->collect(c| c.color < @SQL(CURDATE()))",
-                "@SQL(CURDATE())",
+//                "@SQL(CURDATE())",
+//                "University.allInstances()->collect(u|u.programs)"
+//        "Program.allInstances()->collect(p|p.university)"
+//        "Module_Period.allInstances()->collect(m|m.exam)"
+        
 
 
 //                "Automobile.allInstances()",
