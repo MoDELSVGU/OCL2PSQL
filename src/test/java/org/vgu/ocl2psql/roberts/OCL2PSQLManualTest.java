@@ -44,9 +44,10 @@ public class OCL2PSQLManualTest {
         File contextModel = new File(
 //                "src/main/resources/context-model/alice_context_1.json");
 //                "src/main/resources/context-model/alice_context.json");
-                "src/main/resources/context-model/old-CarPerson_context.json");
+//                "src/main/resources/context-model/old-CarPerson_context.json");
             //This is for the new model
-//                "src/main/resources/context-model/many_to_many.json");
+//                "src/main/resources/context-model/university_test.json");
+                "src/main/resources/context-model/many_to_many.json");
 //                "src/main/resources/context-model/many_to_one.json");
 //                "src/main/resources/context-model/one_to_one.json");
 
@@ -59,6 +60,7 @@ public class OCL2PSQLManualTest {
         Ocl2PsqlSvc simpleO2P = new SimpleO2PApi();
         simpleO2P.setPlainUMLContextFromFile(
                 contextModel.getAbsolutePath());
+        simpleO2P.setDataModelFromFile(contextModel.getAbsolutePath());
         simpleO2P.setDescriptionMode(true);
 //        simpleO2P.setContextualType("self", "Car");
 //        simpleO2P.setContextualType("kself", "Staff");
@@ -260,9 +262,10 @@ public class OCL2PSQLManualTest {
 //                "(kself = kcaller) or (kself.employer->exists(boss|boss = kcaller or boss.employer->exists(bboss|bboss = kcaller)))",
 //                "Car.allInstances()->collect(c| c.color < @SQL(CURDATE()))",
 //                "@SQL(CURDATE())",
-//                "University.allInstances()->collect(u|u.programs)"
-//        "Program.allInstances()->collect(p|p.university)"
-//        "Module_Period.allInstances()->collect(m|m.exam)"
+//                "University.allInstances()->collect(u|u.programs)",
+//        "Program.allInstances()->collect(p|p.university)",
+//        "Module_Period.allInstances()->collect(m|m.exam)",
+        "Room.allInstances()->collect(r|r.exams)",
         
 
 

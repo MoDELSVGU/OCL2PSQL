@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.json.simple.JSONArray;
+import org.vgu.dm2schema.dm.DataModel;
 import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
@@ -39,7 +40,8 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 
 public class SimpleO2PApi extends Ocl2PsqlSvc {
 
-    private JSONArray ctx;
+//    private JSONArray ctx;
+    private DataModel dm;
     
     private SimpleParser parser = new SimpleParser();
     private SimpleOclParser o2pParser = new SimpleOclParser();
@@ -61,9 +63,10 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
     @Override
     public Select mapToSQL(String oclExp) {
 
-        Expression newExp = parser.parse(oclExp, ctx);
+        Expression newExp = parser.parse(oclExp, dm);
 
-        o2pParser.setCtx(ctx);
+//        o2pParser.setCtx(ctx);
+        o2pParser.setDataModel(dm);
         newExp.accept(o2pParser);
 
         return cookFinalStatement(o2pParser.getSelect());
@@ -71,8 +74,14 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
 
     @Override
     public void setContext(JSONArray ctx) {
-        this.ctx = ctx;
+//        this.ctx = ctx;
     }
+
+    @Override
+    public void setDataModel(DataModel dm) {
+        this.dm = dm;
+    }
+
 
     @Override
     public void setContextualType(String varName, String varType) {

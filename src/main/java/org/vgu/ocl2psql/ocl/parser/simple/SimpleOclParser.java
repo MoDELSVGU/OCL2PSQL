@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.json.simple.JSONArray;
+import org.vgu.dm2schema.dm.DataModel;
 import org.vgu.ocl2psql.ocl.parser.exception.OclException;
 import org.vgu.ocl2psql.ocl.parser.utils.VariableUtils;
 import org.vgu.ocl2psql.ocl.roberts.utils.UMLContextUtils;
@@ -83,6 +84,15 @@ public class SimpleOclParser implements ParserVisitor {
 
     private Select select;
     private JSONArray ctx;
+    private DataModel dataModel;
+
+    public DataModel getDataModel() {
+        return dataModel;
+    }
+
+    public void setDataModel(DataModel dm) {
+        this.dataModel = dm;
+    }
 
     public Select getSelect() {
         return this.select;
@@ -216,15 +226,15 @@ public class SimpleOclParser implements ParserVisitor {
         case "oclIsUndefined":
             plainSelect = mapOclIsUndefined(operationCallExp);
             break;
-        case "oclIsKindOf":
-            plainSelect = mapOclIsKindOf(operationCallExp);
-            break;
-        case "oclIsTypeOf":
-            plainSelect = mapOclIsTypeOf(operationCallExp);
-            break;
-        case "oclAsType":
-            plainSelect = mapOclAsType(operationCallExp);
-            break;
+//        case "oclIsKindOf":
+//            plainSelect = mapOclIsKindOf(operationCallExp);
+//            break;
+//        case "oclIsTypeOf":
+//            plainSelect = mapOclIsTypeOf(operationCallExp);
+//            break;
+//        case "oclAsType":
+//            plainSelect = mapOclAsType(operationCallExp);
+//            break;
         case "=":
         case "<>":
         case "<=":
