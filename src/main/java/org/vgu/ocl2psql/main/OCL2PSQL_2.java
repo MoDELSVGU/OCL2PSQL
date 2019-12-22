@@ -20,12 +20,10 @@ package org.vgu.ocl2psql.main;
 
 import java.io.IOException;
 
-import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
 import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
 import org.vgu.ocl2psql.ocl.parser.simple.SimpleO2PApi;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
-import org.vgu.ocl2psql.ocl.roberts.parser.LegacyO2PApi;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 
 public class OCL2PSQL_2 {
@@ -33,28 +31,8 @@ public class OCL2PSQL_2 {
     private Ocl2PsqlSvc ocl2PsqlSvc;
 
     public OCL2PSQL_2() {
-        this(null);
-    }
-    
-    public OCL2PSQL_2(String name) {
-
-        if (name.equalsIgnoreCase("simple")) {
-            ocl2PsqlSvc = new SimpleO2PApi();
-        } else {
-            ocl2PsqlSvc = new LegacyO2PApi();
-        }
-        
+        ocl2PsqlSvc = new SimpleO2PApi();
         ocl2PsqlSvc.setDescriptionMode(false);
-    }
-
-    public void setPlainUMLContextFromFile(String filePath)
-            throws IOException, ParseException {
-        ocl2PsqlSvc.setPlainUMLContextFromFile(filePath);
-    }
-
-    public void setPlainUMLContext(String UMLContext)
-            throws ParseException, IOException {
-        ocl2PsqlSvc.setPlainUMLContextFromString(UMLContext);
     }
 
     public String mapToString(String oclExpression)
@@ -66,10 +44,6 @@ public class OCL2PSQL_2 {
             throws OclParseException, ParseException, IOException {
 
         return ocl2PsqlSvc.mapToSQL(oclExpression);
-    }
-
-    public void setContext(JSONArray context) {
-        ocl2PsqlSvc.setContext(context);
     }
 
     public Boolean getDescriptionMode() {

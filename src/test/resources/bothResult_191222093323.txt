@@ -1,0 +1,3661 @@
+Car.allInstances()->collect(c|c)
+
+/*** BEGIN: Car.allInstances()->collect(c|c) ***/
+SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+FROM (
+    /*** BEGIN: c ***/
+    SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+    FROM (
+        /*** BEGIN: Car.allInstances() ***/
+        SELECT 1 AS val, Car_id AS res, 'Car' AS type
+        FROM Car
+        /*** END: Car.allInstances() ***/
+    ) AS TEMP_DMN
+    /*** END: c ***/
+) AS TEMP_body
+/*** END: Car.allInstances()->collect(c|c) ***/
+;
+Car.allInstances()->forAll(c|c.owners->collect(p|p.ownedCars)->flatten()->size()=1)
+
+/*** BEGIN: Car.allInstances()->forAll(c|c.owners->collect(p|p.ownedCars)->flatten()->size()=1) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) = 0 AS res
+FROM (
+    /*** BEGIN: c.owners->collect(p|p.ownedCars)->flatten()->size()=1 ***/
+    SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.owners->collect(p|p.ownedCars)->flatten()->size() ***/
+        SELECT 1 AS val, 'Integer' AS type, CASE TEMP_src.val = 0 WHEN 1 THEN 0 ELSE COUNT(*) END AS res, TEMP_src.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c.owners->collect(p|p.ownedCars)->flatten() ***/
+            SELECT CASE TEMP_FLATTEN.val IS NULL WHEN 1 THEN 0 ELSE TEMP_FLATTEN.val END AS val, CASE TEMP_FLATTEN.val IS NULL WHEN 1 THEN NULL ELSE TEMP_FLATTEN.res END AS res, TEMP_SOURCE.type AS type, TEMP_FLATTEN.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: c.owners ***/
+                SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: c ***/
+                    SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                    FROM (
+                        /*** BEGIN: Car.allInstances() ***/
+                        SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                        FROM Car
+                        /*** END: Car.allInstances() ***/
+                    ) AS TEMP_DMN
+                    /*** END: c ***/
+                ) AS TEMP_OBJ
+                LEFT JOIN Car_ownedCars_owners_Person
+                ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                /*** END: c.owners ***/
+            ) AS TEMP_SOURCE
+            LEFT JOIN (SELECT *
+            FROM (
+                /*** BEGIN: c.owners->collect(p|p.ownedCars) ***/
+                SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type, TEMP_body.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: p.ownedCars ***/
+                    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p, TEMP_OBJ.ref_c AS ref_c
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+                        FROM (
+                            /*** BEGIN: c.owners ***/
+                            SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                            FROM (
+                                /*** BEGIN: c ***/
+                                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                                FROM (
+                                    /*** BEGIN: Car.allInstances() ***/
+                                    SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                                    FROM Car
+                                    /*** END: Car.allInstances() ***/
+                                ) AS TEMP_DMN
+                                /*** END: c ***/
+                            ) AS TEMP_OBJ
+                            LEFT JOIN Car_ownedCars_owners_Person
+                            ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                            /*** END: c.owners ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                    /*** END: p.ownedCars ***/
+                ) AS TEMP_body
+                /*** END: c.owners->collect(p|p.ownedCars) ***/
+            ) AS TEMP
+            WHERE TEMP.val = 1) AS TEMP_FLATTEN
+            ON TEMP_SOURCE.ref_c = TEMP_FLATTEN.ref_c
+            /*** END: c.owners->collect(p|p.ownedCars)->flatten() ***/
+        ) AS TEMP_src
+        GROUP BY TEMP_src.ref_c, TEMP_src.val
+        /*** END: c.owners->collect(p|p.ownedCars)->flatten()->size() ***/
+    ) AS TEMP_LEFT
+    JOIN (
+        /*** BEGIN: 1 ***/
+        SELECT 1 AS val, 1 AS res, 'Integer' AS type
+        /*** END: 1 ***/
+    ) AS TEMP_RIGHT
+    /*** END: c.owners->collect(p|p.ownedCars)->flatten()->size()=1 ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 0
+/*** END: Car.allInstances()->forAll(c|c.owners->collect(p|p.ownedCars)->flatten()->size()=1) ***/
+;
+Car.allInstances()->forAll(c|c.owners->select(p|p.name.oclIsUndefined())->size()=0)
+
+/*** BEGIN: Car.allInstances()->forAll(c|c.owners->select(p|p.name.oclIsUndefined())->size()=0) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) = 0 AS res
+FROM (
+    /*** BEGIN: c.owners->select(p|p.name.oclIsUndefined())->size()=0 ***/
+    SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.owners->select(p|p.name.oclIsUndefined())->size() ***/
+        SELECT 1 AS val, 'Integer' AS type, CASE TEMP_src.val = 0 WHEN 1 THEN 0 ELSE COUNT(*) END AS res, TEMP_src.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c.owners->select(p|p.name.oclIsUndefined()) ***/
+            SELECT CASE TEMP_SOURCE.val = 0 OR TEMP_BODY.ref_p IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, CASE TEMP_SOURCE.val = 0 OR TEMP_BODY.ref_p IS NULL WHEN 1 THEN NULL ELSE TEMP_SOURCE.res END AS res, TEMP_SOURCE.type AS type
+            FROM (
+                /*** BEGIN: c.owners ***/
+                SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: c ***/
+                    SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                    FROM (
+                        /*** BEGIN: Car.allInstances() ***/
+                        SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                        FROM Car
+                        /*** END: Car.allInstances() ***/
+                    ) AS TEMP_DMN
+                    /*** END: c ***/
+                ) AS TEMP_OBJ
+                LEFT JOIN Car_ownedCars_owners_Person
+                ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                /*** END: c.owners ***/
+            ) AS TEMP_SOURCE
+            LEFT JOIN (SELECT *
+            FROM (
+                /*** BEGIN: p.name.oclIsUndefined() ***/
+                SELECT TEMP_SOURCE.val AS val, CASE TEMP_SOURCE.val = 0 WHEN 1 THEN NULL ELSE TEMP_SOURCE.res IS NULL END AS res, 'Boolean' AS type, TEMP_SOURCE.ref_p AS ref_p, TEMP_SOURCE.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: p.name ***/
+                    SELECT TEMP_OBJ.val AS val, 'String' AS type, Person.name AS res, TEMP_OBJ.ref_p AS ref_p, TEMP_OBJ.ref_c AS ref_c
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+                        FROM (
+                            /*** BEGIN: c.owners ***/
+                            SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                            FROM (
+                                /*** BEGIN: c ***/
+                                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                                FROM (
+                                    /*** BEGIN: Car.allInstances() ***/
+                                    SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                                    FROM Car
+                                    /*** END: Car.allInstances() ***/
+                                ) AS TEMP_DMN
+                                /*** END: c ***/
+                            ) AS TEMP_OBJ
+                            LEFT JOIN Car_ownedCars_owners_Person
+                            ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                            /*** END: c.owners ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Person
+                    ON TEMP_OBJ.ref_p = Person.Person_id AND TEMP_OBJ.val = 1
+                    /*** END: p.name ***/
+                ) AS TEMP_SOURCE
+                /*** END: p.name.oclIsUndefined() ***/
+            ) AS TEMP
+            WHERE TEMP.res = 1) AS TEMP_BODY
+            ON TEMP_SOURCE.res = TEMP_BODY.ref_p AND TEMP_SOURCE.ref_c = TEMP_BODY.ref_c
+            /*** END: c.owners->select(p|p.name.oclIsUndefined()) ***/
+        ) AS TEMP_src
+        GROUP BY TEMP_src.ref_c, TEMP_src.val
+        /*** END: c.owners->select(p|p.name.oclIsUndefined())->size() ***/
+    ) AS TEMP_LEFT
+    JOIN (
+        /*** BEGIN: 0 ***/
+        SELECT 1 AS val, 0 AS res, 'Integer' AS type
+        /*** END: 0 ***/
+    ) AS TEMP_RIGHT
+    /*** END: c.owners->select(p|p.name.oclIsUndefined())->size()=0 ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 0
+/*** END: Car.allInstances()->forAll(c|c.owners->select(p|p.name.oclIsUndefined())->size()=0) ***/
+;
+Car.allInstances()->collect(c|c.color)
+
+/*** BEGIN: Car.allInstances()->collect(c|c.color) ***/
+SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+FROM (
+    /*** BEGIN: c.color ***/
+    SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+        FROM (
+            /*** BEGIN: Car.allInstances() ***/
+            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+            FROM Car
+            /*** END: Car.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: c ***/
+    ) AS TEMP_OBJ
+    LEFT JOIN Car
+    ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+    /*** END: c.color ***/
+) AS TEMP_body
+/*** END: Car.allInstances()->collect(c|c.color) ***/
+;
+Car.allInstances()->collect(c|c.owners)
+
+/*** BEGIN: Car.allInstances()->collect(c|c.owners) ***/
+SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+FROM (
+    /*** BEGIN: c.owners ***/
+    SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+        FROM (
+            /*** BEGIN: Car.allInstances() ***/
+            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+            FROM Car
+            /*** END: Car.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: c ***/
+    ) AS TEMP_OBJ
+    LEFT JOIN Car_ownedCars_owners_Person
+    ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+    /*** END: c.owners ***/
+) AS TEMP_body
+/*** END: Car.allInstances()->collect(c|c.owners) ***/
+;
+Car.allInstances()->collect(c|c.owners)->flatten()
+
+/*** BEGIN: Car.allInstances()->collect(c|c.owners)->flatten() ***/
+SELECT 1 AS val, TEMP_SOURCE.res AS res, TEMP_SOURCE.type AS type
+FROM (
+    /*** BEGIN: Car.allInstances()->collect(c|c.owners) ***/
+    SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+    FROM (
+        /*** BEGIN: c.owners ***/
+        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car_ownedCars_owners_Person
+        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+        /*** END: c.owners ***/
+    ) AS TEMP_body
+    /*** END: Car.allInstances()->collect(c|c.owners) ***/
+) AS TEMP_SOURCE
+WHERE TEMP_SOURCE.val = 1
+/*** END: Car.allInstances()->collect(c|c.owners)->flatten() ***/
+;
+Car.allInstances()->forAll(c|c.owners->collect(p|p)->size() = 1)
+
+/*** BEGIN: Car.allInstances()->forAll(c|c.owners->collect(p|p)->size() = 1) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) = 0 AS res
+FROM (
+    /*** BEGIN: c.owners->collect(p|p)->size() = 1 ***/
+    SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.owners->collect(p|p)->size() ***/
+        SELECT 1 AS val, 'Integer' AS type, CASE TEMP_src.val = 0 WHEN 1 THEN 0 ELSE COUNT(*) END AS res, TEMP_src.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c.owners->collect(p|p) ***/
+            SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type, TEMP_body.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: p ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: c.owners ***/
+                    SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                    FROM (
+                        /*** BEGIN: c ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                        FROM (
+                            /*** BEGIN: Car.allInstances() ***/
+                            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                            FROM Car
+                            /*** END: Car.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: c ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                    /*** END: c.owners ***/
+                ) AS TEMP_DMN
+                /*** END: p ***/
+            ) AS TEMP_body
+            /*** END: c.owners->collect(p|p) ***/
+        ) AS TEMP_src
+        GROUP BY TEMP_src.ref_c, TEMP_src.val
+        /*** END: c.owners->collect(p|p)->size() ***/
+    ) AS TEMP_LEFT
+    JOIN (
+        /*** BEGIN: 1 ***/
+        SELECT 1 AS val, 1 AS res, 'Integer' AS type
+        /*** END: 1 ***/
+    ) AS TEMP_RIGHT
+    /*** END: c.owners->collect(p|p)->size() = 1 ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 0
+/*** END: Car.allInstances()->forAll(c|c.owners->collect(p|p)->size() = 1) ***/
+;
+Car.allInstances()->select(c|c.color = 'no-color')->size()
+
+/*** BEGIN: Car.allInstances()->select(c|c.color = 'no-color')->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances()->select(c|c.color = 'no-color') ***/
+    SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_c AS res, 'Car' AS type
+    FROM (
+        /*** BEGIN: c.color = 'no-color' ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                FROM (
+                    /*** BEGIN: Car.allInstances() ***/
+                    SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                    FROM Car
+                    /*** END: Car.allInstances() ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-color' ***/
+            SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+            /*** END: 'no-color' ***/
+        ) AS TEMP_RIGHT
+        /*** END: c.color = 'no-color' ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    /*** END: Car.allInstances()->select(c|c.color = 'no-color') ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->select(c|c.color = 'no-color')->size() ***/
+;
+Car.allInstances()->exists(c|c.color <> 'no-color')
+
+/*** BEGIN: Car.allInstances()->exists(c|c.color <> 'no-color') ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: c.color <> 'no-color' ***/
+    SELECT TEMP_LEFT.res <> TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.color ***/
+        SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car
+        ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+        /*** END: c.color ***/
+    ) AS TEMP_LEFT
+    JOIN (
+        /*** BEGIN: 'no-color' ***/
+        SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+        /*** END: 'no-color' ***/
+    ) AS TEMP_RIGHT
+    /*** END: c.color <> 'no-color' ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Car.allInstances()->exists(c|c.color <> 'no-color') ***/
+;
+Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name'))->size()
+
+/*** BEGIN: Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name'))->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name')) ***/
+    SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_c AS res, 'Car' AS type
+    FROM (
+        /*** BEGIN: c.owners->exists(p|p.name = 'no-name') ***/
+        SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_c IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_SOURCE
+        LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: p.name = 'no-name' ***/
+            SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_p AS ref_p, TEMP_LEFT.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: p.name ***/
+                SELECT TEMP_OBJ.val AS val, 'String' AS type, Person.name AS res, TEMP_OBJ.ref_p AS ref_p, TEMP_OBJ.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: p ***/
+                    SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+                    FROM (
+                        /*** BEGIN: c.owners ***/
+                        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                        FROM (
+                            /*** BEGIN: c ***/
+                            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                            FROM (
+                                /*** BEGIN: Car.allInstances() ***/
+                                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                                FROM Car
+                                /*** END: Car.allInstances() ***/
+                            ) AS TEMP_DMN
+                            /*** END: c ***/
+                        ) AS TEMP_OBJ
+                        LEFT JOIN Car_ownedCars_owners_Person
+                        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                        /*** END: c.owners ***/
+                    ) AS TEMP_DMN
+                    /*** END: p ***/
+                ) AS TEMP_OBJ
+                LEFT JOIN Person
+                ON TEMP_OBJ.ref_p = Person.Person_id AND TEMP_OBJ.val = 1
+                /*** END: p.name ***/
+            ) AS TEMP_LEFT
+            JOIN (
+                /*** BEGIN: 'no-name' ***/
+                SELECT 1 AS val, 'no-name' AS res, 'String' AS type
+                /*** END: 'no-name' ***/
+            ) AS TEMP_RIGHT
+            /*** END: p.name = 'no-name' ***/
+        ) AS TEMP_BODY
+        WHERE TEMP_BODY.res = 1
+        GROUP BY TEMP_BODY.ref_c) AS TEMP_BODY
+        ON TEMP_SOURCE.ref_c = TEMP_BODY.ref_c
+        /*** END: c.owners->exists(p|p.name = 'no-name') ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    /*** END: Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name')) ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name'))->size() ***/
+;
+Car.allInstances()->forAll(c|c.owners->exists(p|p.name = 'no-name'))
+
+/*** BEGIN: Car.allInstances()->forAll(c|c.owners->exists(p|p.name = 'no-name')) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) = 0 AS res
+FROM (
+    /*** BEGIN: c.owners->exists(p|p.name = 'no-name') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_c IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+        FROM (
+            /*** BEGIN: Car.allInstances() ***/
+            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+            FROM Car
+            /*** END: Car.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: c ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: p.name = 'no-name' ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_p AS ref_p, TEMP_LEFT.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: p.name ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Person.name AS res, TEMP_OBJ.ref_p AS ref_p, TEMP_OBJ.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: p ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: c.owners ***/
+                    SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                    FROM (
+                        /*** BEGIN: c ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                        FROM (
+                            /*** BEGIN: Car.allInstances() ***/
+                            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                            FROM Car
+                            /*** END: Car.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: c ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                    /*** END: c.owners ***/
+                ) AS TEMP_DMN
+                /*** END: p ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Person
+            ON TEMP_OBJ.ref_p = Person.Person_id AND TEMP_OBJ.val = 1
+            /*** END: p.name ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-name' ***/
+            SELECT 1 AS val, 'no-name' AS res, 'String' AS type
+            /*** END: 'no-name' ***/
+        ) AS TEMP_RIGHT
+        /*** END: p.name = 'no-name' ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    GROUP BY TEMP_BODY.ref_c) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_c = TEMP_BODY.ref_c
+    /*** END: c.owners->exists(p|p.name = 'no-name') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 0
+/*** END: Car.allInstances()->forAll(c|c.owners->exists(p|p.name = 'no-name')) ***/
+;
+Car.allInstances()->exists(c|c.owners->forAll(p|p.name = 'no-name'))
+
+/*** BEGIN: Car.allInstances()->exists(c|c.owners->forAll(p|p.name = 'no-name')) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: c.owners->forAll(p|p.name = 'no-name') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_c IS NULL WHEN 1 THEN 1 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+        FROM (
+            /*** BEGIN: Car.allInstances() ***/
+            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+            FROM Car
+            /*** END: Car.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: c ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) = 0 AS res, TEMP_BODY.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: p.name = 'no-name' ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_p AS ref_p, TEMP_LEFT.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: p.name ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Person.name AS res, TEMP_OBJ.ref_p AS ref_p, TEMP_OBJ.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: p ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: c.owners ***/
+                    SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                    FROM (
+                        /*** BEGIN: c ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                        FROM (
+                            /*** BEGIN: Car.allInstances() ***/
+                            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                            FROM Car
+                            /*** END: Car.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: c ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                    /*** END: c.owners ***/
+                ) AS TEMP_DMN
+                /*** END: p ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Person
+            ON TEMP_OBJ.ref_p = Person.Person_id AND TEMP_OBJ.val = 1
+            /*** END: p.name ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-name' ***/
+            SELECT 1 AS val, 'no-name' AS res, 'String' AS type
+            /*** END: 'no-name' ***/
+        ) AS TEMP_RIGHT
+        /*** END: p.name = 'no-name' ***/
+    ) AS TEMP_BODY
+    GROUP BY TEMP_BODY.ref_c) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_c = TEMP_BODY.ref_c
+    WHERE IFNULL(TEMP_BODY.res, 0) = 0 AND TEMP_BODY.val = 1
+    /*** END: c.owners->forAll(p|p.name = 'no-name') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Car.allInstances()->exists(c|c.owners->forAll(p|p.name = 'no-name')) ***/
+;
+Car.allInstances()
+
+/*** BEGIN: Car.allInstances() ***/
+SELECT 1 AS val, Car_id AS res, 'Car' AS type
+FROM Car
+/*** END: Car.allInstances() ***/
+;
+true
+
+/*** BEGIN: true ***/
+SELECT 1 AS val, true AS res, 'Boolean' AS type
+/*** END: true ***/
+;
+Car.allInstances()->collect(c|c.color)
+
+/*** BEGIN: Car.allInstances()->collect(c|c.color) ***/
+SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+FROM (
+    /*** BEGIN: c.color ***/
+    SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+        FROM (
+            /*** BEGIN: Car.allInstances() ***/
+            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+            FROM Car
+            /*** END: Car.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: c ***/
+    ) AS TEMP_OBJ
+    LEFT JOIN Car
+    ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+    /*** END: c.color ***/
+) AS TEMP_body
+/*** END: Car.allInstances()->collect(c|c.color) ***/
+;
+Car.allInstances()->collect(c|c.owners)
+
+/*** BEGIN: Car.allInstances()->collect(c|c.owners) ***/
+SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+FROM (
+    /*** BEGIN: c.owners ***/
+    SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+        FROM (
+            /*** BEGIN: Car.allInstances() ***/
+            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+            FROM Car
+            /*** END: Car.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: c ***/
+    ) AS TEMP_OBJ
+    LEFT JOIN Car_ownedCars_owners_Person
+    ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+    /*** END: c.owners ***/
+) AS TEMP_body
+/*** END: Car.allInstances()->collect(c|c.owners) ***/
+;
+Car.allInstances()->collect(c|c.owners)->flatten()
+
+/*** BEGIN: Car.allInstances()->collect(c|c.owners)->flatten() ***/
+SELECT 1 AS val, TEMP_SOURCE.res AS res, TEMP_SOURCE.type AS type
+FROM (
+    /*** BEGIN: Car.allInstances()->collect(c|c.owners) ***/
+    SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+    FROM (
+        /*** BEGIN: c.owners ***/
+        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car_ownedCars_owners_Person
+        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+        /*** END: c.owners ***/
+    ) AS TEMP_body
+    /*** END: Car.allInstances()->collect(c|c.owners) ***/
+) AS TEMP_SOURCE
+WHERE TEMP_SOURCE.val = 1
+/*** END: Car.allInstances()->collect(c|c.owners)->flatten() ***/
+;
+Car.allInstances()->size()
+
+/*** BEGIN: Car.allInstances()->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances() ***/
+    SELECT 1 AS val, Car_id AS res, 'Car' AS type
+    FROM Car
+    /*** END: Car.allInstances() ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->size() ***/
+;
+Car.allInstances()->collect(c|c.color)->size()
+
+/*** BEGIN: Car.allInstances()->collect(c|c.color)->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances()->collect(c|c.color) ***/
+    SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+    FROM (
+        /*** BEGIN: c.color ***/
+        SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car
+        ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+        /*** END: c.color ***/
+    ) AS TEMP_body
+    /*** END: Car.allInstances()->collect(c|c.color) ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->collect(c|c.color)->size() ***/
+;
+Person.allInstances()->collect(p|p.ownedCars->size())
+
+/*** BEGIN: Person.allInstances()->collect(p|p.ownedCars->size()) ***/
+SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+FROM (
+    /*** BEGIN: p.ownedCars->size() ***/
+    SELECT 1 AS val, 'Integer' AS type, CASE TEMP_src.val = 0 WHEN 1 THEN 0 ELSE COUNT(*) END AS res, TEMP_src.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p.ownedCars ***/
+        SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: p ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+            FROM (
+                /*** BEGIN: Person.allInstances() ***/
+                SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                FROM Person
+                /*** END: Person.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: p ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car_ownedCars_owners_Person
+        ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+        /*** END: p.ownedCars ***/
+    ) AS TEMP_src
+    GROUP BY TEMP_src.ref_p, TEMP_src.val
+    /*** END: p.ownedCars->size() ***/
+) AS TEMP_body
+/*** END: Person.allInstances()->collect(p|p.ownedCars->size()) ***/
+;
+Car.allInstances()->collect(c|c.owners)->flatten()
+
+/*** BEGIN: Car.allInstances()->collect(c|c.owners)->flatten() ***/
+SELECT 1 AS val, TEMP_SOURCE.res AS res, TEMP_SOURCE.type AS type
+FROM (
+    /*** BEGIN: Car.allInstances()->collect(c|c.owners) ***/
+    SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+    FROM (
+        /*** BEGIN: c.owners ***/
+        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car_ownedCars_owners_Person
+        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+        /*** END: c.owners ***/
+    ) AS TEMP_body
+    /*** END: Car.allInstances()->collect(c|c.owners) ***/
+) AS TEMP_SOURCE
+WHERE TEMP_SOURCE.val = 1
+/*** END: Car.allInstances()->collect(c|c.owners)->flatten() ***/
+;
+Car.allInstances()->collect(c|c.owners)->flatten()->size()
+
+/*** BEGIN: Car.allInstances()->collect(c|c.owners)->flatten()->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances()->collect(c|c.owners)->flatten() ***/
+    SELECT 1 AS val, TEMP_SOURCE.res AS res, TEMP_SOURCE.type AS type
+    FROM (
+        /*** BEGIN: Car.allInstances()->collect(c|c.owners) ***/
+        SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+        FROM (
+            /*** BEGIN: c.owners ***/
+            SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                FROM (
+                    /*** BEGIN: Car.allInstances() ***/
+                    SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                    FROM Car
+                    /*** END: Car.allInstances() ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car_ownedCars_owners_Person
+            ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+            /*** END: c.owners ***/
+        ) AS TEMP_body
+        /*** END: Car.allInstances()->collect(c|c.owners) ***/
+    ) AS TEMP_SOURCE
+    WHERE TEMP_SOURCE.val = 1
+    /*** END: Car.allInstances()->collect(c|c.owners)->flatten() ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->collect(c|c.owners)->flatten()->size() ***/
+;
+Car.allInstances()->collect(c|c.owners)->size()
+
+/*** BEGIN: Car.allInstances()->collect(c|c.owners)->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances()->collect(c|c.owners) ***/
+    SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+    FROM (
+        /*** BEGIN: c.owners ***/
+        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car_ownedCars_owners_Person
+        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+        /*** END: c.owners ***/
+    ) AS TEMP_body
+    /*** END: Car.allInstances()->collect(c|c.owners) ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->collect(c|c.owners)->size() ***/
+;
+Person.allInstances()->forAll(p|p.ownedCars->size() > 0)
+
+/*** BEGIN: Person.allInstances()->forAll(p|p.ownedCars->size() > 0) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) = 0 AS res
+FROM (
+    /*** BEGIN: p.ownedCars->size() > 0 ***/
+    SELECT TEMP_LEFT.res > TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p.ownedCars->size() ***/
+        SELECT 1 AS val, 'Integer' AS type, CASE TEMP_src.val = 0 WHEN 1 THEN 0 ELSE COUNT(*) END AS res, TEMP_src.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: p.ownedCars ***/
+            SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: p ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                FROM (
+                    /*** BEGIN: Person.allInstances() ***/
+                    SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                    FROM Person
+                    /*** END: Person.allInstances() ***/
+                ) AS TEMP_DMN
+                /*** END: p ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car_ownedCars_owners_Person
+            ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+            /*** END: p.ownedCars ***/
+        ) AS TEMP_src
+        GROUP BY TEMP_src.ref_p, TEMP_src.val
+        /*** END: p.ownedCars->size() ***/
+    ) AS TEMP_LEFT
+    JOIN (
+        /*** BEGIN: 0 ***/
+        SELECT 1 AS val, 0 AS res, 'Integer' AS type
+        /*** END: 0 ***/
+    ) AS TEMP_RIGHT
+    /*** END: p.ownedCars->size() > 0 ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 0
+/*** END: Person.allInstances()->forAll(p|p.ownedCars->size() > 0) ***/
+;
+Person.allInstances()->forAll(p|true)
+
+/*** BEGIN: Person.allInstances()->forAll(p|true) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) = 0 AS res
+FROM (
+    /*** BEGIN: Person.allInstances() ***/
+    SELECT 1 AS val, Person_id AS res, 'Person' AS type
+    FROM Person
+    /*** END: Person.allInstances() ***/
+) AS TEMP_SOURCE
+JOIN (
+    /*** BEGIN: true ***/
+    SELECT 1 AS val, true AS res, 'Boolean' AS type
+    /*** END: true ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 0
+/*** END: Person.allInstances()->forAll(p|true) ***/
+;
+Person.allInstances()->exists(p|p.ownedCars->size() < 10)
+
+/*** BEGIN: Person.allInstances()->exists(p|p.ownedCars->size() < 10) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: p.ownedCars->size() < 10 ***/
+    SELECT TEMP_LEFT.res < TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p.ownedCars->size() ***/
+        SELECT 1 AS val, 'Integer' AS type, CASE TEMP_src.val = 0 WHEN 1 THEN 0 ELSE COUNT(*) END AS res, TEMP_src.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: p.ownedCars ***/
+            SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: p ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                FROM (
+                    /*** BEGIN: Person.allInstances() ***/
+                    SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                    FROM Person
+                    /*** END: Person.allInstances() ***/
+                ) AS TEMP_DMN
+                /*** END: p ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car_ownedCars_owners_Person
+            ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+            /*** END: p.ownedCars ***/
+        ) AS TEMP_src
+        GROUP BY TEMP_src.ref_p, TEMP_src.val
+        /*** END: p.ownedCars->size() ***/
+    ) AS TEMP_LEFT
+    JOIN (
+        /*** BEGIN: 10 ***/
+        SELECT 1 AS val, 10 AS res, 'Integer' AS type
+        /*** END: 10 ***/
+    ) AS TEMP_RIGHT
+    /*** END: p.ownedCars->size() < 10 ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Person.allInstances()->exists(p|p.ownedCars->size() < 10) ***/
+;
+Person.allInstances()->forAll(p|p.ownedCars->forAll(c|c.color = 'no-color'))
+
+/*** BEGIN: Person.allInstances()->forAll(p|p.ownedCars->forAll(c|c.color = 'no-color')) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) = 0 AS res
+FROM (
+    /*** BEGIN: p.ownedCars->forAll(c|c.color = 'no-color') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_p IS NULL WHEN 1 THEN 1 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+        FROM (
+            /*** BEGIN: Person.allInstances() ***/
+            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+            FROM Person
+            /*** END: Person.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: p ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) = 0 AS res, TEMP_BODY.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: c.color = 'no-color' ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c, TEMP_LEFT.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c, TEMP_DMN.ref_p AS ref_p
+                FROM (
+                    /*** BEGIN: p.ownedCars ***/
+                    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                        FROM (
+                            /*** BEGIN: Person.allInstances() ***/
+                            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                            FROM Person
+                            /*** END: Person.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                    /*** END: p.ownedCars ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-color' ***/
+            SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+            /*** END: 'no-color' ***/
+        ) AS TEMP_RIGHT
+        /*** END: c.color = 'no-color' ***/
+    ) AS TEMP_BODY
+    GROUP BY TEMP_BODY.ref_p) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_p = TEMP_BODY.ref_p
+    WHERE IFNULL(TEMP_BODY.res, 0) = 0 AND TEMP_BODY.val = 1
+    /*** END: p.ownedCars->forAll(c|c.color = 'no-color') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 0
+/*** END: Person.allInstances()->forAll(p|p.ownedCars->forAll(c|c.color = 'no-color')) ***/
+;
+Person.allInstances()->forAll(p|p.ownedCars->exists(c|c.color = 'no-color'))
+
+/*** BEGIN: Person.allInstances()->forAll(p|p.ownedCars->exists(c|c.color = 'no-color')) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) = 0 AS res
+FROM (
+    /*** BEGIN: p.ownedCars->exists(c|c.color = 'no-color') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_p IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+        FROM (
+            /*** BEGIN: Person.allInstances() ***/
+            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+            FROM Person
+            /*** END: Person.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: p ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: c.color = 'no-color' ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c, TEMP_LEFT.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c, TEMP_DMN.ref_p AS ref_p
+                FROM (
+                    /*** BEGIN: p.ownedCars ***/
+                    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                        FROM (
+                            /*** BEGIN: Person.allInstances() ***/
+                            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                            FROM Person
+                            /*** END: Person.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                    /*** END: p.ownedCars ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-color' ***/
+            SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+            /*** END: 'no-color' ***/
+        ) AS TEMP_RIGHT
+        /*** END: c.color = 'no-color' ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    GROUP BY TEMP_BODY.ref_p) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_p = TEMP_BODY.ref_p
+    /*** END: p.ownedCars->exists(c|c.color = 'no-color') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 0
+/*** END: Person.allInstances()->forAll(p|p.ownedCars->exists(c|c.color = 'no-color')) ***/
+;
+Person.allInstances()->exists(p|p.ownedCars->forAll(c|c.color = 'no-color'))
+
+/*** BEGIN: Person.allInstances()->exists(p|p.ownedCars->forAll(c|c.color = 'no-color')) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: p.ownedCars->forAll(c|c.color = 'no-color') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_p IS NULL WHEN 1 THEN 1 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+        FROM (
+            /*** BEGIN: Person.allInstances() ***/
+            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+            FROM Person
+            /*** END: Person.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: p ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) = 0 AS res, TEMP_BODY.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: c.color = 'no-color' ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c, TEMP_LEFT.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c, TEMP_DMN.ref_p AS ref_p
+                FROM (
+                    /*** BEGIN: p.ownedCars ***/
+                    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                        FROM (
+                            /*** BEGIN: Person.allInstances() ***/
+                            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                            FROM Person
+                            /*** END: Person.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                    /*** END: p.ownedCars ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-color' ***/
+            SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+            /*** END: 'no-color' ***/
+        ) AS TEMP_RIGHT
+        /*** END: c.color = 'no-color' ***/
+    ) AS TEMP_BODY
+    GROUP BY TEMP_BODY.ref_p) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_p = TEMP_BODY.ref_p
+    WHERE IFNULL(TEMP_BODY.res, 0) = 0 AND TEMP_BODY.val = 1
+    /*** END: p.ownedCars->forAll(c|c.color = 'no-color') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Person.allInstances()->exists(p|p.ownedCars->forAll(c|c.color = 'no-color')) ***/
+;
+Person.allInstances()->exists(p|p.ownedCars->exists(c|c.color = 'no-color'))
+
+/*** BEGIN: Person.allInstances()->exists(p|p.ownedCars->exists(c|c.color = 'no-color')) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: p.ownedCars->exists(c|c.color = 'no-color') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_p IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+        FROM (
+            /*** BEGIN: Person.allInstances() ***/
+            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+            FROM Person
+            /*** END: Person.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: p ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: c.color = 'no-color' ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c, TEMP_LEFT.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c, TEMP_DMN.ref_p AS ref_p
+                FROM (
+                    /*** BEGIN: p.ownedCars ***/
+                    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                        FROM (
+                            /*** BEGIN: Person.allInstances() ***/
+                            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                            FROM Person
+                            /*** END: Person.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                    /*** END: p.ownedCars ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-color' ***/
+            SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+            /*** END: 'no-color' ***/
+        ) AS TEMP_RIGHT
+        /*** END: c.color = 'no-color' ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    GROUP BY TEMP_BODY.ref_p) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_p = TEMP_BODY.ref_p
+    /*** END: p.ownedCars->exists(c|c.color = 'no-color') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Person.allInstances()->exists(p|p.ownedCars->exists(c|c.color = 'no-color')) ***/
+;
+Car.allInstances()->select(c|c.color = 'no-color')
+
+/*** BEGIN: Car.allInstances()->select(c|c.color = 'no-color') ***/
+SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_c AS res, 'Car' AS type
+FROM (
+    /*** BEGIN: c.color = 'no-color' ***/
+    SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.color ***/
+        SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car
+        ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+        /*** END: c.color ***/
+    ) AS TEMP_LEFT
+    JOIN (
+        /*** BEGIN: 'no-color' ***/
+        SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+        /*** END: 'no-color' ***/
+    ) AS TEMP_RIGHT
+    /*** END: c.color = 'no-color' ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Car.allInstances()->select(c|c.color = 'no-color') ***/
+;
+Person.allInstances()->select(p|p.ownedCars->exists(c|c.color <> 'no-color'))
+
+/*** BEGIN: Person.allInstances()->select(p|p.ownedCars->exists(c|c.color <> 'no-color')) ***/
+SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_p AS res, 'Person' AS type
+FROM (
+    /*** BEGIN: p.ownedCars->exists(c|c.color <> 'no-color') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_p IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+        FROM (
+            /*** BEGIN: Person.allInstances() ***/
+            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+            FROM Person
+            /*** END: Person.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: p ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: c.color <> 'no-color' ***/
+        SELECT TEMP_LEFT.res <> TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c, TEMP_LEFT.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c, TEMP_DMN.ref_p AS ref_p
+                FROM (
+                    /*** BEGIN: p.ownedCars ***/
+                    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                        FROM (
+                            /*** BEGIN: Person.allInstances() ***/
+                            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                            FROM Person
+                            /*** END: Person.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                    /*** END: p.ownedCars ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-color' ***/
+            SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+            /*** END: 'no-color' ***/
+        ) AS TEMP_RIGHT
+        /*** END: c.color <> 'no-color' ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    GROUP BY TEMP_BODY.ref_p) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_p = TEMP_BODY.ref_p
+    /*** END: p.ownedCars->exists(c|c.color <> 'no-color') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Person.allInstances()->select(p|p.ownedCars->exists(c|c.color <> 'no-color')) ***/
+;
+Person.allInstances()->select(p|p.ownedCars->forAll(c|c.color <> 'no-color'))
+
+/*** BEGIN: Person.allInstances()->select(p|p.ownedCars->forAll(c|c.color <> 'no-color')) ***/
+SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_p AS res, 'Person' AS type
+FROM (
+    /*** BEGIN: p.ownedCars->forAll(c|c.color <> 'no-color') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_p IS NULL WHEN 1 THEN 1 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+        FROM (
+            /*** BEGIN: Person.allInstances() ***/
+            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+            FROM Person
+            /*** END: Person.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: p ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) = 0 AS res, TEMP_BODY.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: c.color <> 'no-color' ***/
+        SELECT TEMP_LEFT.res <> TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c, TEMP_LEFT.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c, TEMP_DMN.ref_p AS ref_p
+                FROM (
+                    /*** BEGIN: p.ownedCars ***/
+                    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                        FROM (
+                            /*** BEGIN: Person.allInstances() ***/
+                            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                            FROM Person
+                            /*** END: Person.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                    /*** END: p.ownedCars ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-color' ***/
+            SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+            /*** END: 'no-color' ***/
+        ) AS TEMP_RIGHT
+        /*** END: c.color <> 'no-color' ***/
+    ) AS TEMP_BODY
+    GROUP BY TEMP_BODY.ref_p) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_p = TEMP_BODY.ref_p
+    WHERE IFNULL(TEMP_BODY.res, 0) = 0 AND TEMP_BODY.val = 1
+    /*** END: p.ownedCars->forAll(c|c.color <> 'no-color') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Person.allInstances()->select(p|p.ownedCars->forAll(c|c.color <> 'no-color')) ***/
+;
+Car.allInstances()->select(c|c.color.oclIsUndefined())
+
+/*** BEGIN: Car.allInstances()->select(c|c.color.oclIsUndefined()) ***/
+SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_c AS res, 'Car' AS type
+FROM (
+    /*** BEGIN: c.color.oclIsUndefined() ***/
+    SELECT TEMP_SOURCE.val AS val, CASE TEMP_SOURCE.val = 0 WHEN 1 THEN NULL ELSE TEMP_SOURCE.res IS NULL END AS res, 'Boolean' AS type, TEMP_SOURCE.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.color ***/
+        SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car
+        ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+        /*** END: c.color ***/
+    ) AS TEMP_SOURCE
+    /*** END: c.color.oclIsUndefined() ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Car.allInstances()->select(c|c.color.oclIsUndefined()) ***/
+;
+Person.allInstances()->select(p|p.ownedCars->exists(c|c.color.oclIsUndefined()))
+
+/*** BEGIN: Person.allInstances()->select(p|p.ownedCars->exists(c|c.color.oclIsUndefined())) ***/
+SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_p AS res, 'Person' AS type
+FROM (
+    /*** BEGIN: p.ownedCars->exists(c|c.color.oclIsUndefined()) ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_p IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+        FROM (
+            /*** BEGIN: Person.allInstances() ***/
+            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+            FROM Person
+            /*** END: Person.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: p ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: c.color.oclIsUndefined() ***/
+        SELECT TEMP_SOURCE.val AS val, CASE TEMP_SOURCE.val = 0 WHEN 1 THEN NULL ELSE TEMP_SOURCE.res IS NULL END AS res, 'Boolean' AS type, TEMP_SOURCE.ref_c AS ref_c, TEMP_SOURCE.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c, TEMP_DMN.ref_p AS ref_p
+                FROM (
+                    /*** BEGIN: p.ownedCars ***/
+                    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                        FROM (
+                            /*** BEGIN: Person.allInstances() ***/
+                            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                            FROM Person
+                            /*** END: Person.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                    /*** END: p.ownedCars ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_SOURCE
+        /*** END: c.color.oclIsUndefined() ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    GROUP BY TEMP_BODY.ref_p) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_p = TEMP_BODY.ref_p
+    /*** END: p.ownedCars->exists(c|c.color.oclIsUndefined()) ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Person.allInstances()->select(p|p.ownedCars->exists(c|c.color.oclIsUndefined())) ***/
+;
+Car.allInstances()->select(c|c.color = 'no-color')->size()
+
+/*** BEGIN: Car.allInstances()->select(c|c.color = 'no-color')->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances()->select(c|c.color = 'no-color') ***/
+    SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_c AS res, 'Car' AS type
+    FROM (
+        /*** BEGIN: c.color = 'no-color' ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                FROM (
+                    /*** BEGIN: Car.allInstances() ***/
+                    SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                    FROM Car
+                    /*** END: Car.allInstances() ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-color' ***/
+            SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+            /*** END: 'no-color' ***/
+        ) AS TEMP_RIGHT
+        /*** END: c.color = 'no-color' ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    /*** END: Car.allInstances()->select(c|c.color = 'no-color') ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->select(c|c.color = 'no-color')->size() ***/
+;
+Car.allInstances()->exists(c|c.color <> 'no-color')
+
+/*** BEGIN: Car.allInstances()->exists(c|c.color <> 'no-color') ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: c.color <> 'no-color' ***/
+    SELECT TEMP_LEFT.res <> TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.color ***/
+        SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car
+        ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+        /*** END: c.color ***/
+    ) AS TEMP_LEFT
+    JOIN (
+        /*** BEGIN: 'no-color' ***/
+        SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+        /*** END: 'no-color' ***/
+    ) AS TEMP_RIGHT
+    /*** END: c.color <> 'no-color' ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Car.allInstances()->exists(c|c.color <> 'no-color') ***/
+;
+Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name'))->size()
+
+/*** BEGIN: Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name'))->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name')) ***/
+    SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_c AS res, 'Car' AS type
+    FROM (
+        /*** BEGIN: c.owners->exists(p|p.name = 'no-name') ***/
+        SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_c IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_SOURCE
+        LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: p.name = 'no-name' ***/
+            SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_p AS ref_p, TEMP_LEFT.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: p.name ***/
+                SELECT TEMP_OBJ.val AS val, 'String' AS type, Person.name AS res, TEMP_OBJ.ref_p AS ref_p, TEMP_OBJ.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: p ***/
+                    SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+                    FROM (
+                        /*** BEGIN: c.owners ***/
+                        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                        FROM (
+                            /*** BEGIN: c ***/
+                            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                            FROM (
+                                /*** BEGIN: Car.allInstances() ***/
+                                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                                FROM Car
+                                /*** END: Car.allInstances() ***/
+                            ) AS TEMP_DMN
+                            /*** END: c ***/
+                        ) AS TEMP_OBJ
+                        LEFT JOIN Car_ownedCars_owners_Person
+                        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                        /*** END: c.owners ***/
+                    ) AS TEMP_DMN
+                    /*** END: p ***/
+                ) AS TEMP_OBJ
+                LEFT JOIN Person
+                ON TEMP_OBJ.ref_p = Person.Person_id AND TEMP_OBJ.val = 1
+                /*** END: p.name ***/
+            ) AS TEMP_LEFT
+            JOIN (
+                /*** BEGIN: 'no-name' ***/
+                SELECT 1 AS val, 'no-name' AS res, 'String' AS type
+                /*** END: 'no-name' ***/
+            ) AS TEMP_RIGHT
+            /*** END: p.name = 'no-name' ***/
+        ) AS TEMP_BODY
+        WHERE TEMP_BODY.res = 1
+        GROUP BY TEMP_BODY.ref_c) AS TEMP_BODY
+        ON TEMP_SOURCE.ref_c = TEMP_BODY.ref_c
+        /*** END: c.owners->exists(p|p.name = 'no-name') ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    /*** END: Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name')) ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name'))->size() ***/
+;
+Car.allInstances()->exists(c|c.owners->forAll(p|p.name = 'no-name'))
+
+/*** BEGIN: Car.allInstances()->exists(c|c.owners->forAll(p|p.name = 'no-name')) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: c.owners->forAll(p|p.name = 'no-name') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_c IS NULL WHEN 1 THEN 1 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+        FROM (
+            /*** BEGIN: Car.allInstances() ***/
+            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+            FROM Car
+            /*** END: Car.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: c ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) = 0 AS res, TEMP_BODY.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: p.name = 'no-name' ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_p AS ref_p, TEMP_LEFT.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: p.name ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Person.name AS res, TEMP_OBJ.ref_p AS ref_p, TEMP_OBJ.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: p ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: c.owners ***/
+                    SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                    FROM (
+                        /*** BEGIN: c ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                        FROM (
+                            /*** BEGIN: Car.allInstances() ***/
+                            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                            FROM Car
+                            /*** END: Car.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: c ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                    /*** END: c.owners ***/
+                ) AS TEMP_DMN
+                /*** END: p ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Person
+            ON TEMP_OBJ.ref_p = Person.Person_id AND TEMP_OBJ.val = 1
+            /*** END: p.name ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-name' ***/
+            SELECT 1 AS val, 'no-name' AS res, 'String' AS type
+            /*** END: 'no-name' ***/
+        ) AS TEMP_RIGHT
+        /*** END: p.name = 'no-name' ***/
+    ) AS TEMP_BODY
+    GROUP BY TEMP_BODY.ref_c) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_c = TEMP_BODY.ref_c
+    WHERE IFNULL(TEMP_BODY.res, 0) = 0 AND TEMP_BODY.val = 1
+    /*** END: c.owners->forAll(p|p.name = 'no-name') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Car.allInstances()->exists(c|c.owners->forAll(p|p.name = 'no-name')) ***/
+;
+Car.allInstances()->select(c|c.owners->exists(p|p.name.oclIsUndefined()))->size()
+
+/*** BEGIN: Car.allInstances()->select(c|c.owners->exists(p|p.name.oclIsUndefined()))->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances()->select(c|c.owners->exists(p|p.name.oclIsUndefined())) ***/
+    SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_c AS res, 'Car' AS type
+    FROM (
+        /*** BEGIN: c.owners->exists(p|p.name.oclIsUndefined()) ***/
+        SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_c IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_SOURCE
+        LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: p.name.oclIsUndefined() ***/
+            SELECT TEMP_SOURCE.val AS val, CASE TEMP_SOURCE.val = 0 WHEN 1 THEN NULL ELSE TEMP_SOURCE.res IS NULL END AS res, 'Boolean' AS type, TEMP_SOURCE.ref_p AS ref_p, TEMP_SOURCE.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: p.name ***/
+                SELECT TEMP_OBJ.val AS val, 'String' AS type, Person.name AS res, TEMP_OBJ.ref_p AS ref_p, TEMP_OBJ.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: p ***/
+                    SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+                    FROM (
+                        /*** BEGIN: c.owners ***/
+                        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                        FROM (
+                            /*** BEGIN: c ***/
+                            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                            FROM (
+                                /*** BEGIN: Car.allInstances() ***/
+                                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                                FROM Car
+                                /*** END: Car.allInstances() ***/
+                            ) AS TEMP_DMN
+                            /*** END: c ***/
+                        ) AS TEMP_OBJ
+                        LEFT JOIN Car_ownedCars_owners_Person
+                        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                        /*** END: c.owners ***/
+                    ) AS TEMP_DMN
+                    /*** END: p ***/
+                ) AS TEMP_OBJ
+                LEFT JOIN Person
+                ON TEMP_OBJ.ref_p = Person.Person_id AND TEMP_OBJ.val = 1
+                /*** END: p.name ***/
+            ) AS TEMP_SOURCE
+            /*** END: p.name.oclIsUndefined() ***/
+        ) AS TEMP_BODY
+        WHERE TEMP_BODY.res = 1
+        GROUP BY TEMP_BODY.ref_c) AS TEMP_BODY
+        ON TEMP_SOURCE.ref_c = TEMP_BODY.ref_c
+        /*** END: c.owners->exists(p|p.name.oclIsUndefined()) ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    /*** END: Car.allInstances()->select(c|c.owners->exists(p|p.name.oclIsUndefined())) ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->select(c|c.owners->exists(p|p.name.oclIsUndefined()))->size() ***/
+;
+Car.allInstances()
+
+/*** BEGIN: Car.allInstances() ***/
+SELECT 1 AS val, Car_id AS res, 'Car' AS type
+FROM Car
+/*** END: Car.allInstances() ***/
+;
+true
+
+/*** BEGIN: true ***/
+SELECT 1 AS val, true AS res, 'Boolean' AS type
+/*** END: true ***/
+;
+Car.allInstances()->collect(c|c.color)
+
+/*** BEGIN: Car.allInstances()->collect(c|c.color) ***/
+SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+FROM (
+    /*** BEGIN: c.color ***/
+    SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+        FROM (
+            /*** BEGIN: Car.allInstances() ***/
+            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+            FROM Car
+            /*** END: Car.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: c ***/
+    ) AS TEMP_OBJ
+    LEFT JOIN Car
+    ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+    /*** END: c.color ***/
+) AS TEMP_body
+/*** END: Car.allInstances()->collect(c|c.color) ***/
+;
+Car.allInstances()->collect(c|c.owners)
+
+/*** BEGIN: Car.allInstances()->collect(c|c.owners) ***/
+SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+FROM (
+    /*** BEGIN: c.owners ***/
+    SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+        FROM (
+            /*** BEGIN: Car.allInstances() ***/
+            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+            FROM Car
+            /*** END: Car.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: c ***/
+    ) AS TEMP_OBJ
+    LEFT JOIN Car_ownedCars_owners_Person
+    ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+    /*** END: c.owners ***/
+) AS TEMP_body
+/*** END: Car.allInstances()->collect(c|c.owners) ***/
+;
+Car.allInstances()->collect(c|c.owners)->flatten()
+
+/*** BEGIN: Car.allInstances()->collect(c|c.owners)->flatten() ***/
+SELECT 1 AS val, TEMP_SOURCE.res AS res, TEMP_SOURCE.type AS type
+FROM (
+    /*** BEGIN: Car.allInstances()->collect(c|c.owners) ***/
+    SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+    FROM (
+        /*** BEGIN: c.owners ***/
+        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car_ownedCars_owners_Person
+        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+        /*** END: c.owners ***/
+    ) AS TEMP_body
+    /*** END: Car.allInstances()->collect(c|c.owners) ***/
+) AS TEMP_SOURCE
+WHERE TEMP_SOURCE.val = 1
+/*** END: Car.allInstances()->collect(c|c.owners)->flatten() ***/
+;
+Car.allInstances()->size()
+
+/*** BEGIN: Car.allInstances()->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances() ***/
+    SELECT 1 AS val, Car_id AS res, 'Car' AS type
+    FROM Car
+    /*** END: Car.allInstances() ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->size() ***/
+;
+Car.allInstances()->collect(c|c.color)->size()
+
+/*** BEGIN: Car.allInstances()->collect(c|c.color)->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances()->collect(c|c.color) ***/
+    SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+    FROM (
+        /*** BEGIN: c.color ***/
+        SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car
+        ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+        /*** END: c.color ***/
+    ) AS TEMP_body
+    /*** END: Car.allInstances()->collect(c|c.color) ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->collect(c|c.color)->size() ***/
+;
+Person.allInstances()->collect(p|p.ownedCars->size())
+
+/*** BEGIN: Person.allInstances()->collect(p|p.ownedCars->size()) ***/
+SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+FROM (
+    /*** BEGIN: p.ownedCars->size() ***/
+    SELECT 1 AS val, 'Integer' AS type, CASE TEMP_src.val = 0 WHEN 1 THEN 0 ELSE COUNT(*) END AS res, TEMP_src.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p.ownedCars ***/
+        SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: p ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+            FROM (
+                /*** BEGIN: Person.allInstances() ***/
+                SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                FROM Person
+                /*** END: Person.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: p ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car_ownedCars_owners_Person
+        ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+        /*** END: p.ownedCars ***/
+    ) AS TEMP_src
+    GROUP BY TEMP_src.ref_p, TEMP_src.val
+    /*** END: p.ownedCars->size() ***/
+) AS TEMP_body
+/*** END: Person.allInstances()->collect(p|p.ownedCars->size()) ***/
+;
+Car.allInstances()->collect(c|c.owners)->flatten()
+
+/*** BEGIN: Car.allInstances()->collect(c|c.owners)->flatten() ***/
+SELECT 1 AS val, TEMP_SOURCE.res AS res, TEMP_SOURCE.type AS type
+FROM (
+    /*** BEGIN: Car.allInstances()->collect(c|c.owners) ***/
+    SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+    FROM (
+        /*** BEGIN: c.owners ***/
+        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car_ownedCars_owners_Person
+        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+        /*** END: c.owners ***/
+    ) AS TEMP_body
+    /*** END: Car.allInstances()->collect(c|c.owners) ***/
+) AS TEMP_SOURCE
+WHERE TEMP_SOURCE.val = 1
+/*** END: Car.allInstances()->collect(c|c.owners)->flatten() ***/
+;
+Car.allInstances()->collect(c|c.owners)->flatten()->size()
+
+/*** BEGIN: Car.allInstances()->collect(c|c.owners)->flatten()->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances()->collect(c|c.owners)->flatten() ***/
+    SELECT 1 AS val, TEMP_SOURCE.res AS res, TEMP_SOURCE.type AS type
+    FROM (
+        /*** BEGIN: Car.allInstances()->collect(c|c.owners) ***/
+        SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+        FROM (
+            /*** BEGIN: c.owners ***/
+            SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                FROM (
+                    /*** BEGIN: Car.allInstances() ***/
+                    SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                    FROM Car
+                    /*** END: Car.allInstances() ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car_ownedCars_owners_Person
+            ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+            /*** END: c.owners ***/
+        ) AS TEMP_body
+        /*** END: Car.allInstances()->collect(c|c.owners) ***/
+    ) AS TEMP_SOURCE
+    WHERE TEMP_SOURCE.val = 1
+    /*** END: Car.allInstances()->collect(c|c.owners)->flatten() ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->collect(c|c.owners)->flatten()->size() ***/
+;
+Car.allInstances()->collect(c|c.owners)->size()
+
+/*** BEGIN: Car.allInstances()->collect(c|c.owners)->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances()->collect(c|c.owners) ***/
+    SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+    FROM (
+        /*** BEGIN: c.owners ***/
+        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car_ownedCars_owners_Person
+        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+        /*** END: c.owners ***/
+    ) AS TEMP_body
+    /*** END: Car.allInstances()->collect(c|c.owners) ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->collect(c|c.owners)->size() ***/
+;
+Person.allInstances()->forAll(p|p.ownedCars->size() > 0)
+
+/*** BEGIN: Person.allInstances()->forAll(p|p.ownedCars->size() > 0) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) = 0 AS res
+FROM (
+    /*** BEGIN: p.ownedCars->size() > 0 ***/
+    SELECT TEMP_LEFT.res > TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p.ownedCars->size() ***/
+        SELECT 1 AS val, 'Integer' AS type, CASE TEMP_src.val = 0 WHEN 1 THEN 0 ELSE COUNT(*) END AS res, TEMP_src.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: p.ownedCars ***/
+            SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: p ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                FROM (
+                    /*** BEGIN: Person.allInstances() ***/
+                    SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                    FROM Person
+                    /*** END: Person.allInstances() ***/
+                ) AS TEMP_DMN
+                /*** END: p ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car_ownedCars_owners_Person
+            ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+            /*** END: p.ownedCars ***/
+        ) AS TEMP_src
+        GROUP BY TEMP_src.ref_p, TEMP_src.val
+        /*** END: p.ownedCars->size() ***/
+    ) AS TEMP_LEFT
+    JOIN (
+        /*** BEGIN: 0 ***/
+        SELECT 1 AS val, 0 AS res, 'Integer' AS type
+        /*** END: 0 ***/
+    ) AS TEMP_RIGHT
+    /*** END: p.ownedCars->size() > 0 ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 0
+/*** END: Person.allInstances()->forAll(p|p.ownedCars->size() > 0) ***/
+;
+Person.allInstances()->exists(p|p.ownedCars->size() = 10)
+
+/*** BEGIN: Person.allInstances()->exists(p|p.ownedCars->size() = 10) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: p.ownedCars->size() = 10 ***/
+    SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p.ownedCars->size() ***/
+        SELECT 1 AS val, 'Integer' AS type, CASE TEMP_src.val = 0 WHEN 1 THEN 0 ELSE COUNT(*) END AS res, TEMP_src.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: p.ownedCars ***/
+            SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: p ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                FROM (
+                    /*** BEGIN: Person.allInstances() ***/
+                    SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                    FROM Person
+                    /*** END: Person.allInstances() ***/
+                ) AS TEMP_DMN
+                /*** END: p ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car_ownedCars_owners_Person
+            ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+            /*** END: p.ownedCars ***/
+        ) AS TEMP_src
+        GROUP BY TEMP_src.ref_p, TEMP_src.val
+        /*** END: p.ownedCars->size() ***/
+    ) AS TEMP_LEFT
+    JOIN (
+        /*** BEGIN: 10 ***/
+        SELECT 1 AS val, 10 AS res, 'Integer' AS type
+        /*** END: 10 ***/
+    ) AS TEMP_RIGHT
+    /*** END: p.ownedCars->size() = 10 ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Person.allInstances()->exists(p|p.ownedCars->size() = 10) ***/
+;
+Person.allInstances()->exists(p|p.ownedCars->size() < 10)
+
+/*** BEGIN: Person.allInstances()->exists(p|p.ownedCars->size() < 10) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: p.ownedCars->size() < 10 ***/
+    SELECT TEMP_LEFT.res < TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p.ownedCars->size() ***/
+        SELECT 1 AS val, 'Integer' AS type, CASE TEMP_src.val = 0 WHEN 1 THEN 0 ELSE COUNT(*) END AS res, TEMP_src.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: p.ownedCars ***/
+            SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: p ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                FROM (
+                    /*** BEGIN: Person.allInstances() ***/
+                    SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                    FROM Person
+                    /*** END: Person.allInstances() ***/
+                ) AS TEMP_DMN
+                /*** END: p ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car_ownedCars_owners_Person
+            ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+            /*** END: p.ownedCars ***/
+        ) AS TEMP_src
+        GROUP BY TEMP_src.ref_p, TEMP_src.val
+        /*** END: p.ownedCars->size() ***/
+    ) AS TEMP_LEFT
+    JOIN (
+        /*** BEGIN: 10 ***/
+        SELECT 1 AS val, 10 AS res, 'Integer' AS type
+        /*** END: 10 ***/
+    ) AS TEMP_RIGHT
+    /*** END: p.ownedCars->size() < 10 ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Person.allInstances()->exists(p|p.ownedCars->size() < 10) ***/
+;
+Person.allInstances()->forAll(p|p.ownedCars->forAll(c|c.color = 'no-color'))
+
+/*** BEGIN: Person.allInstances()->forAll(p|p.ownedCars->forAll(c|c.color = 'no-color')) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) = 0 AS res
+FROM (
+    /*** BEGIN: p.ownedCars->forAll(c|c.color = 'no-color') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_p IS NULL WHEN 1 THEN 1 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+        FROM (
+            /*** BEGIN: Person.allInstances() ***/
+            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+            FROM Person
+            /*** END: Person.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: p ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) = 0 AS res, TEMP_BODY.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: c.color = 'no-color' ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c, TEMP_LEFT.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c, TEMP_DMN.ref_p AS ref_p
+                FROM (
+                    /*** BEGIN: p.ownedCars ***/
+                    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                        FROM (
+                            /*** BEGIN: Person.allInstances() ***/
+                            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                            FROM Person
+                            /*** END: Person.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                    /*** END: p.ownedCars ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-color' ***/
+            SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+            /*** END: 'no-color' ***/
+        ) AS TEMP_RIGHT
+        /*** END: c.color = 'no-color' ***/
+    ) AS TEMP_BODY
+    GROUP BY TEMP_BODY.ref_p) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_p = TEMP_BODY.ref_p
+    WHERE IFNULL(TEMP_BODY.res, 0) = 0 AND TEMP_BODY.val = 1
+    /*** END: p.ownedCars->forAll(c|c.color = 'no-color') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 0
+/*** END: Person.allInstances()->forAll(p|p.ownedCars->forAll(c|c.color = 'no-color')) ***/
+;
+Person.allInstances()->forAll(p|p.ownedCars->exists(c|c.color = 'no-color'))
+
+/*** BEGIN: Person.allInstances()->forAll(p|p.ownedCars->exists(c|c.color = 'no-color')) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) = 0 AS res
+FROM (
+    /*** BEGIN: p.ownedCars->exists(c|c.color = 'no-color') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_p IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+        FROM (
+            /*** BEGIN: Person.allInstances() ***/
+            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+            FROM Person
+            /*** END: Person.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: p ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: c.color = 'no-color' ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c, TEMP_LEFT.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c, TEMP_DMN.ref_p AS ref_p
+                FROM (
+                    /*** BEGIN: p.ownedCars ***/
+                    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                        FROM (
+                            /*** BEGIN: Person.allInstances() ***/
+                            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                            FROM Person
+                            /*** END: Person.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                    /*** END: p.ownedCars ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-color' ***/
+            SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+            /*** END: 'no-color' ***/
+        ) AS TEMP_RIGHT
+        /*** END: c.color = 'no-color' ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    GROUP BY TEMP_BODY.ref_p) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_p = TEMP_BODY.ref_p
+    /*** END: p.ownedCars->exists(c|c.color = 'no-color') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 0
+/*** END: Person.allInstances()->forAll(p|p.ownedCars->exists(c|c.color = 'no-color')) ***/
+;
+Person.allInstances()->exists(p|p.ownedCars->forAll(c|c.color = 'no-color'))
+
+/*** BEGIN: Person.allInstances()->exists(p|p.ownedCars->forAll(c|c.color = 'no-color')) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: p.ownedCars->forAll(c|c.color = 'no-color') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_p IS NULL WHEN 1 THEN 1 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+        FROM (
+            /*** BEGIN: Person.allInstances() ***/
+            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+            FROM Person
+            /*** END: Person.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: p ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) = 0 AS res, TEMP_BODY.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: c.color = 'no-color' ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c, TEMP_LEFT.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c, TEMP_DMN.ref_p AS ref_p
+                FROM (
+                    /*** BEGIN: p.ownedCars ***/
+                    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                        FROM (
+                            /*** BEGIN: Person.allInstances() ***/
+                            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                            FROM Person
+                            /*** END: Person.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                    /*** END: p.ownedCars ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-color' ***/
+            SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+            /*** END: 'no-color' ***/
+        ) AS TEMP_RIGHT
+        /*** END: c.color = 'no-color' ***/
+    ) AS TEMP_BODY
+    GROUP BY TEMP_BODY.ref_p) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_p = TEMP_BODY.ref_p
+    WHERE IFNULL(TEMP_BODY.res, 0) = 0 AND TEMP_BODY.val = 1
+    /*** END: p.ownedCars->forAll(c|c.color = 'no-color') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Person.allInstances()->exists(p|p.ownedCars->forAll(c|c.color = 'no-color')) ***/
+;
+Person.allInstances()->exists(p|p.ownedCars->exists(c|c.color = 'no-color'))
+
+/*** BEGIN: Person.allInstances()->exists(p|p.ownedCars->exists(c|c.color = 'no-color')) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: p.ownedCars->exists(c|c.color = 'no-color') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_p IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+        FROM (
+            /*** BEGIN: Person.allInstances() ***/
+            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+            FROM Person
+            /*** END: Person.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: p ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: c.color = 'no-color' ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c, TEMP_LEFT.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c, TEMP_DMN.ref_p AS ref_p
+                FROM (
+                    /*** BEGIN: p.ownedCars ***/
+                    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                        FROM (
+                            /*** BEGIN: Person.allInstances() ***/
+                            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                            FROM Person
+                            /*** END: Person.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                    /*** END: p.ownedCars ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-color' ***/
+            SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+            /*** END: 'no-color' ***/
+        ) AS TEMP_RIGHT
+        /*** END: c.color = 'no-color' ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    GROUP BY TEMP_BODY.ref_p) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_p = TEMP_BODY.ref_p
+    /*** END: p.ownedCars->exists(c|c.color = 'no-color') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Person.allInstances()->exists(p|p.ownedCars->exists(c|c.color = 'no-color')) ***/
+;
+Car.allInstances()->select(c|c.color = 'no-color')
+
+/*** BEGIN: Car.allInstances()->select(c|c.color = 'no-color') ***/
+SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_c AS res, 'Car' AS type
+FROM (
+    /*** BEGIN: c.color = 'no-color' ***/
+    SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.color ***/
+        SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car
+        ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+        /*** END: c.color ***/
+    ) AS TEMP_LEFT
+    JOIN (
+        /*** BEGIN: 'no-color' ***/
+        SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+        /*** END: 'no-color' ***/
+    ) AS TEMP_RIGHT
+    /*** END: c.color = 'no-color' ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Car.allInstances()->select(c|c.color = 'no-color') ***/
+;
+Person.allInstances()->select(p|p.ownedCars->exists(c|c.color <> 'no-color'))
+
+/*** BEGIN: Person.allInstances()->select(p|p.ownedCars->exists(c|c.color <> 'no-color')) ***/
+SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_p AS res, 'Person' AS type
+FROM (
+    /*** BEGIN: p.ownedCars->exists(c|c.color <> 'no-color') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_p IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+        FROM (
+            /*** BEGIN: Person.allInstances() ***/
+            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+            FROM Person
+            /*** END: Person.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: p ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: c.color <> 'no-color' ***/
+        SELECT TEMP_LEFT.res <> TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c, TEMP_LEFT.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c, TEMP_DMN.ref_p AS ref_p
+                FROM (
+                    /*** BEGIN: p.ownedCars ***/
+                    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                        FROM (
+                            /*** BEGIN: Person.allInstances() ***/
+                            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                            FROM Person
+                            /*** END: Person.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                    /*** END: p.ownedCars ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-color' ***/
+            SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+            /*** END: 'no-color' ***/
+        ) AS TEMP_RIGHT
+        /*** END: c.color <> 'no-color' ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    GROUP BY TEMP_BODY.ref_p) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_p = TEMP_BODY.ref_p
+    /*** END: p.ownedCars->exists(c|c.color <> 'no-color') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Person.allInstances()->select(p|p.ownedCars->exists(c|c.color <> 'no-color')) ***/
+;
+Person.allInstances()->select(p|p.ownedCars->forAll(c|c.color <> 'no-color'))
+
+/*** BEGIN: Person.allInstances()->select(p|p.ownedCars->forAll(c|c.color <> 'no-color')) ***/
+SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_p AS res, 'Person' AS type
+FROM (
+    /*** BEGIN: p.ownedCars->forAll(c|c.color <> 'no-color') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_p IS NULL WHEN 1 THEN 1 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+        FROM (
+            /*** BEGIN: Person.allInstances() ***/
+            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+            FROM Person
+            /*** END: Person.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: p ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) = 0 AS res, TEMP_BODY.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: c.color <> 'no-color' ***/
+        SELECT TEMP_LEFT.res <> TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c, TEMP_LEFT.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c, TEMP_DMN.ref_p AS ref_p
+                FROM (
+                    /*** BEGIN: p.ownedCars ***/
+                    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                        FROM (
+                            /*** BEGIN: Person.allInstances() ***/
+                            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                            FROM Person
+                            /*** END: Person.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                    /*** END: p.ownedCars ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-color' ***/
+            SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+            /*** END: 'no-color' ***/
+        ) AS TEMP_RIGHT
+        /*** END: c.color <> 'no-color' ***/
+    ) AS TEMP_BODY
+    GROUP BY TEMP_BODY.ref_p) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_p = TEMP_BODY.ref_p
+    WHERE IFNULL(TEMP_BODY.res, 0) = 0 AND TEMP_BODY.val = 1
+    /*** END: p.ownedCars->forAll(c|c.color <> 'no-color') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Person.allInstances()->select(p|p.ownedCars->forAll(c|c.color <> 'no-color')) ***/
+;
+Car.allInstances()->select(c|c.color.oclIsUndefined())
+
+/*** BEGIN: Car.allInstances()->select(c|c.color.oclIsUndefined()) ***/
+SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_c AS res, 'Car' AS type
+FROM (
+    /*** BEGIN: c.color.oclIsUndefined() ***/
+    SELECT TEMP_SOURCE.val AS val, CASE TEMP_SOURCE.val = 0 WHEN 1 THEN NULL ELSE TEMP_SOURCE.res IS NULL END AS res, 'Boolean' AS type, TEMP_SOURCE.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.color ***/
+        SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car
+        ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+        /*** END: c.color ***/
+    ) AS TEMP_SOURCE
+    /*** END: c.color.oclIsUndefined() ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Car.allInstances()->select(c|c.color.oclIsUndefined()) ***/
+;
+Person.allInstances()->select(p|p.ownedCars->exists(c|c.color.oclIsUndefined()))
+
+/*** BEGIN: Person.allInstances()->select(p|p.ownedCars->exists(c|c.color.oclIsUndefined())) ***/
+SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_p AS res, 'Person' AS type
+FROM (
+    /*** BEGIN: p.ownedCars->exists(c|c.color.oclIsUndefined()) ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_p IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: p ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+        FROM (
+            /*** BEGIN: Person.allInstances() ***/
+            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+            FROM Person
+            /*** END: Person.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: p ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_p AS ref_p
+    FROM (
+        /*** BEGIN: c.color.oclIsUndefined() ***/
+        SELECT TEMP_SOURCE.val AS val, CASE TEMP_SOURCE.val = 0 WHEN 1 THEN NULL ELSE TEMP_SOURCE.res IS NULL END AS res, 'Boolean' AS type, TEMP_SOURCE.ref_c AS ref_c, TEMP_SOURCE.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c, TEMP_OBJ.ref_p AS ref_p
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c, TEMP_DMN.ref_p AS ref_p
+                FROM (
+                    /*** BEGIN: p.ownedCars ***/
+                    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p
+                    FROM (
+                        /*** BEGIN: p ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p
+                        FROM (
+                            /*** BEGIN: Person.allInstances() ***/
+                            SELECT 1 AS val, Person_id AS res, 'Person' AS type
+                            FROM Person
+                            /*** END: Person.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: p ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                    /*** END: p.ownedCars ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_SOURCE
+        /*** END: c.color.oclIsUndefined() ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    GROUP BY TEMP_BODY.ref_p) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_p = TEMP_BODY.ref_p
+    /*** END: p.ownedCars->exists(c|c.color.oclIsUndefined()) ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Person.allInstances()->select(p|p.ownedCars->exists(c|c.color.oclIsUndefined())) ***/
+;
+Car.allInstances()->select(c|c.color = 'no-color')->size()
+
+/*** BEGIN: Car.allInstances()->select(c|c.color = 'no-color')->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances()->select(c|c.color = 'no-color') ***/
+    SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_c AS res, 'Car' AS type
+    FROM (
+        /*** BEGIN: c.color = 'no-color' ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c.color ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: c ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                FROM (
+                    /*** BEGIN: Car.allInstances() ***/
+                    SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                    FROM Car
+                    /*** END: Car.allInstances() ***/
+                ) AS TEMP_DMN
+                /*** END: c ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Car
+            ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+            /*** END: c.color ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-color' ***/
+            SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+            /*** END: 'no-color' ***/
+        ) AS TEMP_RIGHT
+        /*** END: c.color = 'no-color' ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    /*** END: Car.allInstances()->select(c|c.color = 'no-color') ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->select(c|c.color = 'no-color')->size() ***/
+;
+Car.allInstances()->exists(c|c.color <> 'no-color')
+
+/*** BEGIN: Car.allInstances()->exists(c|c.color <> 'no-color') ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: c.color <> 'no-color' ***/
+    SELECT TEMP_LEFT.res <> TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.color ***/
+        SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car
+        ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+        /*** END: c.color ***/
+    ) AS TEMP_LEFT
+    JOIN (
+        /*** BEGIN: 'no-color' ***/
+        SELECT 1 AS val, 'no-color' AS res, 'String' AS type
+        /*** END: 'no-color' ***/
+    ) AS TEMP_RIGHT
+    /*** END: c.color <> 'no-color' ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Car.allInstances()->exists(c|c.color <> 'no-color') ***/
+;
+Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name'))->size()
+
+/*** BEGIN: Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name'))->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name')) ***/
+    SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_c AS res, 'Car' AS type
+    FROM (
+        /*** BEGIN: c.owners->exists(p|p.name = 'no-name') ***/
+        SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_c IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_SOURCE
+        LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: p.name = 'no-name' ***/
+            SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_p AS ref_p, TEMP_LEFT.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: p.name ***/
+                SELECT TEMP_OBJ.val AS val, 'String' AS type, Person.name AS res, TEMP_OBJ.ref_p AS ref_p, TEMP_OBJ.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: p ***/
+                    SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+                    FROM (
+                        /*** BEGIN: c.owners ***/
+                        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                        FROM (
+                            /*** BEGIN: c ***/
+                            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                            FROM (
+                                /*** BEGIN: Car.allInstances() ***/
+                                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                                FROM Car
+                                /*** END: Car.allInstances() ***/
+                            ) AS TEMP_DMN
+                            /*** END: c ***/
+                        ) AS TEMP_OBJ
+                        LEFT JOIN Car_ownedCars_owners_Person
+                        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                        /*** END: c.owners ***/
+                    ) AS TEMP_DMN
+                    /*** END: p ***/
+                ) AS TEMP_OBJ
+                LEFT JOIN Person
+                ON TEMP_OBJ.ref_p = Person.Person_id AND TEMP_OBJ.val = 1
+                /*** END: p.name ***/
+            ) AS TEMP_LEFT
+            JOIN (
+                /*** BEGIN: 'no-name' ***/
+                SELECT 1 AS val, 'no-name' AS res, 'String' AS type
+                /*** END: 'no-name' ***/
+            ) AS TEMP_RIGHT
+            /*** END: p.name = 'no-name' ***/
+        ) AS TEMP_BODY
+        WHERE TEMP_BODY.res = 1
+        GROUP BY TEMP_BODY.ref_c) AS TEMP_BODY
+        ON TEMP_SOURCE.ref_c = TEMP_BODY.ref_c
+        /*** END: c.owners->exists(p|p.name = 'no-name') ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    /*** END: Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name')) ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name'))->size() ***/
+;
+Car.allInstances()->exists(c|c.owners->forAll(p|p.name = 'no-name'))
+
+/*** BEGIN: Car.allInstances()->exists(c|c.owners->forAll(p|p.name = 'no-name')) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: c.owners->forAll(p|p.name = 'no-name') ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_c IS NULL WHEN 1 THEN 1 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+        FROM (
+            /*** BEGIN: Car.allInstances() ***/
+            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+            FROM Car
+            /*** END: Car.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: c ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) = 0 AS res, TEMP_BODY.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: p.name = 'no-name' ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_p AS ref_p, TEMP_LEFT.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: p.name ***/
+            SELECT TEMP_OBJ.val AS val, 'String' AS type, Person.name AS res, TEMP_OBJ.ref_p AS ref_p, TEMP_OBJ.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: p ***/
+                SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: c.owners ***/
+                    SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                    FROM (
+                        /*** BEGIN: c ***/
+                        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                        FROM (
+                            /*** BEGIN: Car.allInstances() ***/
+                            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                            FROM Car
+                            /*** END: Car.allInstances() ***/
+                        ) AS TEMP_DMN
+                        /*** END: c ***/
+                    ) AS TEMP_OBJ
+                    LEFT JOIN Car_ownedCars_owners_Person
+                    ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                    /*** END: c.owners ***/
+                ) AS TEMP_DMN
+                /*** END: p ***/
+            ) AS TEMP_OBJ
+            LEFT JOIN Person
+            ON TEMP_OBJ.ref_p = Person.Person_id AND TEMP_OBJ.val = 1
+            /*** END: p.name ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: 'no-name' ***/
+            SELECT 1 AS val, 'no-name' AS res, 'String' AS type
+            /*** END: 'no-name' ***/
+        ) AS TEMP_RIGHT
+        /*** END: p.name = 'no-name' ***/
+    ) AS TEMP_BODY
+    GROUP BY TEMP_BODY.ref_c) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_c = TEMP_BODY.ref_c
+    WHERE IFNULL(TEMP_BODY.res, 0) = 0 AND TEMP_BODY.val = 1
+    /*** END: c.owners->forAll(p|p.name = 'no-name') ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Car.allInstances()->exists(c|c.owners->forAll(p|p.name = 'no-name')) ***/
+;
+Car.allInstances()->select(c|c.owners->exists(p|p.name.oclIsUndefined()))->size()
+
+/*** BEGIN: Car.allInstances()->select(c|c.owners->exists(p|p.name.oclIsUndefined()))->size() ***/
+SELECT 1 AS val, 'Integer' AS type, COUNT(*) AS res
+FROM (
+    /*** BEGIN: Car.allInstances()->select(c|c.owners->exists(p|p.name.oclIsUndefined())) ***/
+    SELECT TEMP_BODY.val AS val, TEMP_BODY.ref_c AS res, 'Car' AS type
+    FROM (
+        /*** BEGIN: c.owners->exists(p|p.name.oclIsUndefined()) ***/
+        SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_c IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_SOURCE
+        LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: p.name.oclIsUndefined() ***/
+            SELECT TEMP_SOURCE.val AS val, CASE TEMP_SOURCE.val = 0 WHEN 1 THEN NULL ELSE TEMP_SOURCE.res IS NULL END AS res, 'Boolean' AS type, TEMP_SOURCE.ref_p AS ref_p, TEMP_SOURCE.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: p.name ***/
+                SELECT TEMP_OBJ.val AS val, 'String' AS type, Person.name AS res, TEMP_OBJ.ref_p AS ref_p, TEMP_OBJ.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: p ***/
+                    SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+                    FROM (
+                        /*** BEGIN: c.owners ***/
+                        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                        FROM (
+                            /*** BEGIN: c ***/
+                            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                            FROM (
+                                /*** BEGIN: Car.allInstances() ***/
+                                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                                FROM Car
+                                /*** END: Car.allInstances() ***/
+                            ) AS TEMP_DMN
+                            /*** END: c ***/
+                        ) AS TEMP_OBJ
+                        LEFT JOIN Car_ownedCars_owners_Person
+                        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                        /*** END: c.owners ***/
+                    ) AS TEMP_DMN
+                    /*** END: p ***/
+                ) AS TEMP_OBJ
+                LEFT JOIN Person
+                ON TEMP_OBJ.ref_p = Person.Person_id AND TEMP_OBJ.val = 1
+                /*** END: p.name ***/
+            ) AS TEMP_SOURCE
+            /*** END: p.name.oclIsUndefined() ***/
+        ) AS TEMP_BODY
+        WHERE TEMP_BODY.res = 1
+        GROUP BY TEMP_BODY.ref_c) AS TEMP_BODY
+        ON TEMP_SOURCE.ref_c = TEMP_BODY.ref_c
+        /*** END: c.owners->exists(p|p.name.oclIsUndefined()) ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    /*** END: Car.allInstances()->select(c|c.owners->exists(p|p.name.oclIsUndefined())) ***/
+) AS TEMP_src
+/*** END: Car.allInstances()->select(c|c.owners->exists(p|p.name.oclIsUndefined()))->size() ***/
+;
+Car.allInstances()->isEmpty()
+
+/*** BEGIN: Car.allInstances()->isEmpty() ***/
+SELECT 1 AS val, COUNT(*) = 0 AS res, 'Boolean' AS type
+FROM (
+    /*** BEGIN: Car.allInstances() ***/
+    SELECT 1 AS val, Car_id AS res, 'Car' AS type
+    FROM Car
+    /*** END: Car.allInstances() ***/
+) AS TEMP_SRC
+/*** END: Car.allInstances()->isEmpty() ***/
+;
+Car.allInstances()->collect(c|c.color)->isEmpty()
+
+/*** BEGIN: Car.allInstances()->collect(c|c.color)->isEmpty() ***/
+SELECT 1 AS val, COUNT(*) = 0 AS res, 'Boolean' AS type
+FROM (
+    /*** BEGIN: Car.allInstances()->collect(c|c.color) ***/
+    SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+    FROM (
+        /*** BEGIN: c.color ***/
+        SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car
+        ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+        /*** END: c.color ***/
+    ) AS TEMP_body
+    /*** END: Car.allInstances()->collect(c|c.color) ***/
+) AS TEMP_SRC
+/*** END: Car.allInstances()->collect(c|c.color)->isEmpty() ***/
+;
+Car.allInstances()->collect(c|c.owners->isEmpty())
+
+/*** BEGIN: Car.allInstances()->collect(c|c.owners->isEmpty()) ***/
+SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+FROM (
+    /*** BEGIN: c.owners->isEmpty() ***/
+    SELECT 1 AS val, CASE TEMP_SRC.val = 0 WHEN 1 THEN 1 ELSE 0 END AS res, 'Boolean' AS type, TEMP_SRC.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.owners ***/
+        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car_ownedCars_owners_Person
+        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+        /*** END: c.owners ***/
+    ) AS TEMP_SRC
+    GROUP BY TEMP_SRC.ref_c
+    /*** END: c.owners->isEmpty() ***/
+) AS TEMP_body
+/*** END: Car.allInstances()->collect(c|c.owners->isEmpty()) ***/
+;
+Car.allInstances()->forAll(c|c.owners->isEmpty())
+
+/*** BEGIN: Car.allInstances()->forAll(c|c.owners->isEmpty()) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) = 0 AS res
+FROM (
+    /*** BEGIN: c.owners->isEmpty() ***/
+    SELECT 1 AS val, CASE TEMP_SRC.val = 0 WHEN 1 THEN 1 ELSE 0 END AS res, 'Boolean' AS type, TEMP_SRC.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.owners ***/
+        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car_ownedCars_owners_Person
+        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+        /*** END: c.owners ***/
+    ) AS TEMP_SRC
+    GROUP BY TEMP_SRC.ref_c
+    /*** END: c.owners->isEmpty() ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 0
+/*** END: Car.allInstances()->forAll(c|c.owners->isEmpty()) ***/
+;
+Car.allInstances()->exists(c|c.owners->isEmpty())
+
+/*** BEGIN: Car.allInstances()->exists(c|c.owners->isEmpty()) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: c.owners->isEmpty() ***/
+    SELECT 1 AS val, CASE TEMP_SRC.val = 0 WHEN 1 THEN 1 ELSE 0 END AS res, 'Boolean' AS type, TEMP_SRC.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.owners ***/
+        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car_ownedCars_owners_Person
+        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+        /*** END: c.owners ***/
+    ) AS TEMP_SRC
+    GROUP BY TEMP_SRC.ref_c
+    /*** END: c.owners->isEmpty() ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Car.allInstances()->exists(c|c.owners->isEmpty()) ***/
+;
+Car.allInstances()->notEmpty()
+
+/*** BEGIN: Car.allInstances()->notEmpty() ***/
+SELECT 1 AS val, COUNT(*) > 0 AS res, 'Boolean' AS type
+FROM (
+    /*** BEGIN: Car.allInstances() ***/
+    SELECT 1 AS val, Car_id AS res, 'Car' AS type
+    FROM Car
+    /*** END: Car.allInstances() ***/
+) AS TEMP_SRC
+/*** END: Car.allInstances()->notEmpty() ***/
+;
+Car.allInstances()->collect(c|c.color)->notEmpty()
+
+/*** BEGIN: Car.allInstances()->collect(c|c.color)->notEmpty() ***/
+SELECT 1 AS val, COUNT(*) > 0 AS res, 'Boolean' AS type
+FROM (
+    /*** BEGIN: Car.allInstances()->collect(c|c.color) ***/
+    SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+    FROM (
+        /*** BEGIN: c.color ***/
+        SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car
+        ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+        /*** END: c.color ***/
+    ) AS TEMP_body
+    /*** END: Car.allInstances()->collect(c|c.color) ***/
+) AS TEMP_SRC
+/*** END: Car.allInstances()->collect(c|c.color)->notEmpty() ***/
+;
+Car.allInstances()->collect(c|c.owners->notEmpty())
+
+/*** BEGIN: Car.allInstances()->collect(c|c.owners->notEmpty()) ***/
+SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.type AS type
+FROM (
+    /*** BEGIN: c.owners->notEmpty() ***/
+    SELECT 1 AS val, CASE TEMP_SRC.val = 0 WHEN 1 THEN 0 ELSE 1 END AS res, 'Boolean' AS type, TEMP_SRC.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.owners ***/
+        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car_ownedCars_owners_Person
+        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+        /*** END: c.owners ***/
+    ) AS TEMP_SRC
+    GROUP BY TEMP_SRC.ref_c
+    /*** END: c.owners->notEmpty() ***/
+) AS TEMP_body
+/*** END: Car.allInstances()->collect(c|c.owners->notEmpty()) ***/
+;
+Car.allInstances()->forAll(c|c.owners->notEmpty())
+
+/*** BEGIN: Car.allInstances()->forAll(c|c.owners->notEmpty()) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) = 0 AS res
+FROM (
+    /*** BEGIN: c.owners->notEmpty() ***/
+    SELECT 1 AS val, CASE TEMP_SRC.val = 0 WHEN 1 THEN 0 ELSE 1 END AS res, 'Boolean' AS type, TEMP_SRC.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.owners ***/
+        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car_ownedCars_owners_Person
+        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+        /*** END: c.owners ***/
+    ) AS TEMP_SRC
+    GROUP BY TEMP_SRC.ref_c
+    /*** END: c.owners->notEmpty() ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 0
+/*** END: Car.allInstances()->forAll(c|c.owners->notEmpty()) ***/
+;
+Car.allInstances()->exists(c|c.owners->notEmpty())
+
+/*** BEGIN: Car.allInstances()->exists(c|c.owners->notEmpty()) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: c.owners->notEmpty() ***/
+    SELECT 1 AS val, CASE TEMP_SRC.val = 0 WHEN 1 THEN 0 ELSE 1 END AS res, 'Boolean' AS type, TEMP_SRC.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.owners ***/
+        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car_ownedCars_owners_Person
+        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+        /*** END: c.owners ***/
+    ) AS TEMP_SRC
+    GROUP BY TEMP_SRC.ref_c
+    /*** END: c.owners->notEmpty() ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Car.allInstances()->exists(c|c.owners->notEmpty()) ***/
+;
+Car.allInstances()->forAll(c|c.owners->forAll(p|p.ownedCars->forAll(c1|c1.color=c.color)))
+
+/*** BEGIN: Car.allInstances()->forAll(c|c.owners->forAll(p|p.ownedCars->forAll(c1|c1.color=c.color))) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) = 0 AS res
+FROM (
+    /*** BEGIN: c.owners->forAll(p|p.ownedCars->forAll(c1|c1.color=c.color)) ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_c IS NULL WHEN 1 THEN 1 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+        FROM (
+            /*** BEGIN: Car.allInstances() ***/
+            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+            FROM Car
+            /*** END: Car.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: c ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) = 0 AS res, TEMP_BODY.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: p.ownedCars->forAll(c1|c1.color=c.color) ***/
+        SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_p IS NULL WHEN 1 THEN 1 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_p AS ref_p, TEMP_SOURCE.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: p ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: c.owners ***/
+                SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: c ***/
+                    SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                    FROM (
+                        /*** BEGIN: Car.allInstances() ***/
+                        SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                        FROM Car
+                        /*** END: Car.allInstances() ***/
+                    ) AS TEMP_DMN
+                    /*** END: c ***/
+                ) AS TEMP_OBJ
+                LEFT JOIN Car_ownedCars_owners_Person
+                ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                /*** END: c.owners ***/
+            ) AS TEMP_DMN
+            /*** END: p ***/
+        ) AS TEMP_SOURCE
+        LEFT JOIN (SELECT COUNT(*) = 0 AS res, TEMP_BODY.ref_c AS ref_c, TEMP_BODY.ref_p AS ref_p
+        FROM (
+            /*** BEGIN: c1.color=c.color ***/
+            SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c1 AS ref_c1, TEMP_LEFT.ref_p AS ref_p, TEMP_LEFT.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: c1.color ***/
+                SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c1 AS ref_c1, TEMP_OBJ.ref_p AS ref_p, TEMP_OBJ.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: c1 ***/
+                    SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c1, TEMP_DMN.ref_p AS ref_p, TEMP_DMN.ref_c AS ref_c
+                    FROM (
+                        /*** BEGIN: p.ownedCars ***/
+                        SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p, TEMP_OBJ.ref_c AS ref_c
+                        FROM (
+                            /*** BEGIN: p ***/
+                            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+                            FROM (
+                                /*** BEGIN: c.owners ***/
+                                SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                                FROM (
+                                    /*** BEGIN: c ***/
+                                    SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                                    FROM (
+                                        /*** BEGIN: Car.allInstances() ***/
+                                        SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                                        FROM Car
+                                        /*** END: Car.allInstances() ***/
+                                    ) AS TEMP_DMN
+                                    /*** END: c ***/
+                                ) AS TEMP_OBJ
+                                LEFT JOIN Car_ownedCars_owners_Person
+                                ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                                /*** END: c.owners ***/
+                            ) AS TEMP_DMN
+                            /*** END: p ***/
+                        ) AS TEMP_OBJ
+                        LEFT JOIN Car_ownedCars_owners_Person
+                        ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                        /*** END: p.ownedCars ***/
+                    ) AS TEMP_DMN
+                    /*** END: c1 ***/
+                ) AS TEMP_OBJ
+                LEFT JOIN Car
+                ON TEMP_OBJ.ref_c1 = Car.Car_id AND TEMP_OBJ.val = 1
+                /*** END: c1.color ***/
+            ) AS TEMP_LEFT
+            LEFT JOIN (
+                /*** BEGIN: c.color ***/
+                SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: c ***/
+                    SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                    FROM (
+                        /*** BEGIN: Car.allInstances() ***/
+                        SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                        FROM Car
+                        /*** END: Car.allInstances() ***/
+                    ) AS TEMP_DMN
+                    /*** END: c ***/
+                ) AS TEMP_OBJ
+                LEFT JOIN Car
+                ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+                /*** END: c.color ***/
+            ) AS TEMP_RIGHT
+            ON TEMP_LEFT.ref_c = TEMP_RIGHT.ref_c
+            /*** END: c1.color=c.color ***/
+        ) AS TEMP_BODY
+        GROUP BY TEMP_BODY.ref_c, TEMP_BODY.ref_p) AS TEMP_BODY
+        ON TEMP_SOURCE.ref_p = TEMP_BODY.ref_p AND TEMP_SOURCE.ref_c = TEMP_BODY.ref_c
+        WHERE IFNULL(TEMP_BODY.res, 0) = 0 AND TEMP_BODY.val = 1
+        /*** END: p.ownedCars->forAll(c1|c1.color=c.color) ***/
+    ) AS TEMP_BODY
+    GROUP BY TEMP_BODY.ref_c) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_c = TEMP_BODY.ref_c
+    WHERE IFNULL(TEMP_BODY.res, 0) = 0 AND TEMP_BODY.val = 1
+    /*** END: c.owners->forAll(p|p.ownedCars->forAll(c1|c1.color=c.color)) ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 0
+/*** END: Car.allInstances()->forAll(c|c.owners->forAll(p|p.ownedCars->forAll(c1|c1.color=c.color))) ***/
+;
+Car.allInstances()->forAll(c|'blue'=c.color)
+
+/*** BEGIN: Car.allInstances()->forAll(c|'blue'=c.color) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) = 0 AS res
+FROM (
+    /*** BEGIN: 'blue'=c.color ***/
+    SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_RIGHT.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: c.color ***/
+        SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+            FROM (
+                /*** BEGIN: Car.allInstances() ***/
+                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                FROM Car
+                /*** END: Car.allInstances() ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car
+        ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+        /*** END: c.color ***/
+    ) AS TEMP_RIGHT
+    JOIN (
+        /*** BEGIN: 'blue' ***/
+        SELECT 1 AS val, 'blue' AS res, 'String' AS type
+        /*** END: 'blue' ***/
+    ) AS TEMP_LEFT
+    /*** END: 'blue'=c.color ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 0
+/*** END: Car.allInstances()->forAll(c|'blue'=c.color) ***/
+;
+self
+
+/*** BEGIN: self ***/
+SELECT 1 AS val, self AS res, 'Person' AS type
+/*** END: self ***/
+;
+self = caller
+
+/*** BEGIN: self = caller ***/
+SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val
+FROM (
+    /*** BEGIN: self ***/
+    SELECT 1 AS val, self AS res, self AS ref_self, 'Person' AS type
+    /*** END: self ***/
+) AS TEMP_LEFT
+JOIN (
+    /*** BEGIN: caller ***/
+    SELECT 1 AS val, caller AS res, caller AS ref_caller, 'Person' AS type
+    /*** END: caller ***/
+) AS TEMP_RIGHT
+/*** END: self = caller ***/
+;
+self.name
+
+/*** BEGIN: self.name ***/
+SELECT TEMP_OBJ.val AS val, 'String' AS type, Person.name AS res
+FROM (
+    /*** BEGIN: self ***/
+    SELECT 1 AS val, self AS res, self AS ref_self, 'Person' AS type
+    /*** END: self ***/
+) AS TEMP_OBJ
+LEFT JOIN Person
+ON TEMP_OBJ.ref_self = Person.Person_id AND TEMP_OBJ.val = 1
+/*** END: self.name ***/
+;
+self.name = 'Hoang'
+
+/*** BEGIN: self.name = 'Hoang' ***/
+SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val
+FROM (
+    /*** BEGIN: self.name ***/
+    SELECT TEMP_OBJ.val AS val, 'String' AS type, Person.name AS res, TEMP_OBJ.ref_self AS ref_self
+    FROM (
+        /*** BEGIN: self ***/
+        SELECT 1 AS val, self AS res, self AS ref_self, 'Person' AS type
+        /*** END: self ***/
+    ) AS TEMP_OBJ
+    LEFT JOIN Person
+    ON TEMP_OBJ.ref_self = Person.Person_id AND TEMP_OBJ.val = 1
+    /*** END: self.name ***/
+) AS TEMP_LEFT
+JOIN (
+    /*** BEGIN: 'Hoang' ***/
+    SELECT 1 AS val, 'Hoang' AS res, 'String' AS type
+    /*** END: 'Hoang' ***/
+) AS TEMP_RIGHT
+/*** END: self.name = 'Hoang' ***/
+;
+self.ownedCars
+
+/*** BEGIN: self.ownedCars ***/
+SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type
+FROM (
+    /*** BEGIN: self ***/
+    SELECT 1 AS val, self AS res, self AS ref_self, 'Person' AS type
+    /*** END: self ***/
+) AS TEMP_OBJ
+LEFT JOIN Car_ownedCars_owners_Person
+ON TEMP_OBJ.ref_self = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+/*** END: self.ownedCars ***/
+;
+self.ownedCars->size()
+
+/*** BEGIN: self.ownedCars->size() ***/
+SELECT 1 AS val, 'Integer' AS type, CASE TEMP_src.val = 0 WHEN 1 THEN 0 ELSE COUNT(*) END AS res
+FROM (
+    /*** BEGIN: self.ownedCars ***/
+    SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_self AS ref_self
+    FROM (
+        /*** BEGIN: self ***/
+        SELECT 1 AS val, self AS res, self AS ref_self, 'Person' AS type
+        /*** END: self ***/
+    ) AS TEMP_OBJ
+    LEFT JOIN Car_ownedCars_owners_Person
+    ON TEMP_OBJ.ref_self = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+    /*** END: self.ownedCars ***/
+) AS TEMP_src
+GROUP BY TEMP_src.ref_self, TEMP_src.val
+/*** END: self.ownedCars->size() ***/
+;
+self.ownedCars->exists(c|c.color = 'black')
+
+/*** BEGIN: self.ownedCars->exists(c|c.color = 'black') ***/
+SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_self IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res
+FROM (
+    /*** BEGIN: self ***/
+    SELECT 1 AS val, self AS res, self AS ref_self, 'Person' AS type
+    /*** END: self ***/
+) AS TEMP_SOURCE
+LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_self AS ref_self
+FROM (
+    /*** BEGIN: c.color = 'black' ***/
+    SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_c AS ref_c, TEMP_LEFT.ref_self AS ref_self
+    FROM (
+        /*** BEGIN: c.color ***/
+        SELECT TEMP_OBJ.val AS val, 'String' AS type, Car.color AS res, TEMP_OBJ.ref_c AS ref_c, TEMP_OBJ.ref_self AS ref_self
+        FROM (
+            /*** BEGIN: c ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c, TEMP_DMN.ref_self AS ref_self
+            FROM (
+                /*** BEGIN: self.ownedCars ***/
+                SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_self AS ref_self
+                FROM (
+                    /*** BEGIN: self ***/
+                    SELECT 1 AS val, self AS res, self AS ref_self, 'Person' AS type
+                    /*** END: self ***/
+                ) AS TEMP_OBJ
+                LEFT JOIN Car_ownedCars_owners_Person
+                ON TEMP_OBJ.ref_self = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                /*** END: self.ownedCars ***/
+            ) AS TEMP_DMN
+            /*** END: c ***/
+        ) AS TEMP_OBJ
+        LEFT JOIN Car
+        ON TEMP_OBJ.ref_c = Car.Car_id AND TEMP_OBJ.val = 1
+        /*** END: c.color ***/
+    ) AS TEMP_LEFT
+    JOIN (
+        /*** BEGIN: 'black' ***/
+        SELECT 1 AS val, 'black' AS res, 'String' AS type
+        /*** END: 'black' ***/
+    ) AS TEMP_RIGHT
+    /*** END: c.color = 'black' ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+GROUP BY TEMP_BODY.ref_self) AS TEMP_BODY
+ON TEMP_SOURCE.ref_self = TEMP_BODY.ref_self
+/*** END: self.ownedCars->exists(c|c.color = 'black') ***/
+;
+Car.allInstances()->exists(c|c.owners->exists(p|p = self))
+
+/*** BEGIN: Car.allInstances()->exists(c|c.owners->exists(p|p = self)) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: c.owners->exists(p|p = self) ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_c IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_c AS ref_c, TEMP_BODY.ref_self AS ref_self
+    FROM (
+        /*** BEGIN: c ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+        FROM (
+            /*** BEGIN: Car.allInstances() ***/
+            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+            FROM Car
+            /*** END: Car.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: c ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_self AS ref_self, TEMP_BODY.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: p = self ***/
+        SELECT TEMP_LEFT.res = TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_p AS ref_p, TEMP_LEFT.ref_c AS ref_c, TEMP_RIGHT.ref_self AS ref_self
+        FROM (
+            /*** BEGIN: p ***/
+            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: c.owners ***/
+                SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: c ***/
+                    SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                    FROM (
+                        /*** BEGIN: Car.allInstances() ***/
+                        SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                        FROM Car
+                        /*** END: Car.allInstances() ***/
+                    ) AS TEMP_DMN
+                    /*** END: c ***/
+                ) AS TEMP_OBJ
+                LEFT JOIN Car_ownedCars_owners_Person
+                ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                /*** END: c.owners ***/
+            ) AS TEMP_DMN
+            /*** END: p ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: self ***/
+            SELECT 1 AS val, self AS res, self AS ref_self, 'Person' AS type
+            /*** END: self ***/
+        ) AS TEMP_RIGHT
+        /*** END: p = self ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    GROUP BY TEMP_BODY.ref_self, TEMP_BODY.ref_c) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_c = TEMP_BODY.ref_c
+    /*** END: c.owners->exists(p|p = self) ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Car.allInstances()->exists(c|c.owners->exists(p|p = self)) ***/
+;
+Car.allInstances()->exists(c|c.owners->exists(p|p.ownedCars->size() < self.ownedCars->size()))
+
+/*** BEGIN: Car.allInstances()->exists(c|c.owners->exists(p|p.ownedCars->size() < self.ownedCars->size())) ***/
+SELECT 1 AS val, 'Boolean' AS type, COUNT(*) > 0 AS res
+FROM (
+    /*** BEGIN: c.owners->exists(p|p.ownedCars->size() < self.ownedCars->size()) ***/
+    SELECT 1 AS val, 'Boolean' AS type, CASE TEMP_BODY.ref_c IS NULL WHEN 1 THEN 0 ELSE TEMP_BODY.res END AS res, TEMP_SOURCE.ref_c AS ref_c, TEMP_BODY.ref_self AS ref_self
+    FROM (
+        /*** BEGIN: c ***/
+        SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+        FROM (
+            /*** BEGIN: Car.allInstances() ***/
+            SELECT 1 AS val, Car_id AS res, 'Car' AS type
+            FROM Car
+            /*** END: Car.allInstances() ***/
+        ) AS TEMP_DMN
+        /*** END: c ***/
+    ) AS TEMP_SOURCE
+    LEFT JOIN (SELECT COUNT(*) > 0 AS res, TEMP_BODY.ref_self AS ref_self, TEMP_BODY.ref_c AS ref_c
+    FROM (
+        /*** BEGIN: p.ownedCars->size() < self.ownedCars->size() ***/
+        SELECT TEMP_LEFT.res < TEMP_RIGHT.res AS res, 'Boolean' AS type, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_p AS ref_p, TEMP_LEFT.ref_c AS ref_c, TEMP_RIGHT.ref_self AS ref_self
+        FROM (
+            /*** BEGIN: p.ownedCars->size() ***/
+            SELECT 1 AS val, 'Integer' AS type, CASE TEMP_src.val = 0 WHEN 1 THEN 0 ELSE COUNT(*) END AS res, TEMP_src.ref_p AS ref_p, TEMP_src.ref_c AS ref_c
+            FROM (
+                /*** BEGIN: p.ownedCars ***/
+                SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_p AS ref_p, TEMP_OBJ.ref_c AS ref_c
+                FROM (
+                    /*** BEGIN: p ***/
+                    SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Person' AS type, TEMP_DMN.res AS ref_p, TEMP_DMN.ref_c AS ref_c
+                    FROM (
+                        /*** BEGIN: c.owners ***/
+                        SELECT CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.owners AS res, CASE Car_ownedCars_owners_Person.ownedCars IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Person' END AS type, TEMP_OBJ.ref_c AS ref_c
+                        FROM (
+                            /*** BEGIN: c ***/
+                            SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, 'Car' AS type, TEMP_DMN.res AS ref_c
+                            FROM (
+                                /*** BEGIN: Car.allInstances() ***/
+                                SELECT 1 AS val, Car_id AS res, 'Car' AS type
+                                FROM Car
+                                /*** END: Car.allInstances() ***/
+                            ) AS TEMP_DMN
+                            /*** END: c ***/
+                        ) AS TEMP_OBJ
+                        LEFT JOIN Car_ownedCars_owners_Person
+                        ON TEMP_OBJ.ref_c = Car_ownedCars_owners_Person.ownedCars AND TEMP_OBJ.val = 1
+                        /*** END: c.owners ***/
+                    ) AS TEMP_DMN
+                    /*** END: p ***/
+                ) AS TEMP_OBJ
+                LEFT JOIN Car_ownedCars_owners_Person
+                ON TEMP_OBJ.ref_p = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                /*** END: p.ownedCars ***/
+            ) AS TEMP_src
+            GROUP BY TEMP_src.ref_p, TEMP_src.ref_c, TEMP_src.val
+            /*** END: p.ownedCars->size() ***/
+        ) AS TEMP_LEFT
+        JOIN (
+            /*** BEGIN: self.ownedCars->size() ***/
+            SELECT 1 AS val, 'Integer' AS type, CASE TEMP_src.val = 0 WHEN 1 THEN 0 ELSE COUNT(*) END AS res, TEMP_src.ref_self AS ref_self
+            FROM (
+                /*** BEGIN: self.ownedCars ***/
+                SELECT CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Car_ownedCars_owners_Person.ownedCars AS res, CASE Car_ownedCars_owners_Person.owners IS NULL WHEN 1 THEN 'EmptyCol' ELSE 'Car' END AS type, TEMP_OBJ.ref_self AS ref_self
+                FROM (
+                    /*** BEGIN: self ***/
+                    SELECT 1 AS val, self AS res, self AS ref_self, 'Person' AS type
+                    /*** END: self ***/
+                ) AS TEMP_OBJ
+                LEFT JOIN Car_ownedCars_owners_Person
+                ON TEMP_OBJ.ref_self = Car_ownedCars_owners_Person.owners AND TEMP_OBJ.val = 1
+                /*** END: self.ownedCars ***/
+            ) AS TEMP_src
+            GROUP BY TEMP_src.ref_self, TEMP_src.val
+            /*** END: self.ownedCars->size() ***/
+        ) AS TEMP_RIGHT
+        /*** END: p.ownedCars->size() < self.ownedCars->size() ***/
+    ) AS TEMP_BODY
+    WHERE TEMP_BODY.res = 1
+    GROUP BY TEMP_BODY.ref_self, TEMP_BODY.ref_c) AS TEMP_BODY
+    ON TEMP_SOURCE.ref_c = TEMP_BODY.ref_c
+    /*** END: c.owners->exists(p|p.ownedCars->size() < self.ownedCars->size()) ***/
+) AS TEMP_BODY
+WHERE TEMP_BODY.res = 1
+/*** END: Car.allInstances()->exists(c|c.owners->exists(p|p.ownedCars->size() < self.ownedCars->size())) ***/
+;

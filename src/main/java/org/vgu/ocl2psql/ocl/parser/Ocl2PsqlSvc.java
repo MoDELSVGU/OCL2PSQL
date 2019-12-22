@@ -18,45 +18,18 @@ limitations under the License.
 
 package org.vgu.ocl2psql.ocl.parser;
 
-import java.io.File;
-import java.io.FileReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.vgu.dm2schema.dm.DataModel;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 
 public abstract class Ocl2PsqlSvc {
-    
+
     protected Boolean descriptionMode = false;
-    
-    public void setDataModelFromFile(String filePath)
-            throws IOException, ParseException, Exception {
-        File dataModelFile = new File(filePath);
-        DataModel dataModel = new DataModel(new JSONParser().parse(
-                new FileReader(dataModelFile.getAbsolutePath())));
 
-        setDataModel(dataModel);
-    }
-    
-    public void setPlainUMLContextFromFile(String filePath)
-            throws IOException, ParseException {
-        setContext((JSONArray) new JSONParser()
-                .parse(new FileReader(filePath)));
-    }
-
-    public void setPlainUMLContextFromString(String umlCtx)
-            throws IOException, ParseException {
-        setContext((JSONArray) new JSONParser()
-                .parse(umlCtx));
-    }
-
-    public void setPlainUMLContext(JSONArray plainUmlCtx)
-            throws ParseException {
-        setContext(plainUmlCtx);
-    }
+    public abstract void setDataModelFromFile(String filePath)
+        throws FileNotFoundException, IOException, ParseException, Exception;
 
     public boolean getDescriptionMode() {
         return this.getDescriptionMode();
@@ -70,12 +43,12 @@ public abstract class Ocl2PsqlSvc {
 
     public abstract Select mapToSQL(String oclExp);
 
-    public abstract void setContext(JSONArray ctx);
+    public abstract void setDataModel(Object dm);
 
-    public abstract void setDataModel(DataModel dm);
+    public void setContextualType(String varName) {
+    };
 
-    public void setContextualType(String varName) {};
-
-    public void setContextualType(String varName, String varType) {};
+    public void setContextualType(String varName, String varType) {
+    };
 
 }

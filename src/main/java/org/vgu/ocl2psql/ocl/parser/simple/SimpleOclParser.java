@@ -25,9 +25,9 @@ import java.util.Optional;
 
 import org.json.simple.JSONArray;
 import org.vgu.dm2schema.dm.DataModel;
+import org.vgu.dm2schema.dm.DmUtils;
 import org.vgu.ocl2psql.ocl.parser.exception.OclException;
 import org.vgu.ocl2psql.ocl.parser.utils.VariableUtils;
-import org.vgu.ocl2psql.ocl.roberts.utils.UMLContextUtils;
 import org.vgu.ocl2psql.sql.statement.select.Join;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
@@ -555,7 +555,6 @@ public class SimpleOclParser implements ParserVisitor {
         String tmpObjAlias = "TEMP_OBJ";
         
         String table = exp.getReferredAssociationEndType().getReferredType();
-        String oppos = exp.getOppositeAssociationEnd();
         String tableIdColumn = String.format("%1$s_id", table);
         String ase = exp.getAssociationEnd();
         
@@ -635,7 +634,6 @@ public class SimpleOclParser implements ParserVisitor {
             String tmpObjAlias = "TEMP_OBJ";
             
             String table = exp.getReferredAssociationEndType().getReferredType();
-            String oppos = exp.getOppositeAssociationEnd();
             String tableIdColumn = String.format("%1$s_id", table);
             String ase = exp.getAssociationEnd();
             
@@ -710,7 +708,6 @@ public class SimpleOclParser implements ParserVisitor {
             String table = exp.getOppositeAssociationEndType().getReferredType();
             String oppos = exp.getOppositeAssociationEnd();
             String tableIdColumn = String.format("%1$s_id", table);
-            String ase = exp.getAssociationEnd();
             
             CaseExpression caseVal = new CaseExpression();
 
@@ -930,6 +927,7 @@ public class SimpleOclParser implements ParserVisitor {
         return plainSelect;
     }
 
+    @SuppressWarnings("unused")
     private PlainSelect mapOclIsKindOf(OperationCallExp exp) {
         PlainSelect plainSelect = new PlainSelect();
 
@@ -952,7 +950,7 @@ public class SimpleOclParser implements ParserVisitor {
                 .getReferredType();
         }
 
-        boolean isKindOf = UMLContextUtils.isSuperClassOf(this.ctx, typeToCheck,
+        boolean isKindOf = DmUtils.isSuperClassOf(this.ctx, typeToCheck,
             src.getType().getReferredType());
 
         List<Variable> sVarsSrc = VariableUtils.SVars(src);
@@ -988,6 +986,7 @@ public class SimpleOclParser implements ParserVisitor {
         return plainSelect;
     }
 
+    @SuppressWarnings("unused")
     private PlainSelect mapOclIsTypeOf(OperationCallExp exp) {
         PlainSelect plainSelect = new PlainSelect();
 
@@ -1046,6 +1045,7 @@ public class SimpleOclParser implements ParserVisitor {
         return plainSelect;
     }
 
+    @SuppressWarnings("unused")
     private PlainSelect mapOclAsType(OperationCallExp exp) {
         PlainSelect plainSelect = new PlainSelect();
 

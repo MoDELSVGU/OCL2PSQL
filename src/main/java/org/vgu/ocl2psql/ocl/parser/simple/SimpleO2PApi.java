@@ -18,10 +18,15 @@ limitations under the License.
 
 package org.vgu.ocl2psql.ocl.parser.simple;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.vgu.dm2schema.dm.DataModel;
 import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
@@ -40,7 +45,6 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 
 public class SimpleO2PApi extends Ocl2PsqlSvc {
 
-//    private JSONArray ctx;
     private DataModel dm;
     
     private SimpleParser parser = new SimpleParser();
@@ -65,23 +69,11 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
 
         Expression newExp = parser.parse(oclExp, dm);
 
-//        o2pParser.setCtx(ctx);
         o2pParser.setDataModel(dm);
         newExp.accept(o2pParser);
 
         return cookFinalStatement(o2pParser.getSelect());
     }
-
-    @Override
-    public void setContext(JSONArray ctx) {
-//        this.ctx = ctx;
-    }
-
-    @Override
-    public void setDataModel(DataModel dm) {
-        this.dm = dm;
-    }
-
 
     @Override
     public void setContextualType(String varName, String varType) {
@@ -107,6 +99,20 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
         finalPlainSelect.getSelectItems().addAll(newSelectItems);
 
         return finalStatement;
+    }
+
+    @Override
+    public void setDataModelFromFile(String filePath)
+        throws FileNotFoundException, IOException, ParseException, Exception {
+        File dataModelFile = new File(filePath);
+        DataModel dataModel = new DataModel(new JSONParser().parse(
+                new FileReader(dataModelFile.getAbsolutePath())));
+        this.setDataModel(dataModel);
+    }
+
+    @Override
+    public void setDataModel(Object dm) {
+        this.dm = (DataModel) dm;
     }
 
 }
