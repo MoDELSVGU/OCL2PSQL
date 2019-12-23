@@ -24,7 +24,12 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
-public class TypeSelectExpression extends SelectExpressionItem{
+public class TypeSelectExpression extends SelectExpressionItem {
+    
+    //TODO: Generalization is in progress.
+    //For the time being, we disable the type column.
+    final boolean isTypeMode = false;
+    
     public TypeSelectExpression(String typeName) {
         super(new StringValue(typeName));
         super.setAlias(new Alias("type"));
@@ -34,4 +39,10 @@ public class TypeSelectExpression extends SelectExpressionItem{
         super(expression);
         super.setAlias(new Alias("type"));
     }
+    
+    @Override
+    public String toString() {
+        return super.getExpression() + ((super.getAlias() != null) ? super.getAlias().toString() : "");
+    }
+    
 }

@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.json.simple.JSONArray;
 import org.vgu.dm2schema.dm.DataModel;
 import org.vgu.dm2schema.dm.DmUtils;
 import org.vgu.ocl2psql.ocl.parser.exception.OclException;
@@ -44,7 +43,7 @@ import com.vgu.se.jocl.expressions.IteratorExp;
 import com.vgu.se.jocl.expressions.IteratorKind;
 import com.vgu.se.jocl.expressions.LiteralExp;
 import com.vgu.se.jocl.expressions.M2MAssociationClassCallExp;
-import com.vgu.se.jocl.expressions.O2MAssociationClassCallExp;
+import com.vgu.se.jocl.expressions.M2OAssociationClassCallExp;
 import com.vgu.se.jocl.expressions.OclExp;
 import com.vgu.se.jocl.expressions.OperationCallExp;
 import com.vgu.se.jocl.expressions.PropertyCallExp;
@@ -83,7 +82,6 @@ import net.sf.jsqlparser.statement.select.GroupByElement;
 public class SimpleOclParser implements ParserVisitor {
 
     private Select select;
-    private JSONArray ctx;
     private DataModel dataModel;
 
     public DataModel getDataModel() {
@@ -104,30 +102,6 @@ public class SimpleOclParser implements ParserVisitor {
 
     private void addComment(OclExp exp, PlainSelect plainSelect) {
         plainSelect.setCorrespondOCLExpression(exp.getOclStr());
-    }
-
-    public JSONArray getCtx() {
-        return ctx;
-    }
-
-    public void setCtx(JSONArray ctx) {
-        this.ctx = ctx;
-    }
-
-    @Override
-    public void visit(com.vgu.se.jocl.expressions.Expression exp) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void visit(OclExp oclExp) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void visit(SqlExp sqlExp) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -226,15 +200,15 @@ public class SimpleOclParser implements ParserVisitor {
         case "oclIsUndefined":
             plainSelect = mapOclIsUndefined(operationCallExp);
             break;
-//        case "oclIsKindOf":
-//            plainSelect = mapOclIsKindOf(operationCallExp);
-//            break;
-//        case "oclIsTypeOf":
-//            plainSelect = mapOclIsTypeOf(operationCallExp);
-//            break;
-//        case "oclAsType":
-//            plainSelect = mapOclAsType(operationCallExp);
-//            break;
+        case "oclIsKindOf":
+            plainSelect = mapOclIsKindOf(operationCallExp);
+            break;
+        case "oclIsTypeOf":
+            plainSelect = mapOclIsTypeOf(operationCallExp);
+            break;
+        case "oclAsType":
+            plainSelect = mapOclAsType(operationCallExp);
+            break;
         case "=":
         case "<>":
         case "<=":
@@ -263,7 +237,12 @@ public class SimpleOclParser implements ParserVisitor {
 
     @Override
     public void visit(PropertyCallExp propertyCallExp) {
-        PlainSelect plainSelect = map(propertyCallExp);
+        // This is the implementation follow the definition
+        // in the paper. Here we introduce a "short-cut".
+//        PlainSelect plainSelect = map(propertyCallExp);
+
+        // Here is the short-cut
+        PlainSelect plainSelect = mapShortcut(propertyCallExp);
 
         addComment(propertyCallExp, plainSelect);
 
@@ -271,14 +250,251 @@ public class SimpleOclParser implements ParserVisitor {
         this.select.setSelectBody(plainSelect);
     }
 
+    private PlainSelect mapShortcut(PropertyCallExp exp) {
+
+        if (exp.getNavigationSource() instanceof VariableExp) {
+            VariableExp variableExp = (VariableExp) exp.getNavigationSource();
+            if (variableExp.getVariable()
+                .getSource() instanceof OperationCallExp) {
+                OperationCallExp operationCallExp = (OperationCallExp) variableExp
+                    .getVariable().getSource();
+                if (operationCallExp.getReferredOperation().getName()
+                    .equals("allInstances")) {
+                    PlainSelect plainSelect = new PlainSelect();
+
+                    String varType = variableExp.getType().getReferredType();
+                    String varName = variableExp.getVariable().getName();
+                    varType.replaceAll("Col\\((\\w+)\\)", varType);
+
+                    plainSelect.setFromItem(new Table(varType));
+
+                    ResSelectExpression res = new ResSelectExpression(
+                        new Column(
+                            Arrays.asList(varType, exp.getReferredProperty())));
+                    plainSelect.setRes(res);
+
+                    TypeSelectExpression type = new TypeSelectExpression(
+                        exp.getType().getReferredType());
+                    plainSelect.setType(type);
+
+                    VarSelectExpression var = new VarSelectExpression(varName);
+                    var.setRefExpression(new Column(
+                        Arrays.asList(varType, varType.concat("_id"))));
+                    plainSelect.addVar(var);
+
+                    return plainSelect;
+                }
+            }
+        }
+        return map(exp);
+
+    }
+
     @Override
     public void visit(AssociationClassCallExp associationClassCallExp) {
-        PlainSelect plainSelect = map(associationClassCallExp);
+        // This is the implementation follow the definition
+        // in the paper. Here we introduce a "short-cut".
+//        PlainSelect plainSelect = map(associationClassCallExp);
+
+        // Here is the short-cut
+        PlainSelect plainSelect = mapShortcut(associationClassCallExp);
 
         addComment(associationClassCallExp, plainSelect);
 
         this.select = new Select();
         this.select.setSelectBody(plainSelect);
+    }
+
+    private PlainSelect mapShortcut(AssociationClassCallExp exp) {
+
+        if (exp.getNavigationSource() instanceof VariableExp) {
+            VariableExp variableExp = (VariableExp) exp.getNavigationSource();
+            if (variableExp.getVariable()
+                .getSource() instanceof OperationCallExp) {
+                OperationCallExp operationCallExp = (OperationCallExp) variableExp
+                    .getVariable().getSource();
+                if (operationCallExp.getReferredOperation().getName()
+                    .equals("allInstances")) {
+
+                    if (exp instanceof M2MAssociationClassCallExp) {
+                        return mapShortcutM2M(exp, variableExp);
+                    } else if (exp instanceof M2OAssociationClassCallExp) {
+                        return mapShortcutM2O(exp, variableExp);
+                    } else {
+                        return mapShortcutO2O(exp, variableExp);
+                    }
+
+                }
+            }
+        }
+        return map(exp);
+
+    }
+
+    private PlainSelect mapShortcutO2O(AssociationClassCallExp exp,
+        VariableExp variableExp) {
+        
+        PlainSelect plainSelect = new PlainSelect();
+
+        String varName = variableExp.getVariable().getName();
+        String referredEndType = exp.getReferredAssociationEndType()
+            .getReferredType();
+        String referredEndName = exp.getReferredAssociationEnd();
+        String oppositeEndType = exp.getOppositeAssociationEndType().getReferredType();
+        
+        ResSelectExpression res = new ResSelectExpression(
+            new Column(Arrays.asList(oppositeEndType, referredEndName)));
+        plainSelect.setRes(res);
+
+        TypeSelectExpression type = new TypeSelectExpression(referredEndType);
+        plainSelect.setType(type);
+
+        VarSelectExpression var = new VarSelectExpression(varName);
+        var.setRefExpression(new Column(Arrays.asList(oppositeEndType,
+            oppositeEndType.concat("_id"))));
+        plainSelect.addVar(var);
+
+        plainSelect.setFromItem(new Table(oppositeEndType));
+        
+        return plainSelect;
+    }
+
+    private PlainSelect mapShortcutM2O(AssociationClassCallExp exp,
+        VariableExp variableExp) {
+
+        PlainSelect plainSelect = new PlainSelect();
+
+        String varName = variableExp.getVariable().getName();
+        String referredEndType = exp.getReferredAssociationEndType()
+            .getReferredType();
+        String referredEndName = exp.getReferredAssociationEnd();
+        String oppositeEndType = exp.getOppositeAssociationEndType().getReferredType();
+        String oppositeEndName = exp.getOppositeAssociationEnd();
+
+        if (((M2OAssociationClassCallExp) exp).isOneEndAssociationCall()) {
+            ResSelectExpression res = new ResSelectExpression(
+                new Column(Arrays.asList(oppositeEndType, referredEndName)));
+            plainSelect.setRes(res);
+
+            TypeSelectExpression type = new TypeSelectExpression(referredEndType);
+            plainSelect.setType(type);
+
+            VarSelectExpression var = new VarSelectExpression(varName);
+            var.setRefExpression(new Column(Arrays.asList(oppositeEndType,
+                oppositeEndType.concat("_id"))));
+            plainSelect.addVar(var);
+
+            plainSelect.setFromItem(new Table(oppositeEndType));
+        } else {
+            CaseExpression caseVal = new CaseExpression();
+            IsNullExpression isOpposNull = new IsNullExpression();
+            isOpposNull
+                .setLeftExpression(new Column(Arrays.asList(oppositeEndType, oppositeEndName)));
+            caseVal.setSwitchExpression(isOpposNull);
+            WhenClause whenClause = new WhenClause();
+            whenClause.setWhenExpression(new LongValue(1L));
+            whenClause.setThenExpression(new LongValue(0L));
+            caseVal.setWhenClauses(Arrays.asList(whenClause));
+            caseVal.setElseExpression(new LongValue(1L));
+            ValSelectExpression val = new ValSelectExpression(caseVal);
+            plainSelect.setVal(val);
+
+            ResSelectExpression res = new ResSelectExpression(
+                new Column(Arrays.asList(oppositeEndType, oppositeEndType.concat("_id"))));
+            plainSelect.setRes(res);
+
+            CaseExpression caseType = new CaseExpression();
+            caseType.setSwitchExpression(isOpposNull);
+            WhenClause typeWhenClause = new WhenClause();
+            typeWhenClause.setWhenExpression(new LongValue(1L));
+            typeWhenClause.setThenExpression(new StringValue("EmptyCol"));
+            caseType.setWhenClauses(Arrays.asList(typeWhenClause));
+            caseType.setElseExpression(new StringValue(referredEndType));
+            TypeSelectExpression type = new TypeSelectExpression(caseType);
+            plainSelect.setType(type);
+            
+            VarSelectExpression var = new VarSelectExpression(varName);
+            var.setRefExpression(new Column(Arrays.asList(oppositeEndType,
+                oppositeEndType.concat("_id"))));
+            plainSelect.addVar(var);
+
+            plainSelect.setFromItem(new Table(referredEndType));
+
+            Join leftJ = new Join();
+            leftJ.setLeft(true);
+            leftJ.setRightItem(new Table(oppositeEndType));
+
+            BinaryExpression EqOppos = buildBinExp("=",
+                new Column(Arrays.asList(oppositeEndType,
+                    oppositeEndType.concat("_id"))),
+                new Column(Arrays.asList(referredEndType, oppositeEndName)));
+
+            leftJ.setOnExpression(EqOppos);
+
+            plainSelect.setJoins(Arrays.asList(leftJ));
+        }
+        return plainSelect;
+    }
+
+    private PlainSelect mapShortcutM2M(AssociationClassCallExp exp,
+        VariableExp variableExp) {
+        PlainSelect plainSelect = new PlainSelect();
+
+        String varName = variableExp.getVariable().getName();
+        String associationTableName = exp.getAssociation();
+        String referredEndType = exp.getReferredAssociationEndType()
+            .getReferredType();
+        String oppositeEndType = exp.getOppositeAssociationEndType().getReferredType();
+        String referredEndName = exp.getReferredAssociationEnd();
+        String oppositeEndName = exp.getOppositeAssociationEnd();
+        
+
+        plainSelect.setFromItem(new Table(oppositeEndType));
+
+        Join leftJoin = new Join();
+        leftJoin.setLeft(true);
+        leftJoin.setRightItem(new Table(associationTableName));
+        BinaryExpression refVEqOppos = buildBinExp("=",
+            new Column(Arrays.asList(oppositeEndType,
+                oppositeEndType.concat("_id"))),
+            new Column(Arrays.asList(associationTableName, oppositeEndName)));
+        leftJoin.setOnExpression(refVEqOppos);
+        plainSelect.setJoins(Arrays.asList(leftJoin));
+
+        ResSelectExpression res = new ResSelectExpression(
+            new Column(Arrays.asList(associationTableName, referredEndName)));
+        plainSelect.setRes(res);
+
+        ValSelectExpression val = new ValSelectExpression();
+        CaseExpression caseVal = new CaseExpression();
+        IsNullExpression isOpposNull = new IsNullExpression();
+        isOpposNull.setLeftExpression(
+            new Column(Arrays.asList(associationTableName, oppositeEndName)));
+        caseVal.setSwitchExpression(isOpposNull);
+        WhenClause whenValClause = new WhenClause();
+        whenValClause.setWhenExpression(new LongValue(1L));
+        whenValClause.setThenExpression(new LongValue(0L));
+        caseVal.setWhenClauses(Arrays.asList(whenValClause));
+        caseVal.setElseExpression(new LongValue(1L));
+        val.setExpression(caseVal);
+        plainSelect.setVal(val);
+
+        CaseExpression caseType = new CaseExpression();
+        caseType.setSwitchExpression(isOpposNull);
+        WhenClause whenTypeClause = new WhenClause();
+        whenTypeClause.setWhenExpression(new LongValue(1L));
+        whenTypeClause.setThenExpression(new StringValue("EmptyCol"));
+        caseType.setWhenClauses(Arrays.asList(whenTypeClause));
+        caseType.setElseExpression(new StringValue(referredEndType));
+        TypeSelectExpression type = new TypeSelectExpression(caseType);
+        plainSelect.setType(type);
+
+        VarSelectExpression var = new VarSelectExpression(varName);
+        var.setRefExpression(new Column(
+            Arrays.asList(oppositeEndType, oppositeEndType.concat("_id"))));
+        plainSelect.addVar(var);
+
+        return plainSelect;
     }
 
     @Override
@@ -537,58 +753,51 @@ public class SimpleOclParser implements ParserVisitor {
         PlainSelect plainSelect;
 
         if (exp instanceof M2MAssociationClassCallExp) {
-            plainSelect = mapM2MAssociationClassCallExp(exp);
-        } else if (exp instanceof O2MAssociationClassCallExp) {
-            plainSelect = mapO2MAssociationClassCallExp(exp);
+            plainSelect = mapM2M(exp);
+        } else if (exp instanceof M2OAssociationClassCallExp) {
+            plainSelect = mapM2O(exp);
         } else {
-            plainSelect = mapO2OAssociationClassCallExp(exp);
+            plainSelect = mapO2O(exp);
         }
 
         return plainSelect;
     }
 
-    private PlainSelect mapO2OAssociationClassCallExp(
-        AssociationClassCallExp exp) {
-        
+    private PlainSelect mapO2O(AssociationClassCallExp exp) {
+
         PlainSelect plainSelect = new PlainSelect();
-        
+
         String tmpObjAlias = "TEMP_OBJ";
-        
-        String table = exp.getReferredAssociationEndType().getReferredType();
-        String tableIdColumn = String.format("%1$s_id", table);
-        String ase = exp.getAssociationEnd();
-        
+
+        String referredEndType = exp.getReferredAssociationEndType()
+            .getReferredType();
+        String referredEndIdColumn = String.format("%1$s_id", referredEndType);
+        String referredEndName = exp.getReferredAssociationEnd();
+
         CaseExpression caseVal = new CaseExpression();
-
         IsNullExpression isOpposNull = new IsNullExpression();
-        isOpposNull.setLeftExpression(new Column(Arrays.asList(table, tableIdColumn)));
+        isOpposNull.setLeftExpression(
+            new Column(Arrays.asList(referredEndType, referredEndIdColumn)));
         caseVal.setSwitchExpression(isOpposNull);
-
         WhenClause whenClause = new WhenClause();
         whenClause.setWhenExpression(new LongValue(1L));
         whenClause.setThenExpression(new LongValue(0L));
         caseVal.setWhenClauses(Arrays.asList(whenClause));
-
-        caseVal.setElseExpression(new Column(tmpObjAlias.concat(".val")));
-
+        caseVal.setElseExpression(new LongValue(1L));
         ValSelectExpression val = new ValSelectExpression(caseVal);
         plainSelect.setVal(val);
-        
+
         ResSelectExpression res = new ResSelectExpression(
-            new Column(Arrays.asList(table, ase)));
+            new Column(Arrays.asList(referredEndType, referredEndName)));
         plainSelect.setRes(res);
-        
+
         CaseExpression caseType = new CaseExpression();
         caseType.setSwitchExpression(isOpposNull);
-
         WhenClause typeWhenClause = new WhenClause();
         typeWhenClause.setWhenExpression(new LongValue(1L));
         typeWhenClause.setThenExpression(new StringValue("EmptyCol"));
         caseType.setWhenClauses(Arrays.asList(typeWhenClause));
-
-        String resType = exp.getOppositeAssociationEndType().getReferredType();
-        caseType.setElseExpression(new StringValue(resType));
-
+        caseType.setElseExpression(new StringValue(referredEndType));
         TypeSelectExpression type = new TypeSelectExpression(caseType);
         plainSelect.setType(type);
 
@@ -607,13 +816,13 @@ public class SimpleOclParser implements ParserVisitor {
 
         Join leftJ = new Join();
         leftJ.setLeft(true);
-        leftJ.setRightItem(new Table(table));
+        leftJ.setRightItem(new Table(referredEndType));
 
         VariableExp varExp = (VariableExp) exp.getNavigationSource();
         BinaryExpression refVEqOppos = buildBinExp("=",
             new Column(Arrays.asList(tmpObjAlias,
                 "ref_".concat(varExp.getVariable().getName()))),
-            new Column(Arrays.asList(table, tableIdColumn)));
+            new Column(Arrays.asList(referredEndType, referredEndIdColumn)));
 
         BinaryExpression valEq1 = buildBinExp("=",
             new Column(Arrays.asList(tmpObjAlias, "val")), new LongValue(1L));
@@ -622,52 +831,50 @@ public class SimpleOclParser implements ParserVisitor {
         leftJ.setOnExpression(onExp);
 
         plainSelect.setJoins(Arrays.asList(leftJ));
-        
+
         return plainSelect;
     }
 
-    private PlainSelect mapO2MAssociationClassCallExp(
-        AssociationClassCallExp exp) {
-        
+    private PlainSelect mapM2O(AssociationClassCallExp exp) {
+
         PlainSelect plainSelect = new PlainSelect();
-        if(((O2MAssociationClassCallExp) exp).isOneEndAssociationCall()) {
-            String tmpObjAlias = "TEMP_OBJ";
-            
-            String table = exp.getReferredAssociationEndType().getReferredType();
-            String tableIdColumn = String.format("%1$s_id", table);
-            String ase = exp.getAssociationEnd();
-            
+
+        String tmpObjAlias = "TEMP_OBJ";
+        String referredEndType = exp.getReferredAssociationEndType()
+            .getReferredType();
+        String referredEndIdColumn = String.format("%1$s_id", referredEndType);
+        String referredEndName = exp.getReferredAssociationEnd();
+        String oppositeEndType = exp.getOppositeAssociationEndType()
+            .getReferredType();
+        String oppositeEndName = exp.getOppositeAssociationEnd();
+        String oppositeEndIdColumn = String.format("%1$s_id", oppositeEndType);
+
+        if (((M2OAssociationClassCallExp) exp).isOneEndAssociationCall()) {
+
             CaseExpression caseVal = new CaseExpression();
-
             IsNullExpression isOpposNull = new IsNullExpression();
-            isOpposNull.setLeftExpression(new Column(Arrays.asList(table, tableIdColumn)));
+            isOpposNull.setLeftExpression(new Column(
+                Arrays.asList(referredEndType, referredEndIdColumn)));
             caseVal.setSwitchExpression(isOpposNull);
-
             WhenClause whenClause = new WhenClause();
             whenClause.setWhenExpression(new LongValue(1L));
             whenClause.setThenExpression(new LongValue(0L));
             caseVal.setWhenClauses(Arrays.asList(whenClause));
-
-            caseVal.setElseExpression(new Column(tmpObjAlias.concat(".val")));
-
+            caseVal.setElseExpression(new LongValue(1L));
             ValSelectExpression val = new ValSelectExpression(caseVal);
             plainSelect.setVal(val);
-            
+
             ResSelectExpression res = new ResSelectExpression(
-                new Column(Arrays.asList(table, ase)));
+                new Column(Arrays.asList(referredEndType, referredEndName)));
             plainSelect.setRes(res);
-            
+
             CaseExpression caseType = new CaseExpression();
             caseType.setSwitchExpression(isOpposNull);
-
             WhenClause typeWhenClause = new WhenClause();
             typeWhenClause.setWhenExpression(new LongValue(1L));
             typeWhenClause.setThenExpression(new StringValue("EmptyCol"));
             caseType.setWhenClauses(Arrays.asList(typeWhenClause));
-
-            String resType = exp.getOppositeAssociationEndType().getReferredType();
-            caseType.setElseExpression(new StringValue(resType));
-
+            caseType.setElseExpression(new StringValue(referredEndType));
             TypeSelectExpression type = new TypeSelectExpression(caseType);
             plainSelect.setType(type);
 
@@ -686,16 +893,18 @@ public class SimpleOclParser implements ParserVisitor {
 
             Join leftJ = new Join();
             leftJ.setLeft(true);
-            leftJ.setRightItem(new Table(table));
+            leftJ.setRightItem(new Table(referredEndType));
 
             VariableExp varExp = (VariableExp) exp.getNavigationSource();
             BinaryExpression refVEqOppos = buildBinExp("=",
                 new Column(Arrays.asList(tmpObjAlias,
                     "ref_".concat(varExp.getVariable().getName()))),
-                new Column(Arrays.asList(table, tableIdColumn)));
+                new Column(
+                    Arrays.asList(referredEndType, referredEndIdColumn)));
 
             BinaryExpression valEq1 = buildBinExp("=",
-                new Column(Arrays.asList(tmpObjAlias, "val")), new LongValue(1L));
+                new Column(Arrays.asList(tmpObjAlias, "val")),
+                new LongValue(1L));
 
             BinaryExpression onExp = buildBinExp("and", refVEqOppos, valEq1);
             leftJ.setOnExpression(onExp);
@@ -703,43 +912,31 @@ public class SimpleOclParser implements ParserVisitor {
             plainSelect.setJoins(Arrays.asList(leftJ));
 
         } else {
-            String tmpObjAlias = "TEMP_OBJ";
-            
-            String table = exp.getOppositeAssociationEndType().getReferredType();
-            String oppos = exp.getOppositeAssociationEnd();
-            String tableIdColumn = String.format("%1$s_id", table);
-            
             CaseExpression caseVal = new CaseExpression();
 
             IsNullExpression isOpposNull = new IsNullExpression();
-            isOpposNull.setLeftExpression(new Column(Arrays.asList(table, oppos)));
+            isOpposNull.setLeftExpression(
+                new Column(Arrays.asList(oppositeEndType, oppositeEndName)));
             caseVal.setSwitchExpression(isOpposNull);
-
             WhenClause whenClause = new WhenClause();
             whenClause.setWhenExpression(new LongValue(1L));
             whenClause.setThenExpression(new LongValue(0L));
             caseVal.setWhenClauses(Arrays.asList(whenClause));
-
             caseVal.setElseExpression(new LongValue(1L));
-
             ValSelectExpression val = new ValSelectExpression(caseVal);
             plainSelect.setVal(val);
-            
-            ResSelectExpression res = new ResSelectExpression(
-                new Column(Arrays.asList(table, tableIdColumn)));
+
+            ResSelectExpression res = new ResSelectExpression(new Column(
+                Arrays.asList(oppositeEndType, oppositeEndIdColumn)));
             plainSelect.setRes(res);
-            
+
             CaseExpression caseType = new CaseExpression();
             caseType.setSwitchExpression(isOpposNull);
-
             WhenClause typeWhenClause = new WhenClause();
             typeWhenClause.setWhenExpression(new LongValue(1L));
             typeWhenClause.setThenExpression(new StringValue("EmptyCol"));
             caseType.setWhenClauses(Arrays.asList(typeWhenClause));
-
-            String resType = exp.getOppositeAssociationEndType().getReferredType();
-            caseType.setElseExpression(new StringValue(resType));
-
+            caseType.setElseExpression(new StringValue(referredEndType));
             TypeSelectExpression type = new TypeSelectExpression(caseType);
             plainSelect.setType(type);
 
@@ -758,69 +955,64 @@ public class SimpleOclParser implements ParserVisitor {
 
             Join leftJ = new Join();
             leftJ.setLeft(true);
-            leftJ.setRightItem(new Table(table));
+            leftJ.setRightItem(new Table(oppositeEndType));
 
             VariableExp varExp = (VariableExp) exp.getNavigationSource();
             BinaryExpression refVEqOppos = buildBinExp("=",
                 new Column(Arrays.asList(tmpObjAlias,
                     "ref_".concat(varExp.getVariable().getName()))),
-                new Column(Arrays.asList(table, oppos)));
+                new Column(Arrays.asList(oppositeEndType, oppositeEndName)));
 
             BinaryExpression valEq1 = buildBinExp("=",
-                new Column(Arrays.asList(tmpObjAlias, "val")), new LongValue(1L));
+                new Column(Arrays.asList(tmpObjAlias, "val")),
+                new LongValue(1L));
 
             BinaryExpression onExp = buildBinExp("and", refVEqOppos, valEq1);
             leftJ.setOnExpression(onExp);
 
             plainSelect.setJoins(Arrays.asList(leftJ));
-            
+
         }
         return plainSelect;
     }
 
-    private PlainSelect mapM2MAssociationClassCallExp(
-        AssociationClassCallExp exp) {
-        
+    private PlainSelect mapM2M(AssociationClassCallExp exp) {
+
         PlainSelect plainSelect = new PlainSelect();
 
         String tmpObjAlias = "TEMP_OBJ";
 
-        String assoc = exp.getAssociation();
-        String oppos = exp.getOppositeAssociationEnd();
-        String ase = exp.getAssociationEnd();
+        String associationTableName = exp.getAssociation();
+        String oppositeEndName = exp.getOppositeAssociationEnd();
+        String referredEndName = exp.getReferredAssociationEnd();
+        String referredEndType = exp.getReferredAssociationEndType()
+            .getReferredType();
 
         CaseExpression caseVal = new CaseExpression();
-
         IsNullExpression isOpposNull = new IsNullExpression();
-        isOpposNull.setLeftExpression(new Column(Arrays.asList(assoc, oppos)));
+        isOpposNull.setLeftExpression(
+            new Column(Arrays.asList(associationTableName, oppositeEndName)));
         caseVal.setSwitchExpression(isOpposNull);
-
         WhenClause whenClause = new WhenClause();
         whenClause.setWhenExpression(new LongValue(1L));
         whenClause.setThenExpression(new LongValue(0L));
         caseVal.setWhenClauses(Arrays.asList(whenClause));
-
         caseVal.setElseExpression(new LongValue(1L));
-
         ValSelectExpression val = new ValSelectExpression(caseVal);
         plainSelect.setVal(val);
 
         ResSelectExpression res = new ResSelectExpression(
-            new Column(Arrays.asList(assoc, ase)));
+            new Column(Arrays.asList(associationTableName, referredEndName)));
         plainSelect.setRes(res);
 
         CaseExpression caseType = new CaseExpression();
         caseType.setSwitchExpression(isOpposNull);
-
         WhenClause typeWhenClause = new WhenClause();
         typeWhenClause.setWhenExpression(new LongValue(1L));
         typeWhenClause.setThenExpression(new StringValue("EmptyCol"));
         caseType.setWhenClauses(Arrays.asList(typeWhenClause));
-
-        String resType = exp.getOppositeAssociationEndType().getReferredType()
-            .replaceAll("Col\\((\\w+)\\)", "$1");
+        String resType = referredEndType.replaceAll("Col\\((\\w+)\\)", "$1");
         caseType.setElseExpression(new StringValue(resType));
-
         TypeSelectExpression type = new TypeSelectExpression(caseType);
         plainSelect.setType(type);
 
@@ -839,13 +1031,13 @@ public class SimpleOclParser implements ParserVisitor {
 
         Join leftJ = new Join();
         leftJ.setLeft(true);
-        leftJ.setRightItem(new Table(assoc));
+        leftJ.setRightItem(new Table(associationTableName));
 
         VariableExp varExp = (VariableExp) exp.getNavigationSource();
         BinaryExpression refVEqOppos = buildBinExp("=",
             new Column(Arrays.asList(tmpObjAlias,
                 "ref_".concat(varExp.getVariable().getName()))),
-            new Column(Arrays.asList(assoc, oppos)));
+            new Column(Arrays.asList(associationTableName, oppositeEndName)));
 
         BinaryExpression valEq1 = buildBinExp("=",
             new Column(Arrays.asList(tmpObjAlias, "val")), new LongValue(1L));
@@ -927,7 +1119,6 @@ public class SimpleOclParser implements ParserVisitor {
         return plainSelect;
     }
 
-    @SuppressWarnings("unused")
     private PlainSelect mapOclIsKindOf(OperationCallExp exp) {
         PlainSelect plainSelect = new PlainSelect();
 
@@ -950,7 +1141,7 @@ public class SimpleOclParser implements ParserVisitor {
                 .getReferredType();
         }
 
-        boolean isKindOf = DmUtils.isSuperClassOf(this.ctx, typeToCheck,
+        boolean isKindOf = DmUtils.isSuperClassOf(this.dataModel, typeToCheck,
             src.getType().getReferredType());
 
         List<Variable> sVarsSrc = VariableUtils.SVars(src);
@@ -986,7 +1177,6 @@ public class SimpleOclParser implements ParserVisitor {
         return plainSelect;
     }
 
-    @SuppressWarnings("unused")
     private PlainSelect mapOclIsTypeOf(OperationCallExp exp) {
         PlainSelect plainSelect = new PlainSelect();
 
@@ -1045,7 +1235,6 @@ public class SimpleOclParser implements ParserVisitor {
         return plainSelect;
     }
 
-    @SuppressWarnings("unused")
     private PlainSelect mapOclAsType(OperationCallExp exp) {
         PlainSelect plainSelect = new PlainSelect();
 
@@ -2562,6 +2751,24 @@ public class SimpleOclParser implements ParserVisitor {
         binExp.setRightExpression(rightExp);
 
         return binExp;
+    }
+
+    @Override
+    public void visit(com.vgu.se.jocl.expressions.Expression exp) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void visit(OclExp oclExp) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void visit(SqlExp sqlExp) {
+        // TODO Auto-generated method stub
+
     }
 
 }
