@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.vgu.dm2schema.dm.DataModel;
@@ -113,6 +114,12 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
     @Override
     public void setDataModel(Object dm) {
         this.dm = (DataModel) dm;
+    }
+
+    @Override
+    public void setDataModelFromFile(JSONArray json) throws Exception {
+        DataModel dataModel = new DataModel(json);
+        this.setDataModel(dataModel);
     }
 
 }
