@@ -247,18 +247,6 @@ public class PlainSelect
     @Override
     public String toString() {
         StringBuilder sql = new StringBuilder();
-        if (super.isUseBrackets()) {
-            sql.append("(");
-            if (this.correspondOCLExpression != null
-                && !this.correspondOCLExpression.isEmpty())
-                sql.append(String.format("\n/*** BEGIN: %s ***/\n",
-                    this.correspondOCLExpression));
-        } else {
-            if (this.correspondOCLExpression != null
-                && !this.correspondOCLExpression.isEmpty())
-                sql.append(String.format("\n/*** BEGIN: %s ***/\n",
-                    this.correspondOCLExpression));
-        }
         sql.append("SELECT ");
 
         if (super.getOracleHint() != null) {
@@ -301,7 +289,7 @@ public class PlainSelect
         if (super.getFromItem() != null) {
             if (super.getFromItem() instanceof SubSelect) {
                 sql.append("\nFROM ").append(((SubSelect) super.getFromItem())
-                    .toStringWithDescription());
+                    .toString());
             } else {
                 sql.append("\nFROM ").append(super.getFromItem());
             }
@@ -312,7 +300,7 @@ public class PlainSelect
                     String joinText;
                     if (join instanceof org.vgu.ocl2psql.sql.statement.select.Join) {
                         joinText = ((org.vgu.ocl2psql.sql.statement.select.Join) join)
-                            .toStringWithDescription();
+                            .toString();
                     } else {
                         joinText = join.toString();
                     }
@@ -374,18 +362,6 @@ public class PlainSelect
         if (super.getForXmlPath() != null) {
             sql.append(" FOR XML PATH(").append(super.getForXmlPath())
                 .append(")");
-        }
-        if (super.isUseBrackets()) {
-            if (this.correspondOCLExpression != null
-                && !this.correspondOCLExpression.isEmpty())
-                sql.append(String.format("\n/*** END: %s ***/\n",
-                    this.correspondOCLExpression));
-            sql.append(")");
-        } else {
-            if (this.correspondOCLExpression != null
-                && !this.correspondOCLExpression.isEmpty())
-                sql.append(String.format("\n/*** END: %s ***/\n",
-                    this.correspondOCLExpression));
         }
         return sql.toString();
     }
