@@ -34,12 +34,12 @@ public class OCL2PSQLManualTest {
         File contextModel = new File(
 //                "src/main/resources/context-model/alice_context_1.json");
 //                "src/main/resources/context-model/alice_context.json");
-//            "src/main/resources/context-model/CarPerson_context-new-model.json");
+            "src/main/resources/context-model/CarPerson_context-new-model.json");
         // This is for the new model
 //                "src/main/resources/context-model/university_test.json");
 //                "src/main/resources/context-model/many_to_many.json");
 //                "src/main/resources/context-model/many_to_one.json");
-                "src/main/resources/context-model/one_to_one.json");
+//                "src/main/resources/context-model/one_to_one.json");
 
 //        Ocl2PsqlSvc robertO2P = new LegacyO2PApi();
 //        robertO2P.setPlainUMLContextFromFile(
@@ -95,9 +95,13 @@ public class OCL2PSQLManualTest {
     }
 
     private static String[] simpleCases = {
+//        "Car.allInstances()->select(c|c.color = 'no-color')->size()",
+//        "Car.allInstances()->exists(c|c.color <> 'no-color')",
+//        "Car.allInstances()->select(c|c.owners->exists(p|p.name = 'no-name'))->size()",
+//        
 //        "Car.allInstances()->collect(c|c)",
 //        "Car.allInstances()->forAll(c|c.owners->collect(p|p.ownedCars)->flatten()->size()=1)",
-//        "Car.allInstances()->forAll(c|c.owners->select(p|p.name.oclIsUndefined())->size()=0)",
+        "Car.allInstances()->forAll(c|c.owners->select(p|p.name.oclIsUndefined())->size()=0)",
 //        "Car.allInstances()->collect(c|c.color)",
 //        "Car.allInstances()->collect(c|c.owners)",
 //        "Car.allInstances()->collect(c|c.owners)->flatten()",
@@ -205,7 +209,7 @@ public class OCL2PSQLManualTest {
 //        "Exam.allInstances()->collect(e|e.rooms)"
 //        "Room.allInstances()->collect(r|r.exams)"
 //        "Program.allInstances()->collect(p|p.university)"
-        "Module_Period.allInstances()->collect(mp|mp.exam)"
+//        "Module_Period.allInstances()->collect(mp|mp.exam)"
 
         //asSet
 //      "Car.allInstances()->asSet()",

@@ -272,6 +272,8 @@ public class SimpleOclParser implements ParserVisitor {
                         new Column(
                             Arrays.asList(varType, exp.getReferredProperty())));
                     plainSelect.setRes(res);
+                    
+                    plainSelect.createTrueValColumn();
 
                     TypeSelectExpression type = new TypeSelectExpression(
                         exp.getType().getReferredType());
@@ -281,7 +283,7 @@ public class SimpleOclParser implements ParserVisitor {
                     var.setRefExpression(new Column(
                         Arrays.asList(varType, varType.concat("_id"))));
                     plainSelect.addVar(var);
-
+                    
                     return plainSelect;
                 }
             }
@@ -1658,6 +1660,7 @@ public class SimpleOclParser implements ParserVisitor {
                 groupByExps.add(new Column(
                     Arrays.asList(tmpSrcAlias, "ref_".concat(v.getName()))));
             }
+            groupByExps.add(new Column(Arrays.asList(tmpSrcAlias, "val")));
 
             groupBy.setGroupByExpressions(groupByExps);
 
@@ -1738,7 +1741,8 @@ public class SimpleOclParser implements ParserVisitor {
                 groupByExps.add(new Column(
                     Arrays.asList(tmpSrcAlias, "ref_".concat(v.getName()))));
             }
-
+            groupByExps.add(new Column(Arrays.asList(tmpSrcAlias, "val")));
+            
             groupBy.setGroupByExpressions(groupByExps);
 
             plainSelect.setGroupByElement(groupBy);
@@ -1826,6 +1830,7 @@ public class SimpleOclParser implements ParserVisitor {
                 groupByList.add(new Column(
                     Arrays.asList(tmpSrcAlias, "ref_".concat(v.getName()))));
             }
+            groupByList.add(new Column(Arrays.asList(tmpSrcAlias, "val")));
 
             groupBy.setGroupByExpressions(groupByList);
 
@@ -1868,10 +1873,8 @@ public class SimpleOclParser implements ParserVisitor {
         List<Variable> svBody = VariableUtils.SVars(bodyExp);
         List<Variable> svSrc = VariableUtils.SVars(srcExp);
 
-        List<Variable> svComplement = new ArrayList<Variable>(svBody);
-        svComplement.removeAll(svSrc);
-
-        svComplement.remove(v);
+        List<Variable> svBodyComplement = VariableUtils.getComplement(svSrc, svBody);
+        List<Variable> svBodyComplementExcludeCurrentVar = VariableUtils.getComplement(svBodyComplement, Arrays.asList(v));
 
         // . End preparation
 
@@ -1952,7 +1955,7 @@ public class SimpleOclParser implements ParserVisitor {
             plainSelect.setType(type);
 
             VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
-            VariableUtils.addVar(svComplement, plainSelect, tmpBodyAlias);
+            VariableUtils.addVar(svBodyComplementExcludeCurrentVar, plainSelect, tmpBodyAlias);
 
             plainSelect.setFromItem(tmpSrc);
 
@@ -2033,6 +2036,12 @@ public class SimpleOclParser implements ParserVisitor {
 
         List<Variable> fvBody = VariableUtils.FVars(bodyExp);
         boolean isVarInFvBody = fvBody.contains(vExp);
+        
+        List<Variable> svBody = VariableUtils.SVars(bodyExp);
+        List<Variable> svSrc = VariableUtils.SVars(sourceExp);
+
+        List<Variable> svBodyComplement = VariableUtils.getComplement(svSrc, svBody);
+        List<Variable> svBodyComplementExcludeCurrentVar = VariableUtils.getComplement(svBodyComplement, Arrays.asList(vExp));
 
         String vName = exp.getIterator().getName();
 
@@ -2133,6 +2142,10 @@ public class SimpleOclParser implements ParserVisitor {
             TypeSelectExpression type = new TypeSelectExpression(
                 new Column(Arrays.asList(tmpSourceAlias, "type")));
             plainSelect.setType(type);
+            
+            // Ref columns
+            VariableUtils.addVar(svSrc, plainSelect, tmpSourceAlias);
+            VariableUtils.addVar(svBodyComplementExcludeCurrentVar, plainSelect, tmpBodyAlias);
 
             plainSelect.setFromItem(tmpSource);
 
@@ -2314,6 +2327,8 @@ public class SimpleOclParser implements ParserVisitor {
 
             // Right item of left join
             PlainSelect plainSelectInJoin = new PlainSelect();
+            
+            plainSelectInJoin.createTrueValColumn();
 
             ResSelectExpression resInJoin = new ResSelectExpression(
                 countAllEq0);
@@ -2508,6 +2523,8 @@ public class SimpleOclParser implements ParserVisitor {
 
             // Right item of left join
             PlainSelect plainSelectInJoin = new PlainSelect();
+            
+            plainSelectInJoin.createTrueValColumn();
 
             ResSelectExpression resInJoin = new ResSelectExpression(
                 countAllEq0);
