@@ -20,13 +20,6 @@ This web service is intended for readers of our manuscripts:
 Please, be aware that OCL2PSQL is an on-going research project.
 In particular, OCL2PSQL does **NOT** cover yet the full OCL language. 
 
-Moreover, for the time being, OCL expressions should adjust to the following syntactical conventions:
-
-* Use single quotation marks for string-literals. E.g., `p.Person:name = 'string'`.
-* **allInstances-expressions**. `<class>.allInstances()` should be written `<class>::allInstances()`. E.g., `Car::allInstances()`.
-* **dot-expressions**. `<var>.<attr>` should be written `<var>.<class>:<attr>`, where `<class>` is the class of `<attr>`. E.g., `p.Person:name`.
-* Similarly, `<var>.<assoc-end>` should be written `<var>.<class>:<assoc-end>`, where `<class>` is the source-class of `<assoc-end>`. E.g., `c.Car:owners`.
-
 This table represents a detailed overview of supported Object Constraint Language (OCL) operators in our implementation `OCL2PSQL`. It consists of several categories, in which contains 2 columns: the operator (on the left) and the syntax example (on the right).
 
 ##### Class operations
@@ -64,11 +57,6 @@ This table represents a detailed overview of supported Object Constraint Languag
 |`isUnique`  |  *source-expr* -> `isUnique()`|
 |`flatten`[<sup>1</sup>]  |  *source-expr* -> `flatten()`|
 
-##### Bag operations
-|||
-|--------------------------|---|
-|`asSet`  |  *bag-expr* -> `asSet()`|
-
 ###### [<sup>1</sup>] For the time being, this can operate *ONLY* after the `collect` operation
 [<sup>1</sup>]:#-For
 
@@ -77,15 +65,15 @@ This table represents a detailed overview of supported Object Constraint Languag
 An easy way to use `OCL2PSQL` library is 
 
 ```java
-OCL2PSQL ocl2psql = new OCL2PSQL();
+OCL2PSQL_2 ocl2psql = new OCL2PSQL_2();
 String filePath = "/absolute/path/of/contextual/data/model";
-ocl2psql.setPlainUMLContextFromFile(filePath);
+ocl2psql.setDataModelFromFile(filePath);
 ocl2psql.setDescriptionMode(true);
 
-String oclExpression = "Car::allInstances()->collect(c.Car:owners->isUnique())";
+String oclExpression = "Car.allInstances()->collect(c.owners->isUnique())";
 String finalStatement = ocl2psql.mapToString(oclExpression);
 ```
-###### The contextual data model definition can be found in the manuscript above.
-###### Description mode add OCL sub-expressions as comments to generated SQL statements. Its default value is false.
+###### The contextual data model definition can be found in the manuscripts above.
+###### Description mode add OCL sub-expressions as comments to generated SQL statements, it is false by default.
 
-For the interested individuals, we provide one sample scenario where the *contextual model* of the OCL expressions can be translated by the model `CarOwnership` [(See here)](http://researcher-paper.ap-southeast-1.elasticbeanstalk.com/model.html) and the generated SQL expressions are *solely* intended for the database schema CarDB [(See here)](http://researcher-paper.ap-southeast-1.elasticbeanstalk.com/schema.html). 
+For the interested individuals, we provide one sample scenario where the *contextual model* of the OCL expressions can be translated by the model `CarOwnership` [(See here)](http://researcher-paper.ap-southeast-1.elasticbeanstalk.com/model.html) and the generated SQL expressions are *solely* intended for the database schema CarDB [(See here)](http://researcher-paper.ap-southeast-1.elasticbeanstalk.com/schema.html). Also, the generated database schema can also be generated using [dm2schema](https://github.com/ocl-vgu/dm2schema).
