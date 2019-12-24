@@ -18,6 +18,7 @@ limitations under the License.
 
 package org.vgu.ocl2psql.main;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.json.simple.parser.ParseException;
@@ -60,5 +61,9 @@ public class OCL2PSQL_2 {
 
     public void setContextualType(String varName, String varType) {
         ocl2PsqlSvc.setContextualType(varName, varType);
+    }
+    
+    public void setDataModelFromFile(String filePath) throws FileNotFoundException, IOException, ParseException, Exception {
+        ocl2PsqlSvc.setDataModelFromFile(filePath);
     }
 }
