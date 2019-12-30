@@ -62,6 +62,12 @@ This table represents a detailed overview of supported Object Constraint Languag
 
 # Quick Guideline
 
+Interested readers can clone our project (and related submodules) using these commands:
+```
+git clone https://github.com/ocl-vgu/OCL2PSQL.git
+git submodule update --init --recursive
+```
+
 An easy way to use `OCL2PSQL` library is 
 
 ```java
@@ -76,4 +82,4 @@ String finalStatement = ocl2psql.mapToString(oclExpression);
 ###### The contextual data model definition can be found in the manuscripts above.
 ###### Description mode add OCL sub-expressions as comments to generated SQL statements, it is false by default.
 
-For the interested individuals, we provide one sample scenario where the *contextual model* of the OCL expressions can be translated by the model `CarOwnership` [(See here)](http://researcher-paper.ap-southeast-1.elasticbeanstalk.com/model.html) and the generated SQL expressions are *solely* intended for the database schema CarDB [(See here)](http://researcher-paper.ap-southeast-1.elasticbeanstalk.com/schema.html). Also, the generated database schema can also be generated using [dm2schema](https://github.com/ocl-vgu/dm2schema).
+We provide one sample scenario where the *contextual model* of the OCL expressions can be translated by the model `CarOwnership` [(See here)](http://researcher-paper.ap-southeast-1.elasticbeanstalk.com/model.html) and the generated SQL expressions are *solely* intended for the database schema CarDB [(See here)](http://researcher-paper.ap-southeast-1.elasticbeanstalk.com/schema.html). Also, the generated database schema can also be generated using [dm2schema](https://github.com/ocl-vgu/dm2schema).
