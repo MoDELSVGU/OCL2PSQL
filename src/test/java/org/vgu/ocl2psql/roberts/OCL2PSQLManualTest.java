@@ -36,7 +36,7 @@ public class OCL2PSQLManualTest {
 //                "src/main/resources/context-model/alice_context.json");
 //            "src/main/resources/context-model/CarPerson_context-new-model.json");
         // This is for the new model
-                "src/main/resources/context-model/university_test.json");
+                "src/main/resources/genSQL/uni_pof_dm.json");
 //                "src/main/resources/context-model/many_to_many.json");
 //                "src/main/resources/context-model/many_to_one.json");
 //                "src/main/resources/context-model/one_to_one.json");

@@ -344,6 +344,8 @@ public class SimpleOclParser implements ParserVisitor {
         String referredEndName = exp.getReferredAssociationEnd();
         String oppositeEndType = exp.getOppositeAssociationEndType().getReferredType();
         
+        plainSelect.createTrueValColumn();
+        
         ResSelectExpression res = new ResSelectExpression(
             new Column(Arrays.asList(oppositeEndType, referredEndName)));
         plainSelect.setRes(res);
@@ -377,6 +379,8 @@ public class SimpleOclParser implements ParserVisitor {
             ResSelectExpression res = new ResSelectExpression(
                 new Column(Arrays.asList(oppositeEndType, referredEndName)));
             plainSelect.setRes(res);
+            
+            plainSelect.createTrueValColumn();
 
             TypeSelectExpression type = new TypeSelectExpression(referredEndType);
             plainSelect.setType(type);
@@ -391,7 +395,7 @@ public class SimpleOclParser implements ParserVisitor {
             CaseExpression caseVal = new CaseExpression();
             IsNullExpression isOpposNull = new IsNullExpression();
             isOpposNull
-                .setLeftExpression(new Column(Arrays.asList(oppositeEndType, oppositeEndName)));
+                .setLeftExpression(new Column(Arrays.asList(referredEndType, oppositeEndName)));
             caseVal.setSwitchExpression(isOpposNull);
             WhenClause whenClause = new WhenClause();
             whenClause.setWhenExpression(new LongValue(1L));
@@ -402,7 +406,7 @@ public class SimpleOclParser implements ParserVisitor {
             plainSelect.setVal(val);
 
             ResSelectExpression res = new ResSelectExpression(
-                new Column(Arrays.asList(oppositeEndType, oppositeEndType.concat("_id"))));
+                new Column(Arrays.asList(referredEndType, referredEndType.concat("_id"))));
             plainSelect.setRes(res);
 
             CaseExpression caseType = new CaseExpression();
