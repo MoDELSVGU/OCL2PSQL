@@ -1,0 +1,37 @@
+DROP DATABASE IF EXISTS unidb;
+CREATE DATABASE unidb 
+ DEFAULT CHARACTER SET utf8 
+ DEFAULT COLLATE utf8_general_ci;
+USE unidb;
+CREATE TABLE Program (Program_id INT (11) NOT NULL AUTO_INCREMENT PRIMARY KEY, code VARCHAR (100) UNIQUE NOT NULL, name VARCHAR (100) );
+CREATE TABLE Period (Period_id INT (11) NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR (100) , ends DATE NOT NULL, starts DATE NOT NULL);
+CREATE TABLE Student (Student_id INT (11) NOT NULL AUTO_INCREMENT PRIMARY KEY, birthplace VARCHAR (100) NOT NULL, lastname VARCHAR (100) NOT NULL, firstname VARCHAR (100) NOT NULL, code VARCHAR (100) UNIQUE NOT NULL, gender VARCHAR (100) NOT NULL, midname VARCHAR (100) , dob DATE NOT NULL);
+CREATE TABLE Module_Period (Module_Period_id INT (11) NOT NULL AUTO_INCREMENT PRIMARY KEY, starts DATE NOT NULL, ends DATE NOT NULL);
+CREATE TABLE Module_Group (Module_Group_id INT (11) NOT NULL AUTO_INCREMENT PRIMARY KEY, group_name VARCHAR (100) , code VARCHAR (100) UNIQUE NOT NULL);
+CREATE TABLE University (University_id INT (11) NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR (100) UNIQUE NOT NULL, doe DATE NOT NULL);
+CREATE TABLE Registration_Exam (Registration_Exam_id INT (11) NOT NULL AUTO_INCREMENT PRIMARY KEY, time TIME , status INT (1) , date DATE );
+CREATE TABLE Enrollment (Enrollment_id INT (11) NOT NULL AUTO_INCREMENT PRIMARY KEY, starts DATE NOT NULL, ends DATE );
+CREATE TABLE Record (Record_id INT (11) NOT NULL AUTO_INCREMENT PRIMARY KEY, status VARCHAR (100) );
+CREATE TABLE Module (Module_id INT (11) NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR (100) , code VARCHAR (100) UNIQUE NOT NULL);
+CREATE TABLE Room (Room_id INT (11) NOT NULL AUTO_INCREMENT PRIMARY KEY, par INT (11) , name VARCHAR (100) );
+CREATE TABLE Exam (Exam_id INT (11) NOT NULL AUTO_INCREMENT PRIMARY KEY, date DATE NOT NULL, starts TIME , ends TIME , deadline DATETIME );
+CREATE TABLE Session (Session_id INT (11) NOT NULL AUTO_INCREMENT PRIMARY KEY, starts TIME , date DATE , ends TIME );
+ALTER TABLE Record ADD COLUMN student INT (11), ADD FOREIGN KEY (student) REFERENCES Student (Student_id);
+ALTER TABLE Program ADD COLUMN university INT (11), ADD FOREIGN KEY (university) REFERENCES University (University_id);
+ALTER TABLE Registration_Exam ADD COLUMN record INT (11), ADD FOREIGN KEY (record) REFERENCES Record (Record_id);
+CREATE TABLE Record_records_sessions_Session (records INT (11), sessions INT (11));
+ALTER TABLE Record_records_sessions_Session ADD FOREIGN KEY (records) REFERENCES Record (Record_id), ADD FOREIGN KEY (sessions) REFERENCES Session (Session_id);
+ALTER TABLE Enrollment ADD COLUMN student INT (11), ADD FOREIGN KEY (student) REFERENCES Student (Student_id);
+CREATE TABLE Exam_exams_rooms_Room (exams INT (11), rooms INT (11));
+ALTER TABLE Exam_exams_rooms_Room ADD FOREIGN KEY (exams) REFERENCES Exam (Exam_id), ADD FOREIGN KEY (rooms) REFERENCES Room (Room_id);
+ALTER TABLE Record ADD COLUMN module_period INT (11), ADD FOREIGN KEY (module_period) REFERENCES Module_Period (Module_Period_id);
+ALTER TABLE Session ADD COLUMN module_period INT (11), ADD FOREIGN KEY (module_period) REFERENCES Module_Period (Module_Period_id);
+ALTER TABLE Module_Period ADD COLUMN period INT (11), ADD FOREIGN KEY (period) REFERENCES Period (Period_id);
+ALTER TABLE Module_Period ADD COLUMN module INT (11), ADD FOREIGN KEY (module) REFERENCES Module (Module_id);
+ALTER TABLE Registration_Exam ADD COLUMN exam INT (11), ADD FOREIGN KEY (exam) REFERENCES Exam (Exam_id);
+ALTER TABLE Session ADD COLUMN room INT (11), ADD FOREIGN KEY (room) REFERENCES Room (Room_id);
+ALTER TABLE Module_Period ADD COLUMN exam INT (11), ADD FOREIGN KEY (exam) REFERENCES Exam (Exam_id);
+ALTER TABLE Exam ADD COLUMN module_period INT (11), ADD FOREIGN KEY (module_period) REFERENCES Module_Period (Module_Period_id);
+ALTER TABLE Enrollment ADD COLUMN program INT (11), ADD FOREIGN KEY (program) REFERENCES Program (Program_id);
+ALTER TABLE Module ADD COLUMN program INT (11), ADD FOREIGN KEY (program) REFERENCES Program (Program_id);
+ALTER TABLE Module ADD COLUMN module_group INT (11), ADD FOREIGN KEY (module_group) REFERENCES Module_Group (Module_Group_id);

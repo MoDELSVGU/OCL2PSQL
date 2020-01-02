@@ -1,0 +1,9 @@
+DROP DATABASE IF EXISTS cardb;
+CREATE DATABASE cardb 
+ DEFAULT CHARACTER SET utf8 
+ DEFAULT COLLATE utf8_general_ci;
+USE cardb;
+CREATE TABLE Car (Car_id INT (11) NOT NULL AUTO_INCREMENT PRIMARY KEY, color VARCHAR (100) );
+CREATE TABLE Person (Person_id INT (11) NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR (100) );
+CREATE TABLE Car_ownedCars_owners_Person (ownedCars INT (11), owners INT (11));
+ALTER TABLE Car_ownedCars_owners_Person ADD FOREIGN KEY (ownedCars) REFERENCES Car (Car_id), ADD FOREIGN KEY (owners) REFERENCES Person (Person_id);

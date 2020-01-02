@@ -34,9 +34,9 @@ public class OCL2PSQLManualTest {
         File contextModel = new File(
 //                "src/main/resources/context-model/alice_context_1.json");
 //                "src/main/resources/context-model/alice_context.json");
-            "src/main/resources/context-model/CarPerson_context-new-model.json");
+//            "src/main/resources/context-model/CarPerson_context-new-model.json");
         // This is for the new model
-//                "src/main/resources/context-model/university_test.json");
+                "src/main/resources/context-model/university_test.json");
 //                "src/main/resources/context-model/many_to_many.json");
 //                "src/main/resources/context-model/many_to_one.json");
 //                "src/main/resources/context-model/one_to_one.json");
@@ -101,7 +101,7 @@ public class OCL2PSQLManualTest {
 //        
 //        "Car.allInstances()->collect(c|c)",
 //        "Car.allInstances()->forAll(c|c.owners->collect(p|p.ownedCars)->flatten()->size()=1)",
-        "Car.allInstances()->forAll(c|c.owners->select(p|p.name.oclIsUndefined())->size()=0)",
+//        "Car.allInstances()->forAll(c|c.owners->select(p|p.name.oclIsUndefined())->size()=0)",
 //        "Car.allInstances()->collect(c|c.color)",
 //        "Car.allInstances()->collect(c|c.owners)",
 //        "Car.allInstances()->collect(c|c.owners)->flatten()",
@@ -234,6 +234,12 @@ public class OCL2PSQLManualTest {
 //        "Automobile.allInstances()->collect(au|au.oclAsType(Car))",
 //        "Automobile.allInstances()->collect(au|au.oclAsType(Bus))",
 //        "Automobile.allInstances()->collect(au|au.oclAsType(Car).color)"   
+        
+        //University test
+//        "Program.allInstances()->forAll(p|p.doe < @SQL(CURDATE()))",
+//        "Enrollment.allInstances()->forAll(e|e.ends.oclIsUndefined() or e.ends > e.starts)",
+//        "Enrollment.allInstances()->forAll(e|e.starts > e.program.doe)"
+        "Program.allInstances()->forAll(p|p.modules->collect(m|m.name)->isUnique())"
     };
 
 }

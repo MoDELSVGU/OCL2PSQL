@@ -1,0 +1,19 @@
+[
+    {"class" : "Role",
+      "attributes" : [
+        {"name" : "name", "type" : "String"}
+      ],
+      "isRoleClass" : "true"
+    },
+    {"class" : "Staff", 
+     "attributes" : [
+        {"name" : "name", "type" : "String"},
+        {"name" : "age", "type" : "Integer"},
+        {"name" : "salary", "type" : "Integer"}
+     ],
+    "isUserClass" : "true"
+    },
+    {"association" : "Employment",
+     "ends" : ["employer", "employees"],
+     "classes" : ["Staff", "Staff"]
+    }]

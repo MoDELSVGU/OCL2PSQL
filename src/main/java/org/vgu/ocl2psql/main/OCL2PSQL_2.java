@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.json.simple.parser.ParseException;
+import org.vgu.dm2schema.dm.DataModel;
 import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
 import org.vgu.ocl2psql.ocl.parser.simple.SimpleO2PApi;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
@@ -65,5 +66,9 @@ public class OCL2PSQL_2 {
     
     public void setDataModelFromFile(String filePath) throws FileNotFoundException, IOException, ParseException, Exception {
         ocl2PsqlSvc.setDataModelFromFile(filePath);
+    }
+    
+    public void setDataModel(DataModel dataModel) {
+        ocl2PsqlSvc.setDataModel(dataModel);
     }
 }

@@ -44,10 +44,12 @@ public class Select extends net.sf.jsqlparser.statement.select.Select{
         else {
             retval.append(super.getSelectBody());
         }
-        return retval.toString().concat(";");
+//        return retval.toString().concat(";");
+        return retval.toString();
     }
     
     public String toString() {
-        return this.getSelectBody().toString().concat(";");
+//        return this.getSelectBody().toString().concat(";");
+        return this.getSelectBody().toString();
     }
 }

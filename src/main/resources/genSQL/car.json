@@ -1,0 +1,36 @@
+[
+    {
+        "class": "Car",
+        "attributes": [
+            {
+                "name": "color",
+                "type": "String"
+            }
+        ],
+        "ends": [
+            {
+                "name": "owners",
+                "target": "Person",
+                "opp": "ownedCars",
+                "mult": "*"
+            }
+        ]
+    },
+    {
+        "class": "Person",
+        "attributes": [
+            {
+                "name": "name",
+                "type": "String"
+            }
+        ],
+        "ends": [
+            {
+                "name": "ownedCars",
+                "target": "Car",
+                "opp": "owners",
+                "mult": "*"
+            }
+        ]
+    }
+]
