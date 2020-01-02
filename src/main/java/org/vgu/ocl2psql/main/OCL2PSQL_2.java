@@ -21,6 +21,7 @@ package org.vgu.ocl2psql.main;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
 import org.vgu.dm2schema.dm.DataModel;
 import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
@@ -54,10 +55,6 @@ public class OCL2PSQL_2 {
 
     public void setDescriptionMode(Boolean descriptionMode) {
         ocl2PsqlSvc.setDescriptionMode(descriptionMode);
-    }
-
-    public void setContextualType(String typeName) {
-        ocl2PsqlSvc.setContextualType(typeName);
     }
 
     public void setContextualType(String varName, String varType) {
