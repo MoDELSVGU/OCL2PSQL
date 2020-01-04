@@ -43,8 +43,14 @@ import org.vgu.dm2schema.dm.End;
 import org.vgu.dm2schema.dm.Entity;
 import org.vgu.dm2schema.dm.Invariant;
 import org.vgu.dm2schema.sql.CreateDatabase;
+import org.vgu.dm2schema.sql.CreateInvariantFunction;
+import org.vgu.dm2schema.sql.CreateInvariantTrigger;
 import org.vgu.dm2schema.sql.DropDatabase;
-import org.vgu.dm2schema.sql.InvariantFunction;
+import org.vgu.dm2schema.sql.DropFunction;
+import org.vgu.dm2schema.sql.DropTrigger;
+import org.vgu.dm2schema.sql.Function;
+import org.vgu.dm2schema.sql.Trigger;
+import org.vgu.dm2schema.sql.TriggerAction;
 import org.vgu.ocl2psql.main.OCL2PSQL_2;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
 
@@ -62,7 +68,8 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 public class DM2Schema {
 
     public static void main(String[] args) throws Exception {
-        File dataModelFile = new File("src/main/resources/genSQL/uni_pof_dm.json");
+        File dataModelFile = new File(
+            "src/main/resources/genSQL/uni_pof_dm.json");
         File SQLschemaFile = new File("src/main/resources/genSQL/pof.sql");
         String databaseName = "unipof";
 
@@ -87,6 +94,9 @@ public class DM2Schema {
         List<String> invariantFunctions = generateInvariantFunctions(dataModel);
         schema.addAll(invariantFunctions);
         
+//        List<String> invariantTriggers = generateInvariantTriggers(dataModel);
+//        schema.addAll(invariantTriggers);
+
         schema.forEach(statement -> {
             try {
                 fileWriter.write(SQLStatementHelper.transform(statement));
@@ -94,23 +104,52 @@ public class DM2Schema {
                 e.printStackTrace();
             }
         });
-        
+
         fileWriter.flush();
         fileWriter.close();
     }
 
-    private static List<String> generateInvariantFunctions(
-        DataModel dataModel)
-        throws OclParseException, ParseException, IOException {
-        List<InvariantFunction> invariantFunctions = new ArrayList<InvariantFunction>();
+    private static List<String> generateInvariantTriggers(DataModel dataModel) {
+        //TODO: A proof-of-concept
+        List<String> invariantTriggers = new ArrayList<String>();
         List<Invariant> invariants = dataModel.getInvariantsFlatten();
-        for(Invariant invariant : invariants) {
-            InvariantFunction invariantFunction = new InvariantFunction();
-            invariantFunction.setName(invariant.getLabel());
-            invariantFunction.setSqlInvariant(translateToSQL(dataModel, invariant.getOcl()));
-            invariantFunctions.add(invariantFunction);
+        for (Invariant invariant : invariants) {
+            Function function = new Function(invariant.getLabel());
+            Trigger trigger = new Trigger(invariant.getLabel());
+            trigger.setAction(TriggerAction.INSERT);
+            trigger.setAfter(true);
+            trigger.setTable(new Table("Program"));
+            DropTrigger dropTrigger = new DropTrigger();
+            dropTrigger.setIfExists(true);
+            dropTrigger.setTrigger(trigger);
+            CreateInvariantTrigger invariantTrigger = new CreateInvariantTrigger();
+            invariantTrigger.setDelimiter("//");
+            invariantTrigger.setTrigger(trigger);
+            invariantTrigger.setFunction(function);
+            invariantTriggers.add(dropTrigger.toString());
+            invariantTriggers.add(invariantTrigger.toString());
         }
-        return invariantFunctions.stream().map(InvariantFunction::toString).collect(Collectors.toList());
+        return invariantTriggers;
+    }
+
+    private static List<String> generateInvariantFunctions(DataModel dataModel)
+        throws OclParseException, ParseException, IOException {
+        List<String> invariantFunctions = new ArrayList<String>();
+        List<Invariant> invariants = dataModel.getInvariantsFlatten();
+        for (Invariant invariant : invariants) {
+            Function function = new Function(invariant.getLabel());
+            DropFunction dropFunction = new DropFunction();
+            dropFunction.setIfExists(true);
+            dropFunction.setFunction(function);
+            CreateInvariantFunction invariantFunction = new CreateInvariantFunction();
+            invariantFunction.setDelimiter("//");
+            invariantFunction.setFunction(function);
+            invariantFunction
+                .setSqlInvariant(translateToSQL(dataModel, invariant.getOcl()));
+            invariantFunctions.add(dropFunction.toString());
+            invariantFunctions.add(invariantFunction.toString());
+        }
+        return invariantFunctions;
     }
 
     private static String translateToSQL(DataModel dataModel, String ocl)

@@ -81,7 +81,7 @@ FROM (SELECT TEMP_LEFT.res < TEMP_RIGHT.res AS res, CASE TEMP_LEFT.val = 0 OR TE
 FROM (SELECT Enrollment.starts AS res, 1 AS val, Enrollment.Enrollment_id AS ref_e
 FROM Enrollment) AS TEMP_LEFT
 LEFT JOIN (SELECT TEMP_OBJ.val AS val, Program.doe AS res, TEMP_OBJ.ref_e AS ref_e
-FROM (SELECT Enrollment.program AS res, Enrollment.Enrollment_id AS ref_e
+FROM (SELECT Enrollment.program AS res, 1 AS val, Enrollment.Enrollment_id AS ref_e
 FROM Enrollment) AS TEMP_OBJ
 LEFT JOIN Program ON TEMP_OBJ.ref_e = Program.Program_id AND TEMP_OBJ.val = 1) AS TEMP_RIGHT ON TEMP_LEFT.ref_e = TEMP_RIGHT.ref_e) AS TEMP_BODY
 WHERE TEMP_BODY.res = 0) AS TEMP_result;
@@ -99,7 +99,7 @@ FROM (SELECT 1 AS val, CASE TEMP_SRC.val = 0 WHEN 1 THEN 1 ELSE COUNT(TEMP_SRC.r
 FROM (SELECT TEMP_body.val AS val, TEMP_body.res AS res, TEMP_body.ref_p AS ref_p
 FROM (SELECT TEMP_OBJ.val AS val, Module.name AS res, TEMP_OBJ.ref_m AS ref_m, TEMP_OBJ.ref_p AS ref_p
 FROM (SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, TEMP_DMN.res AS ref_m, TEMP_DMN.ref_p AS ref_p
-FROM (SELECT CASE Program.program IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Program.Program_id AS res, Program.Program_id AS ref_p
+FROM (SELECT CASE Module.program IS NULL WHEN 1 THEN 0 ELSE 1 END AS val, Module.Module_id AS res, Program.Program_id AS ref_p
 FROM Module
 LEFT JOIN Program ON Program.Program_id = Module.program) AS TEMP_DMN) AS TEMP_OBJ
 LEFT JOIN Module ON TEMP_OBJ.ref_m = Module.Module_id AND TEMP_OBJ.val = 1) AS TEMP_body) AS TEMP_SRC
@@ -127,12 +127,90 @@ JOIN (SELECT TEMP_DMN.val AS val, TEMP_DMN.res AS res, TEMP_DMN.res AS ref_r1
 FROM (SELECT 1 AS val, Record_id AS res
 FROM Record) AS TEMP_DMN) AS TEMP_RIGHT) AS TEMP_LEFT
 LEFT JOIN (SELECT TEMP_LEFT.res <> TEMP_RIGHT.res AS res, CASE TEMP_LEFT.val = 0 OR TEMP_RIGHT.val = 0 WHEN 1 THEN 0 ELSE 1 END AS val, TEMP_LEFT.ref_r2 AS ref_r2, TEMP_RIGHT.ref_r1 AS ref_r1
-FROM (SELECT Record.module_period AS res, Record.Record_id AS ref_r2
+FROM (SELECT Record.module_period AS res, 1 AS val, Record.Record_id AS ref_r2
 FROM Record) AS TEMP_LEFT
-JOIN (SELECT Record.module_period AS res, Record.Record_id AS ref_r1
+JOIN (SELECT Record.module_period AS res, 1 AS val, Record.Record_id AS ref_r1
 FROM Record) AS TEMP_RIGHT) AS TEMP_RIGHT ON TEMP_LEFT.ref_r2 = TEMP_RIGHT.ref_r2) AS TEMP_BODY
 WHERE TEMP_BODY.res = 0) AS TEMP_BODY
 WHERE TEMP_BODY.res = 0) AS TEMP_result;
 RETURN (result);
+END //
+DELIMITER ;
+DROP TRIGGER IF EXISTS valid_student_age_at_least_18AFTERINSERT;
+DELIMITER //
+CREATE TRIGGER valid_student_age_at_least_18AFTERINSERT AFTER INSERT ON Program
+FOR EACH ROW
+BEGIN
+DECLARE _result INT DEFAULT 0;
+SELECT valid_student_age_at_least_18() INTO _result;
+IF (_result = 0)
+THEN
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invariant violated';
+END IF;
+END //
+DELIMITER ;
+DROP TRIGGER IF EXISTS valid_program_doe_before_todayAFTERINSERT;
+DELIMITER //
+CREATE TRIGGER valid_program_doe_before_todayAFTERINSERT AFTER INSERT ON Program
+FOR EACH ROW
+BEGIN
+DECLARE _result INT DEFAULT 0;
+SELECT valid_program_doe_before_today() INTO _result;
+IF (_result = 0)
+THEN
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invariant violated';
+END IF;
+END //
+DELIMITER ;
+DROP TRIGGER IF EXISTS valid_enrollment_starts_before_endsAFTERINSERT;
+DELIMITER //
+CREATE TRIGGER valid_enrollment_starts_before_endsAFTERINSERT AFTER INSERT ON Program
+FOR EACH ROW
+BEGIN
+DECLARE _result INT DEFAULT 0;
+SELECT valid_enrollment_starts_before_ends() INTO _result;
+IF (_result = 0)
+THEN
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invariant violated';
+END IF;
+END //
+DELIMITER ;
+DROP TRIGGER IF EXISTS valid_enrollment_starts_after_program_doeAFTERINSERT;
+DELIMITER //
+CREATE TRIGGER valid_enrollment_starts_after_program_doeAFTERINSERT AFTER INSERT ON Program
+FOR EACH ROW
+BEGIN
+DECLARE _result INT DEFAULT 0;
+SELECT valid_enrollment_starts_after_program_doe() INTO _result;
+IF (_result = 0)
+THEN
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invariant violated';
+END IF;
+END //
+DELIMITER ;
+DROP TRIGGER IF EXISTS valid_module_name_unique_by_programAFTERINSERT;
+DELIMITER //
+CREATE TRIGGER valid_module_name_unique_by_programAFTERINSERT AFTER INSERT ON Program
+FOR EACH ROW
+BEGIN
+DECLARE _result INT DEFAULT 0;
+SELECT valid_module_name_unique_by_program() INTO _result;
+IF (_result = 0)
+THEN
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invariant violated';
+END IF;
+END //
+DELIMITER ;
+DROP TRIGGER IF EXISTS valid_record_no_duplicate_student_moduleperiodAFTERINSERT;
+DELIMITER //
+CREATE TRIGGER valid_record_no_duplicate_student_moduleperiodAFTERINSERT AFTER INSERT ON Program
+FOR EACH ROW
+BEGIN
+DECLARE _result INT DEFAULT 0;
+SELECT valid_record_no_duplicate_student_moduleperiod() INTO _result;
+IF (_result = 0)
+THEN
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invariant violated';
+END IF;
 END //
 DELIMITER ;
