@@ -234,7 +234,6 @@ public class OCL2PSQLManualTest {
 //        "Automobile.allInstances()->collect(au|au.oclAsType(Car))",
 //        "Automobile.allInstances()->collect(au|au.oclAsType(Bus))",
 //        "Automobile.allInstances()->collect(au|au.oclAsType(Car).color)"   
-        
         //University test
 //        "Program.allInstances()->forAll(p|p.doe < @SQL(CURDATE()))",
 //        "Enrollment.allInstances()->forAll(e|e.ends.oclIsUndefined() or e.ends > e.starts)",

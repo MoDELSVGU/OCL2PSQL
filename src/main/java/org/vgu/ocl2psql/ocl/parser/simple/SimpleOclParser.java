@@ -561,6 +561,14 @@ public class SimpleOclParser implements ParserVisitor {
 
         Function fn = new Function();
         fn.setName(fnStr.replaceAll("(\\w+)\\(.*", "$1"));
+        
+        String[] params = fnStr.replaceAll("^\\w+\\((.*)\\)$", "$1").split(",");
+        List<Expression> expList = new ArrayList<>();
+        for (String param : params) {
+            expList.add(new Column(param.trim()));
+        }
+        ExpressionList expLs = new ExpressionList(expList);
+        fn.setParameters(expLs);
 
         ResSelectExpression res = new ResSelectExpression(fn);
         plainSelect.setRes(res);
