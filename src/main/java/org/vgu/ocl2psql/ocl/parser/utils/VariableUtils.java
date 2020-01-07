@@ -31,6 +31,7 @@ import com.vgu.se.jocl.expressions.OperationCallExp;
 import com.vgu.se.jocl.expressions.PropertyCallExp;
 import com.vgu.se.jocl.expressions.Variable;
 import com.vgu.se.jocl.expressions.VariableExp;
+import com.vgu.se.jocl.expressions.sql.functions.SqlFnTimestampdiff;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
@@ -57,6 +58,12 @@ public class VariableUtils {
 
     private static List<Variable> FVarsAux(com.vgu.se.jocl.expressions.Expression src,
             List<Variable> fVars) {
+        
+        if (src instanceof SqlFnTimestampdiff) {
+            SqlFnTimestampdiff sqlFn = (SqlFnTimestampdiff) src;
+            FVarsAux(sqlFn.getParams().get(0), fVars);
+            return FVarsAux(sqlFn.getParams().get(1), fVars);
+        }
 
         if (src instanceof IteratorExp) {
             return FVarsAux(((IteratorExp) src).getSource(), fVars);

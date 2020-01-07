@@ -54,6 +54,8 @@ import com.vgu.se.jocl.expressions.Variable;
 import com.vgu.se.jocl.expressions.VariableExp;
 import com.vgu.se.jocl.expressions.sql.SqlExp;
 import com.vgu.se.jocl.expressions.sql.SqlFunctionExp;
+import com.vgu.se.jocl.expressions.sql.functions.SqlFnCurdate;
+import com.vgu.se.jocl.expressions.sql.functions.SqlFnTimestampdiff;
 import com.vgu.se.jocl.visit.ParserVisitor;
 
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -100,7 +102,7 @@ public class SimpleOclParser implements ParserVisitor {
         this.select = select;
     }
 
-    private void addComment(OclExp exp, PlainSelect plainSelect) {
+    private void addComment(com.vgu.se.jocl.expressions.Expression exp, PlainSelect plainSelect) {
         plainSelect.setCorrespondOCLExpression(exp.getOclStr());
     }
 
@@ -554,31 +556,178 @@ public class SimpleOclParser implements ParserVisitor {
     }
 
     @Override
-    public void visit(SqlFunctionExp sqlFunctionExp) {
+    public void visit(com.vgu.se.jocl.expressions.Expression exp) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void visit(SqlFnCurdate sqlFnCurdate) {
         PlainSelect plainSelect = new PlainSelect();
         plainSelect.createTrueValColumn();
-        String fnStr = sqlFunctionExp.getName();
 
         Function fn = new Function();
-        fn.setName(fnStr.replaceAll("(\\w+)\\(.*", "$1"));
-        
-        String[] params = fnStr.replaceAll("^\\w+\\((.*)\\)$", "$1").split(",");
-        List<Expression> expList = new ArrayList<>();
-        for (String param : params) {
-            expList.add(new Column(param.trim()));
-        }
-        ExpressionList expLs = new ExpressionList(expList);
-        fn.setParameters(expLs);
+        fn.setName(sqlFnCurdate.getName());
 
         ResSelectExpression res = new ResSelectExpression(fn);
         plainSelect.setRes(res);
 
+        addComment(sqlFnCurdate, plainSelect);
+
         this.select = new Select();
         this.select.setSelectBody(plainSelect);
+    }
+
+    @Override
+    public void visit(SqlFnTimestampdiff sqlFnTimestampdiff) {
+        PlainSelect plainSelect = mapSqlFnTimestampdiff(sqlFnTimestampdiff);
+
+        addComment(sqlFnTimestampdiff, plainSelect);
+
+        this.select = new Select();
+        this.select.setSelectBody(plainSelect);
+        
     }
     // ***********************************************
     // * Helpers
     // ***********************************************
+    
+    private PlainSelect mapSqlFnTimestampdiff(SqlFnTimestampdiff exp) {
+        PlainSelect plainSelect = new PlainSelect();
+
+        com.vgu.se.jocl.expressions.Expression leftExp = exp.getParams().get(0);
+        com.vgu.se.jocl.expressions.Expression rightExp = exp.getParams().get(1);
+        String unit = exp.getLiteralParams().get(0).getParam();
+
+        String tmpLeftAlias = "TEMP_LEFT";
+        String tmpRightAlias = "TEMP_RIGHT";
+
+        List<Variable> fVarsLeft = VariableUtils.FVars(leftExp);
+        List<Variable> fVarsRight = VariableUtils.FVars(rightExp);
+
+        boolean isEmptyFvLeft = fVarsLeft.isEmpty();
+        boolean isEmptyFvRight = fVarsRight.isEmpty();
+
+        Function fn = new Function();
+        fn.setName(exp.getName());
+
+        List<Expression> ls = new ArrayList<>();
+        ls.add(new Column(unit));
+        ls.add(new Column(Arrays.asList(tmpLeftAlias, "res")));
+        ls.add(new Column(Arrays.asList(tmpRightAlias, "res")));
+
+        fn.setParameters(new ExpressionList(ls));
+
+        ResSelectExpression res = new ResSelectExpression(fn);
+        plainSelect.setRes(res);
+
+        TypeSelectExpression type = new TypeSelectExpression(
+            new StringValue(exp.getType().getReferredType()));
+        plainSelect.setType(type);
+
+        leftExp.accept(this);
+        Select leftMap = this.getSelect();
+        SubSelect tmpLeft = new SubSelect(leftMap.getSelectBody(),
+            tmpLeftAlias);
+
+        rightExp.accept(this);
+        Select rightMap = this.getSelect();
+        SubSelect tmpRight = new SubSelect(rightMap.getSelectBody(),
+            tmpRightAlias);
+
+        // Case 1
+        if (isEmptyFvLeft && isEmptyFvRight) {
+            plainSelect.createTrueValColumn();
+
+            plainSelect.setFromItem(tmpLeft);
+
+            Join join = new Join();
+            join.setRightItem(tmpRight);
+
+            plainSelect.setJoins(Arrays.asList(join));
+
+            return plainSelect;
+        }
+
+        // Preparation for Case 2, 3, 4
+        List<Variable> sVarsLeft = VariableUtils.SVars(leftExp);
+        List<Variable> sVarsRight = VariableUtils.SVars(rightExp);
+
+        boolean isSubsetSvLeftOfSvRight = sVarsRight.containsAll(sVarsLeft);
+        boolean isSubsetSvRightOfSvLeft = sVarsLeft.containsAll(sVarsRight);
+
+        List<Variable> sVarsIntxn = new ArrayList<Variable>(sVarsLeft);
+        sVarsIntxn.retainAll(sVarsRight);
+
+        boolean isEmptySvIntxn = sVarsIntxn.isEmpty();
+
+        CaseExpression caseVal = new CaseExpression();
+
+        BinaryExpression leftValEq0 = buildBinExp("=",
+            new Column(Arrays.asList(tmpLeftAlias, "val")), new LongValue(0L));
+
+        BinaryExpression rightValEq0 = buildBinExp("=",
+            new Column(Arrays.asList(tmpRightAlias, "val")), new LongValue(0L));
+
+        OrExpression orExp = new OrExpression(leftValEq0, rightValEq0);
+        caseVal.setSwitchExpression(orExp);
+
+        WhenClause whenClause = new WhenClause();
+        whenClause.setWhenExpression(new LongValue(1L));
+        whenClause.setThenExpression(new LongValue(0L));
+        caseVal.setWhenClauses(Arrays.asList(whenClause));
+
+        caseVal.setElseExpression(new LongValue(1L));
+
+        ValSelectExpression val = new ValSelectExpression(caseVal);
+        plainSelect.setVal(val);
+
+        Join join = new Join();
+
+        if (!isEmptySvIntxn) {
+            join.setLeft(true);
+
+            for (Variable v : sVarsIntxn) {
+                VarSelectExpression var = new VarSelectExpression(v.getName());
+                String refName = var.getRef().getAlias().getName();
+
+                BinaryExpression onExp = buildBinExp("=",
+                    new Column(Arrays.asList(tmpLeftAlias, refName)),
+                    new Column(Arrays.asList(tmpRightAlias, refName)));
+
+                join.setOnExpression(onExp);
+            }
+        }
+
+        // Case 2
+        if (!isEmptyFvLeft && isSubsetSvRightOfSvLeft) {
+            VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
+
+            plainSelect.setFromItem(tmpLeft);
+            join.setRightItem(tmpRight);
+        }
+        // case 3
+        else if (!isEmptyFvRight && isSubsetSvLeftOfSvRight) {
+            VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
+
+            plainSelect.setFromItem(tmpRight);
+            join.setRightItem(tmpLeft);
+        }
+        // case 4
+        else if (!isEmptyFvLeft && !isEmptyFvLeft && !isSubsetSvLeftOfSvRight
+            && !isSubsetSvRightOfSvLeft) {
+
+            VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
+            VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
+
+            plainSelect.setFromItem(tmpLeft);
+            join.setRightItem(tmpRight);
+        }
+
+        plainSelect.setJoins(Arrays.asList(join));
+
+        return plainSelect;
+    }
 
     private PlainSelect map(BooleanLiteralExp exp) {
         PlainSelect plainSelect = new PlainSelect();
@@ -2780,24 +2929,6 @@ public class SimpleOclParser implements ParserVisitor {
         binExp.setRightExpression(rightExp);
 
         return binExp;
-    }
-
-    @Override
-    public void visit(com.vgu.se.jocl.expressions.Expression exp) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void visit(OclExp oclExp) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void visit(SqlExp sqlExp) {
-        // TODO Auto-generated method stub
-
     }
 
 }

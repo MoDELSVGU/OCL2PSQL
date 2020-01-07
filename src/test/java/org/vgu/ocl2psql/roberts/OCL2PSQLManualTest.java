@@ -49,7 +49,7 @@ public class OCL2PSQLManualTest {
 
         Ocl2PsqlSvc simpleO2P = new SimpleO2PApi();
         simpleO2P.setDataModelFromFile(contextModel.getAbsolutePath());
-        simpleO2P.setDescriptionMode(true);
+        simpleO2P.setDescriptionMode(false);
 //        simpleO2P.setContextualType("self", "Person");
 //        simpleO2P.setContextualType("caller", "Person");
 //        simpleO2P.setContextualType("kself", "Staff");
@@ -238,7 +238,11 @@ public class OCL2PSQLManualTest {
 //        "Program.allInstances()->forAll(p|p.doe < @SQL(CURDATE()))",
 //        "Enrollment.allInstances()->forAll(e|e.ends.oclIsUndefined() or e.ends > e.starts)",
 //        "Enrollment.allInstances()->forAll(e|e.starts > e.program.doe)"
-        "Program.allInstances()->forAll(p|p.modules->collect(m|m.name)->isUnique())"
+//        "Program.allInstances()->forAll(p|p.modules->collect(m|m.name)->isUnique())"
+            
+//            "Student.allInstances()->collect(s|@SQL(CURDATE()))",
+//            "@SQL(TimeStampDiff(year, @SQL(curdate()) , @SQL(curdate()) ))",
+            "Student.allInstances()->exists(s| @SQL(TIMESTAMPDIFF(year, s.dob, @SQL(CURDATE()))) > 18)",
     };
 
 }
