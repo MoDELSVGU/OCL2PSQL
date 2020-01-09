@@ -79,7 +79,9 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.GroupByElement;
+import net.sf.jsqlparser.statement.select.SelectItem;
 
 public class SimpleOclParser implements ParserVisitor {
 
@@ -120,6 +122,7 @@ public class SimpleOclParser implements ParserVisitor {
         case asSequence:
             break;
         case asSet:
+            plainSelect = mapAsSet(iteratorExp);
             break;
         case at:
             break;
@@ -220,6 +223,9 @@ public class SimpleOclParser implements ParserVisitor {
         case "and":
         case "or":
             plainSelect = mapBinary(operationCallExp);
+            break;
+        case "implies":
+            plainSelect = mapImplies(operationCallExp);
             break;
         default:
             break;
@@ -1593,6 +1599,148 @@ public class SimpleOclParser implements ParserVisitor {
         return plainSelect;
     }
 
+    private PlainSelect mapImplies(OperationCallExp exp) {
+        PlainSelect plainSelect = new PlainSelect();
+
+        com.vgu.se.jocl.expressions.Expression leftExp = exp.getSource();
+        com.vgu.se.jocl.expressions.Expression rightExp = exp.getArguments()
+            .get(0);
+
+        String tmpLeftAlias = "TEMP_LEFT";
+        String tmpRightAlias = "TEMP_RIGHT";
+
+        leftExp.accept(this);
+        Select leftMap = this.getSelect();
+        SubSelect tmpLeft = new SubSelect(leftMap.getSelectBody(),
+            tmpLeftAlias);
+
+        rightExp.accept(this);
+        Select rightMap = this.getSelect();
+        SubSelect tmpRight = new SubSelect(rightMap.getSelectBody(),
+            tmpRightAlias);
+
+        List<Variable> fVarsLeft = VariableUtils.FVars(leftExp);
+        List<Variable> fVarsRight = VariableUtils.FVars(rightExp);
+
+        boolean isEmptyFvLeft = fVarsLeft.isEmpty();
+        boolean isEmptyFvRight = fVarsRight.isEmpty();
+
+        CaseExpression caseImplies = new CaseExpression();
+
+        BinaryExpression tmpLeftEq1 = buildBinExp("=", 
+                new Column(Arrays.asList(tmpLeftAlias, "res")),
+                new LongValue(1L));
+
+        WhenClause caseWhen = new WhenClause();
+        caseWhen.setWhenExpression(tmpLeftEq1);
+        caseWhen.setThenExpression(new Column(Arrays.asList(tmpRightAlias, "res")));
+        caseImplies.setWhenClauses(Arrays.asList(caseWhen));
+        
+        caseImplies.setElseExpression(new LongValue(1L));
+
+        ResSelectExpression res = new ResSelectExpression(caseImplies);
+        plainSelect.setRes(res);
+
+        TypeSelectExpression type = new TypeSelectExpression(
+            new StringValue("Boolean"));
+        plainSelect.setType(type);
+
+
+        // Case 1
+        if (isEmptyFvLeft && isEmptyFvRight) {
+            plainSelect.createTrueValColumn();
+
+            plainSelect.setFromItem(tmpLeft);
+
+            Join join = new Join();
+            join.setRightItem(tmpRight);
+
+            plainSelect.setJoins(Arrays.asList(join));
+
+            return plainSelect;
+        }
+
+        // Preparation for Case 2, 3, 4
+        List<Variable> sVarsLeft = VariableUtils.SVars(leftExp);
+        List<Variable> sVarsRight = VariableUtils.SVars(rightExp);
+
+        boolean isSubsetSvLeftOfSvRight = sVarsRight.containsAll(sVarsLeft);
+        boolean isSubsetSvRightOfSvLeft = sVarsLeft.containsAll(sVarsRight);
+
+        List<Variable> sVarsIntxn = new ArrayList<Variable>(sVarsLeft);
+        sVarsIntxn.retainAll(sVarsRight);
+
+        boolean isEmptySvIntxn = sVarsIntxn.isEmpty();
+
+        CaseExpression caseVal = new CaseExpression();
+
+        BinaryExpression leftValEq0 = buildBinExp("=",
+            new Column(Arrays.asList(tmpLeftAlias, "val")), new LongValue(0L));
+
+        BinaryExpression rightValEq0 = buildBinExp("=",
+            new Column(Arrays.asList(tmpRightAlias, "val")), new LongValue(0L));
+
+        OrExpression orExp = new OrExpression(leftValEq0, rightValEq0);
+        caseVal.setSwitchExpression(orExp);
+
+        WhenClause whenClause = new WhenClause();
+        whenClause.setWhenExpression(new LongValue(1L));
+        whenClause.setThenExpression(new LongValue(0L));
+        caseVal.setWhenClauses(Arrays.asList(whenClause));
+
+        caseVal.setElseExpression(new LongValue(1L));
+
+        ValSelectExpression val = new ValSelectExpression(caseVal);
+        plainSelect.setVal(val);
+
+        Join join = new Join();
+
+        if (!isEmptySvIntxn) {
+            join.setLeft(true);
+
+            for (Variable v : sVarsIntxn) {
+                VarSelectExpression var = new VarSelectExpression(v.getName());
+                String refName = var.getRef().getAlias().getName();
+
+                BinaryExpression onExp = buildBinExp("=",
+                    new Column(Arrays.asList(tmpLeftAlias, refName)),
+                    new Column(Arrays.asList(tmpRightAlias, refName)));
+
+                join.setOnExpression(onExp);
+            }
+        }
+
+        // Case 2
+        if (!isEmptyFvLeft && isSubsetSvRightOfSvLeft) {
+            VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
+
+            plainSelect.setFromItem(tmpLeft);
+            join.setRightItem(tmpRight);
+        }
+        // case 3
+        else if (!isEmptyFvRight && isSubsetSvLeftOfSvRight) {
+            VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
+
+            plainSelect.setFromItem(tmpRight);
+            join.setRightItem(tmpLeft);
+        }
+        // case 4
+        else if (!isEmptyFvLeft && !isEmptyFvLeft && !isSubsetSvLeftOfSvRight
+            && !isSubsetSvRightOfSvLeft) {
+
+            VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
+            VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
+
+            plainSelect.setFromItem(tmpLeft);
+            join.setRightItem(tmpRight);
+        }
+
+        plainSelect.setJoins(Arrays.asList(join));
+
+        return plainSelect;
+    }
+
+
     private PlainSelect mapSize(IteratorExp exp) {
         PlainSelect plainSelect = new PlainSelect();
         plainSelect.createTrueValColumn();
@@ -1655,6 +1803,50 @@ public class SimpleOclParser implements ParserVisitor {
             GroupByElement groupByEl = new GroupByElement();
             groupByEl.setGroupByExpressions(groupByFields);
             plainSelect.setGroupByElement(groupByEl);
+
+            return plainSelect;
+        }
+    }
+
+    private PlainSelect mapAsSet(IteratorExp exp) {
+        PlainSelect plainSelect = new PlainSelect();
+        exp.getSource().accept(this);
+        Select source = this.getSelect();
+
+        String tmpSourceAlias = "TEMP_src";
+        SubSelect tmpSource = new SubSelect(source.getSelectBody(),
+            tmpSourceAlias);
+        plainSelect.setFromItem(tmpSource);
+
+        String srcType = exp.getSource().getType().getReferredType()
+                .replaceAll("Col\\((\\w+)\\)", "$1");
+        TypeSelectExpression type = new TypeSelectExpression(srcType);
+        plainSelect.setType(type);
+
+        if (VariableUtils.FVars(exp).isEmpty()) {
+            ResSelectExpression res = new ResSelectExpression(
+                    new Column(Arrays.asList(tmpSourceAlias, "res")));
+            plainSelect.setRes(res);
+            
+            Distinct distinctRes = new Distinct();
+            plainSelect.setDistinct(distinctRes);
+            
+            return plainSelect;
+
+        } else {
+            ValSelectExpression val = new ValSelectExpression(
+                    new Column(Arrays.asList(tmpSourceAlias, "val")));
+            plainSelect.setVal(val);
+            
+            ResSelectExpression res = new ResSelectExpression(
+                    new Column(Arrays.asList(tmpSourceAlias, "res")));
+            plainSelect.setRes(res);
+
+            List<Variable> sVars = VariableUtils.SVars(exp);
+            VariableUtils.addVar(sVars, plainSelect, tmpSourceAlias);
+
+            Distinct distinctRes = new Distinct();
+            plainSelect.setDistinct(distinctRes);
 
             return plainSelect;
         }

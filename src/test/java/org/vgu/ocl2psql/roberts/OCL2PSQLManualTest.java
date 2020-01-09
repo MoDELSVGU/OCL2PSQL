@@ -242,7 +242,11 @@ public class OCL2PSQLManualTest {
             
 //            "Student.allInstances()->collect(s|@SQL(CURDATE()))",
 //            "@SQL(TimeStampDiff(year, @SQL(curdate()) , @SQL(curdate()) ))",
-            "Student.allInstances()->exists(s| @SQL(TIMESTAMPDIFF(year, s.dob, @SQL(CURDATE()))) > 18)",
+//            "Student.allInstances()->exists(s| @SQL(TIMESTAMPDIFF(year, s.dob, @SQL(CURDATE()))) > 18)",
+//            "Student.allInstances()->forAll(s|s.gender = 'M' implies s.gender = 'M')",
+            "Student.allInstances()->collect(s|s.enrolls->asSet())",
+//            "Student.allInstances()->collect(s|s.gender)->size()"
+//            "Student.allInstances()->collect(s|s.gender)->asSet()"
     };
 
 }
