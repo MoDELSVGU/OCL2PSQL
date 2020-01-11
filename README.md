@@ -65,7 +65,6 @@ This table represents a detailed overview of supported Object Constraint Languag
 Interested readers can clone our project (and related submodules) using these commands:
 ```
 git clone https://github.com/ocl-vgu/OCL2PSQL.git
-git submodule update --init --recursive
 ```
 Then, please add the related submodules
 ```
