@@ -67,6 +67,17 @@ Interested readers can clone our project (and related submodules) using these co
 git clone https://github.com/ocl-vgu/OCL2PSQL.git
 git submodule update --init --recursive
 ```
+Then, please add the related submodules
+```
+git submodule update --init --recursive
+```
+And check out the corresponding branch OCL2PSQL-v2 for this project, for example:
+```
+cd jocl
+git checkout OCL2PSQL-v2
+cd ..\dm2schema
+git checkout OCL2PSQL-v2
+```
 
 An easy way to use `OCL2PSQL` library is 
 
