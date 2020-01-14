@@ -1,398 +1,915 @@
 [
-   {
-      "class":"Student",
-      "attributes":[
-         {
-            "name":"code",
-            "type":"String",
-            "constraints":[
-               "unique",
-               "notnull"
-            ]
-         },
-         {
-            "name":"firstname",
-            "type":"String",
-            "constraints":[
-               "notnull"
-            ]
-         },
-         {
-            "name":"midname",
-            "type":"String"
-         },
-         {
-            "name":"lastname",
-            "type":"String",
-            "constraints":[
-               "notnull"
-            ]
-         },
-         {
-            "name":"gender",
-            "type":"String",
-            "constraints":[
-               "notnull"
-            ]
-         },
-         {
-            "name":"birthplace",
-            "type":"String",
-            "constraints":[
-               "notnull"
-            ]
-         },
-         {
-            "name":"dob",
-            "type":"Date",
-            "constraints":[
-               "notnull"
-            ]
-         }
-      ],
-      "ends":[
-         {
-            "name":"enrolls",
-            "target":"Enrollment",
-            "opp":"student",
-            "mult":"*"
-         },
-         {
-            "name":"records",
-            "target":"Record",
-            "opp":"student",
-            "mult":"*"
-         }
-      ]
-   },
-   {
-      "class":"Program",
-      "attributes":[
-         {
-            "name":"code",
-            "type":"String",
-            "constraints":[
-               "unique",
-               "notnull"
-            ]
-         },
-         {
-            "name":"name",
-            "type":"String",
-            "constraints":[
-               "unique",
-               "notnull"
-            ]
-         },
-         {
-            "name":"doe",
-            "type":"Date",
-            "constraints":[
-               "notnull"
-            ]
-         }
-      ],
-      "ends":[
-         {
-            "name":"enrolls",
-            "target":"Enrollment",
-            "opp":"program",
-            "mult":"*"
-         },
-         {
-            "name":"modules",
-            "target":"Module",
-            "opp":"program",
-            "mult":"*"
-         }
-      ]
-   },
-   {
-      "class":"Enrollment",
-      "attributes":[
-         {
-            "name":"starts",
-            "type":"Date",
-            "constraints":[
-               "notnull"
-            ]
-         },
-         {
-            "name":"ends",
-            "type":"Date"
-         }
-      ],
-      "ends":[
-         {
-            "name":"program",
-            "target":"Program",
-            "opp":"enrolls",
-            "mult":"1"
-         },
-         {
-            "name":"student",
-            "target":"Student",
-            "opp":"enrolls",
-            "mult":"1"
-         }
-      ]
-   },
-   {
-      "class":"Module",
-      "attributes":[
-         {
-            "name":"code",
-            "type":"String",
-            "constraints":[
-               "unique",
-               "notnull"
-            ]
-         },
-         {
-            "name":"name",
-            "type":"String",
-            "constraints":[
-               "notnull"
-            ]
-         }
-      ],
-      "ends":[
-         {
-            "name":"program",
-            "target":"Program",
-            "opp":"modules",
-            "mult":"1"
-         },
-         {
-            "name":"module_periods",
-            "target":"Module_Period",
-            "opp":"module",
-            "mult":"*"
-         }
-      ]
-   },
-   {
-      "class":"Record",
-      "attributes":[
-         {
-            "name":"status",
-            "type":"String",
-            "constraints":[
-               "notnull"
-            ]
-         }
-      ],
-      "ends":[
-         {
-            "name":"student",
-            "target":"Student",
-            "opp":"records",
-            "mult":"1"
-         },
-         {
-            "name":"reg_exams",
-            "target":"Registration_Exam",
-            "opp":"record",
-            "mult":"*"
-         },
-         {
-            "name":"module_period",
-            "target":"Module_Period",
-            "opp":"records",
-            "mult":"1"
-         }
-      ]
-   },
-   {
-      "class":"Period",
-      "attributes":[
-         {
-            "name":"name",
-            "type":"String"
-         },
-         {
-            "name":"starts",
-            "type":"Date",
-            "constraints":[
-               "notnull"
-            ]
-         },
-         {
-            "name":"ends",
-            "type":"Date",
-            "constraints":[
-               "notnull"
-            ]
-         }
-      ],
-      "ends":[
-         {
-            "name":"module_periods",
-            "target":"Module_Period",
-            "opp":"period",
-            "mult":"*"
-         }
-      ]
-   },
-   {
-      "class":"Module_Period",
-      "attributes":[
-         {
-            "name":"name",
-            "type":"String",
-            "constraints":[
-               "unique",
-               "notnull"
-            ]
-         },
-         {
-            "name":"starts",
-            "type":"Date",
-            "constraints":[
-               "notnull"
-            ]
-         },
-         {
-            "name":"ends",
-            "type":"Date",
-            "constraints":[
-               "notnull"
-            ]
-         }
-      ],
-      "ends":[
-         {
-            "name":"period",
-            "target":"Period",
-            "opp":"module_periods",
-            "mult":"1"
-         },
-         {
-            "name":"module",
-            "target":"Module",
-            "opp":"module_periods",
-            "mult":"1"
-         },
-         {
-            "name":"records",
-            "target":"Record",
-            "opp":"module_period",
-            "mult":"*"
-         },
-         {
-            "name":"exams",
-            "target":"Exam",
-            "opp":"module_period",
-            "mult":"*"
-         }
-      ]
-   },
-   {
-      "class":"Exam",
-      "attributes":[
-         {
-            "name":"date",
-            "type":"Date",
-            "constraints":[
-               "notnull"
-            ]
-         },
-         {
-            "name":"starts",
-            "type":"Time",
-            "constraints":[
-               "notnull"
-            ]
-         },
-         {
-            "name":"ends",
-            "type":"Time",
-            "constraints":[
-               "notnull"
-            ]
-         },
-         {
-            "name":"deadline",
-            "type":"Datetime",
-            "constraints":[
-               "notnull"
-            ]
-         }
-      ],
-      "ends":[
-         {
-            "name":"reg_exams",
-            "target":"Registration_Exam",
-            "opp":"exam",
-            "mult":"*"
-         },
-         {
-            "name":"module_period",
-            "target":"Module_Period",
-            "opp":"exams",
-            "mult":"1"
-         }
-      ]
-   },
-   {
-      "class":"Registration_Exam",
-      "attributes":[
-         {
-            "name":"datetime",
-            "type":"Datetime",
-            "constraints":[
-               "notnull"
-            ]
-         },
-         {
-            "name":"status",
-            "type":"String",
-            "constraints":[
-               "notnull"
-            ]
-         }
-      ],
-      "ends":[
-         {
-            "name":"record",
-            "target":"Record",
-            "opp":"reg_exams",
-            "mult":"1"
-         },
-         {
-            "name":"exam",
-            "target":"Exam",
-            "opp":"reg_exams",
-            "mult":"1"
-         }
-      ]
-   },
-	{
-	  "invariants": [
-		{
-		  "label": "valid_student_age_at_least_18",
-		  "ocl": "Student.allInstances()->collect(s|s.dob)->notEmpty()"
-		},
-		{
-		  "label": "valid_program_doe_before_today",
-		  "ocl": "Program.allInstances()->forAll(p|p.doe < @SQL(CURDATE()))"
-		},
-		{
-		  "label": "valid_enrollment_starts_before_ends",
-		  "ocl": "Enrollment.allInstances()->forAll(e|e.ends.oclIsUndefined() or e.ends > e.starts)"
-		},
-		{
-		  "label": "valid_enrollment_starts_after_program_doe",
-		  "ocl": "Enrollment.allInstances()->forAll(e|e.starts < e.program.doe)"
-		},
-		{
-		  "label": "valid_module_name_unique_by_program",
-		  "ocl": "Program.allInstances()->forAll(p|p.modules->collect(m|m.name)->isUnique())"
-		},
-		{
-		  "label": "valid_record_no_duplicate_student_moduleperiod",
-		  "ocl": "Record.allInstances()->forAll(r1|Record.allInstances()->forAll(r2|r2 = r1 or r2.module_period <> r1.module_period))"
-		}
-	  ]
-	}
+    {
+        "class": "Role",
+        "attributes": [
+            {
+                "name": "role",
+                "type": "String",
+                "constraints": [
+                    "unique",
+                    "notnull"
+                ]
+            }
+        ],
+        "ends": [
+            {
+                "name": "accounts",
+                "target": "Account",
+                "opp": "role",
+                "mult": "*"
+            }
+        ]
+    },
+    {
+        "class": "Account",
+        "attributes": [
+            {
+                "name": "username",
+                "type": "String",
+                "constraints": [
+                    "unique",
+                    "notnull"
+                ]
+            },
+            {
+                "name": "password",
+                "type": "String",
+                "constraints": [
+                    "notnull"
+                ]
+            }
+        ],
+        "ends": [
+            {
+                "name": "role",
+                "target": "Role",
+                "opp": "accounts",
+                "mult": "1"
+            },
+            {
+                "name": "student",
+                "target": "Student",
+                "opp": "account",
+                "mult": "1"
+            },
+            {
+                "name": "assistant",
+                "target": "Assistant",
+                "opp": "account",
+                "mult": "1"
+            },
+            {
+                "name": "lecturer",
+                "target": "Lecturer",
+                "opp": "account",
+                "mult": "1"
+            }
+        ]
+    },
+    {
+        "class": "Assistant",
+        "attributes": [
+            {
+                "name": "firstname",
+                "type": "String",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "lastname",
+                "type": "String",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "midname",
+                "type": "String",
+                "constraints": []
+            },
+            {
+                "name": "email",
+                "type": "String",
+                "constraints": [
+                    "notnull",
+                    "unique"
+                ]
+            }
+        ],
+        "ends": [
+            {
+                "name": "account",
+                "target": "Account",
+                "opp": "assistant",
+                "mult": "1"
+            }
+        ]
+    },
+    {
+        "class": "Lecturer",
+        "attributes": [
+            {
+                "name": "firstname",
+                "type": "String",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "lastname",
+                "type": "String",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "midname",
+                "type": "String",
+                "constraints": []
+            }
+        ],
+        "ends": [
+            {
+                "name": "account",
+                "target": "Account",
+                "opp": "lecturer",
+                "mult": "1"
+            },
+            {
+                "name": "module_periods",
+                "target": "Module_Period",
+                "opp": "lecturer",
+                "mult": "*"
+            }
+        ]
+    },
+    {
+        "class": "Student",
+        "attributes": [
+            {
+                "name": "code",
+                "type": "String",
+                "constraints": [
+                    "unique",
+                    "notnull"
+                ]
+            },
+            {
+                "name": "firstname",
+                "type": "String",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "midname",
+                "type": "String"
+            },
+            {
+                "name": "lastname",
+                "type": "String",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "gender",
+                "type": "String",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "birthplace",
+                "type": "String",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "dob",
+                "type": "Date",
+                "constraints": [
+                    "notnull"
+                ]
+            }
+        ],
+        "ends": [
+            {
+                "name": "enrolls",
+                "target": "Enrollment",
+                "opp": "student",
+                "mult": "*"
+            },
+            {
+                "name": "records",
+                "target": "Record",
+                "opp": "student",
+                "mult": "*"
+            },
+            {
+                "name": "account",
+                "target": "Account",
+                "opp": "student",
+                "mult": "1"
+            }
+        ]
+    },
+    {
+        "class": "Program",
+        "attributes": [
+            {
+                "name": "code",
+                "type": "String",
+                "constraints": [
+                    "unique",
+                    "notnull"
+                ]
+            },
+            {
+                "name": "name",
+                "type": "String",
+                "constraints": [
+                    "unique",
+                    "notnull"
+                ]
+            },
+            {
+                "name": "doe",
+                "type": "Date",
+                "constraints": [
+                    "notnull"
+                ]
+            }
+        ],
+        "ends": [
+            {
+                "name": "enrolls",
+                "target": "Enrollment",
+                "opp": "program",
+                "mult": "*"
+            },
+            {
+                "name": "modules",
+                "target": "Module",
+                "opp": "program",
+                "mult": "*"
+            },
+            {
+                "name": "university",
+                "target": "University",
+                "opp": "programs",
+                "mult": "1"
+            }
+        ]
+    },
+    {
+        "class": "University",
+        "attributes": [
+            {
+                "name": "name",
+                "type": "String",
+                "constraints": [
+                    "unique",
+                    "notnull"
+                ]
+            },
+            {
+                "name": "doe",
+                "type": "Date",
+                "constraints": []
+            }
+        ],
+        "ends": [
+            {
+                "name": "programs",
+                "target": "Program",
+                "opp": "university",
+                "mult": "*"
+            }
+        ]
+    },
+    {
+        "class": "Enrollment",
+        "attributes": [
+            {
+                "name": "starts",
+                "type": "Date",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "ends",
+                "type": "Date"
+            }
+        ],
+        "ends": [
+            {
+                "name": "program",
+                "target": "Program",
+                "opp": "enrolls",
+                "mult": "1"
+            },
+            {
+                "name": "student",
+                "target": "Student",
+                "opp": "enrolls",
+                "mult": "1"
+            }
+        ]
+    },
+    {
+        "class": "Module",
+        "attributes": [
+            {
+                "name": "code",
+                "type": "String",
+                "constraints": [
+                    "unique",
+                    "notnull"
+                ]
+            },
+            {
+                "name": "name",
+                "type": "String",
+                "constraints": [
+                    "notnull"
+                ]
+            }
+        ],
+        "ends": [
+            {
+                "name": "program",
+                "target": "Program",
+                "opp": "modules",
+                "mult": "1"
+            },
+            {
+                "name": "module_periods",
+                "target": "Module_Period",
+                "opp": "module",
+                "mult": "*"
+            },
+            {
+                "name": "module_group",
+                "target": "Module_Group",
+                "opp": "modules",
+                "mult": "1"
+            },
+            {
+                "name": "prerequisites",
+                "target": "Module",
+                "opp": "modules",
+                "mult": "*"
+            },
+            {
+                "name": "modules",
+                "target": "Module",
+                "opp": "prerequisites",
+                "mult": "*"
+            }
+        ]
+    },
+    {
+        "class": "Module_Group",
+        "attributes": [
+            {
+                "name": "group_name",
+                "type": "String",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "code",
+                "type": "String",
+                "constraints": [
+                    "notnull",
+                    "unique"
+                ]
+            }
+        ],
+        "ends": [
+            {
+                "name": "modules",
+                "target": "Module",
+                "opp": "module_group",
+                "mult": "*"
+            }
+        ]
+    },
+    {
+        "class": "Record",
+        "attributes": [
+            {
+                "name": "status",
+                "type": "String",
+                "constraints": [
+                    "notnull"
+                ]
+            }
+        ],
+        "ends": [
+            {
+                "name": "student",
+                "target": "Student",
+                "opp": "records",
+                "mult": "1"
+            },
+            {
+                "name": "reg_exams",
+                "target": "Registration_Exam",
+                "opp": "record",
+                "mult": "*"
+            },
+            {
+                "name": "module_period",
+                "target": "Module_Period",
+                "opp": "records",
+                "mult": "1"
+            },
+            {
+                "name": "sessions",
+                "target": "Session",
+                "opp": "records",
+                "mult": "*"
+            }
+        ]
+    },
+    {
+        "class": "Period",
+        "attributes": [
+            {
+                "name": "name",
+                "type": "String"
+            },
+            {
+                "name": "starts",
+                "type": "Date",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "ends",
+                "type": "Date",
+                "constraints": [
+                    "notnull"
+                ]
+            }
+        ],
+        "ends": [
+            {
+                "name": "module_periods",
+                "target": "Module_Period",
+                "opp": "period",
+                "mult": "*"
+            }
+        ]
+    },
+    {
+        "class": "Module_Period",
+        "attributes": [
+            {
+                "name": "name",
+                "type": "String",
+                "constraints": [
+                    "unique",
+                    "notnull"
+                ]
+            },
+            {
+                "name": "starts",
+                "type": "Date",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "ends",
+                "type": "Date",
+                "constraints": [
+                    "notnull"
+                ]
+            }
+        ],
+        "ends": [
+            {
+                "name": "period",
+                "target": "Period",
+                "opp": "module_periods",
+                "mult": "1"
+            },
+            {
+                "name": "module",
+                "target": "Module",
+                "opp": "module_periods",
+                "mult": "1"
+            },
+            {
+                "name": "records",
+                "target": "Record",
+                "opp": "module_period",
+                "mult": "*"
+            },
+            {
+                "name": "exams",
+                "target": "Exam",
+                "opp": "module_period",
+                "mult": "*"
+            },
+            {
+                "name": "sessions",
+                "target": "Session",
+                "opp": "module_period",
+                "mult": "*"
+            },
+            {
+                "name": "lecturer",
+                "target": "Lecturer",
+                "opp": "module_periods",
+                "mult": "1"
+            }
+        ]
+    },
+    {
+        "class": "Session",
+        "attributes": [
+            {
+                "name": "date",
+                "type": "Date",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "starts",
+                "type": "Time",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "ends",
+                "type": "Time",
+                "constraints": [
+                    "notnull"
+                ]
+            }
+        ],
+        "ends": [
+            {
+                "name": "records",
+                "target": "Record",
+                "opp": "sessions",
+                "mult": "*"
+            },
+            {
+                "name": "module_period",
+                "target": "Module_Period",
+                "opp": "sessions",
+                "mult": "1"
+            },
+            {
+                "name": "room",
+                "target": "Room",
+                "opp": "sessions",
+                "mult": "1"
+            }
+        ]
+    },
+    {
+        "class": "Room",
+        "attributes": [
+            {
+                "name": "name",
+                "type": "String",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "capacity",
+                "type": "Integer",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "type",
+                "type": "String",
+                "constraints": []
+            }
+        ],
+        "ends": [
+            {
+                "name": "sessions",
+                "target": "Session",
+                "opp": "room",
+                "mult": "*"
+            },
+            {
+                "name": "exams",
+                "target": "Exam",
+                "opp": "rooms",
+                "mult": "*"
+            }
+        ]
+    },
+    {
+        "class": "Exam",
+        "attributes": [
+            {
+                "name": "date",
+                "type": "Date",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "starts",
+                "type": "Time",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "ends",
+                "type": "Time",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "deadline",
+                "type": "Datetime",
+                "constraints": [
+                    "notnull"
+                ]
+            }
+        ],
+        "ends": [
+            {
+                "name": "reg_exams",
+                "target": "Registration_Exam",
+                "opp": "exam",
+                "mult": "*"
+            },
+            {
+                "name": "module_period",
+                "target": "Module_Period",
+                "opp": "exams",
+                "mult": "1"
+            },
+            {
+                "name": "rooms",
+                "target": "Room",
+                "opp": "exams",
+                "mult": "*"
+            }
+        ]
+    },
+    {
+        "class": "Registration_Exam",
+        "attributes": [
+            {
+                "name": "datetime",
+                "type": "Datetime",
+                "constraints": [
+                    "notnull"
+                ]
+            },
+            {
+                "name": "status",
+                "type": "String",
+                "constraints": [
+                    "notnull"
+                ]
+            }
+        ],
+        "ends": [
+            {
+                "name": "record",
+                "target": "Record",
+                "opp": "reg_exams",
+                "mult": "1"
+            },
+            {
+                "name": "exam",
+                "target": "Exam",
+                "opp": "reg_exams",
+                "mult": "1"
+            }
+        ]
+    },
+    {
+        "invariants": [
+            {
+                "label": "valid_student_age_at_least_18",
+                "ocl": "Student.allInstances()->forAll(s|@SQL(TIMESTAMPDIFF(year, s.dob, @SQL(CURDATE()))) > 17)"
+            },
+            {
+                "label": "valid_program_doe_before_today",
+                "ocl": "Program.allInstances()->forAll(p|p.doe < @SQL(CURDATE()))"
+            },
+            {
+                "label": "valid_enrollment_starts_before_ends",
+                "ocl": "Enrollment.allInstances()->forAll(e|e.ends.oclIsUndefined() or e.ends > e.starts)"
+            },
+            {
+                "label": "valid_enrollment_starts_after_program_doe",
+                "ocl": "Enrollment.allInstances()->forAll(e|e.starts < e.program.doe)"
+            },
+            {
+                "label": "valid_module_name_unique_by_program",
+                "ocl": "Program.allInstances()->forAll(p|p.modules->collect(m|m.name)->isUnique())"
+            },
+            {
+                "label": "valid_record_no_duplicate_student_moduleperiod",
+                "ocl": "Record.allInstances()->forAll(r1|Record.allInstances()->forAll(r2|r2 = r1 or r2.module_period <> r1.module_period))"
+            },
+            
+            
+            
+            
+            {
+                "label": "inv_Account_student_only",
+                "ocl": "Account.allInstances()->forAll(a| not a.student.oclIsUndefined() implies a.lecturer.oclIsUndefined() and a.assistant.oclIsUndefined())"
+            },
+            {
+                "label": "inv_Account_lecturer_only",
+                "ocl": "Account.allInstances()->forAll(a| not a.lecturer.oclIsUndefined() implies a.student.oclIsUndefined() and a.assistant.oclIsUndefined())"
+            },
+            {
+                "label": "inv_Account_assistant_only",
+                "ocl": "Account.allInstances()->forAll(a| not a.assistant.oclIsUndefined() implies a.lecturer.oclIsUndefined() and a.student.oclIsUndefined())"
+            },
+            {
+                "label": "inv_Enrollment_starts_before_ends",
+                "ocl": "Enrollment.allInstances() ->forAll(e|e.ends.oclIsUndefined() or e.ends > e.starts)"
+            },
+            {
+                "label": "inv_Enrollment_starts_after_program_doe",
+                "ocl": "Enrollment.allInstances() ->forAll(e|e.starts > e.program.doe)"
+            },
+            {
+                "label": "inv_Enrollment_same_uni_two_students_unique",
+                "ocl": "Enrollment.allInstances() ->forAll(e1| Enrollment.allInstances() ->forAll(e2| e1 <> e2 implies (e1.program.university = e2.program.university implies (e1.student <> e2.student implies e1.student.code <> e2.student.code))))"
+            },
+            {
+                "label": "inv_Enrollment_no_overlapping",
+                "ocl": "Enrollment.allInstances() ->forAll(e1|Enrollment.allInstances() ->forAll(e2|e1.student = e2.student implies e1.starts > e2.ends or e1.ends < e2.starts))"
+            },
+            {
+                "label": "inv_Exam_starts_earlier_than_ends",
+                "ocl": "Exam.allInstances() ->forAll(e|e.starts < e.ends)"
+            },
+            {
+                "label": "inv_Exam_reg_deadline_2_days_earlier",
+                "ocl": "Exam.allInstances() ->forAll(e|@SQL(TIMESTAMPDIFF(day,e.date,e.deadline)) >= 2)"
+            },
+            {
+                "label": "inv_Exam_no_more_than_2_exams_same_module_period",
+                "ocl": "Exam.allInstances() ->forAll(e1|Exam.allInstances() ->select(e2|e2.module_period = e1.module_period) ->size() <= 2)"
+            },
+            {
+                "label": "inv_Exam_no_overlapping_same_module_period",
+                "ocl": "Exam.allInstances() ->forAll(e1|Exam.allInstances() ->forAll(e2| (e2 = e1) or (e2.module_period <> e1.module_period) or e2.starts > e1.ends or e2.ends < e1.starts))"
+            },
+            {
+                "label": "inv_Exam_no_overlapping_same_module_group",
+                "ocl": "Exam.allInstances() ->forAll(e1|Exam.allInstances() ->forAll(e2| e1 = e2 or e1.module_period.module.module_group = e2.module_period.module.module_group implies e1.starts > e2.ends or e1.ends < e2.starts))"
+            },
+            {
+                "label": "inv_Exam_date_after_final_session",
+                "ocl": "Exam.allInstances() ->forAll(e| Session.allInstances() ->select(s| s.module_period = e.module_period) ->forAll(s| s.date < e.date))"
+            },
+            {
+                "label": "inv_Exam_no_overlapping_for_same_module",
+                "ocl": "Exam.allInstances() ->forAll(e1| Exam.allInstances() ->forAll(e2| e1 <> e2 implies (e1.module_period = e2.module_period implies (e1.date <> e2.date) or (e1.starts > e2.ends or e1.ends < e2.starts))))"
+            },
+            {
+                "label": "inv_Exam_no_2_exams_same_room",
+                "ocl": "Exam.allInstances()->forAll(e1| Exam.allInstances() ->forAll(e2| e1 <> e2 implies e1.rooms -> forAll( r1 | e2.rooms -> forAll( r2 | r1 <> r2 ))))"
+            },
+            {
+                "label": "inv_Module_prerequisite_not_containing_itself",
+                "ocl": "Module.allInstances() ->forAll(m|m.prerequisites ->forAll(p| m <> p))"
+            },
+            {
+                "label": "inv_Program_module_group_name_unique",
+                "ocl": "Program.allInstances()->forAll(p|p.modules->collect(m|m.module_group.group_name)->isUnique())"
+            },
+            {
+                "label": "inv_Program_module_group_code_unique",
+                "ocl": "Program.allInstances()->forAll(p|p.modules->collect(m|m.module_group.code)->isUnique())"
+            },
+            {
+                "label": "inv_Program_module_in_module_group_unique",
+                "ocl": "Program.allInstances()->forAll(p| p.modules->collect(m| m.name)->isUnique())"
+            },
+            {
+                "label": "inv_Program_module_code_in_module_group_unique",
+                "ocl": "Program.allInstances()->forAll(p| p.modules->collect(m| m.code)->isUnique())"
+            },
+            {
+                "label": "inv_Module_Period_same_module_same_period_diff_lecturer",
+                "ocl": "Module_Period.allInstances() ->forAll(mp1|Module_Period.allInstances() ->forAll(mp2| (mp1 = mp2) or ((mp1.module.code = mp2.module.code and mp1.period.starts = mp2.period.starts) implies mp1.lecturer <> mp2.lecturer)))"
+            },
+            {
+                "label": "inv_Module_Period_start_earlier_than_end",
+                "ocl": "Module_Period.allInstances() ->forAll(m|m.starts < m.ends)"
+            },
+            {
+                "label": "inv_Module_Period_start_end_within_period_duration",
+                "ocl": "Module_Period.allInstances() ->forAll(m|m.ends < m.period.ends and m.starts > m.period.starts)"
+            },
+            {
+                "label": "inv_Period_start_earlier_than_end",
+                "ocl": "Period.allInstances() ->forAll(p| p.starts < p.ends)"
+            },
+            {
+                "label": "inv_Program_doe_after_uni_doe",
+                "ocl": "Program.allInstances() ->forAll(p|p.doe > p.university.doe)"
+            },
+            {
+                "label": "inv_Program_doe_before_current_date",
+                "ocl": "Program.allInstances() ->forAll(p|p.doe < @SQL(CURDATE()))"
+            },
+            {
+                "label": "inv_Record_max_3_fails_per_module",
+                "ocl": "Record.allInstances() ->forAll(r1| Record.allInstances() ->collect(r3| r1.student = r3.student and r3.module_period.module = r1.module_period.module and r3.status = 'failed' ) ->size() <=3)"
+            },
+            {
+                "label": "inv_Record_no_record_after_pass",
+                "ocl": "Record.allInstances() ->forAll(r1| Record.allInstances() ->forAll(r2| (r1 = r2) or (r1.student = r2.student and r1.module_period.module = r2.module_period.module and r1.status = 'passed') implies r1.module_period.starts > r2.module_period.ends))"
+            },
+            {
+                "label": "inv_Record_no_overlapping_session_per_student",
+                "ocl": "Record.allInstances() ->forAll(r1| Record.allInstances() ->forAll(r2| (r1 = r2) or (r1.student <> r2.student) or r1.sessions->forAll(s1| r2.sessions-> forAll(s2| s1.starts > s2.ends or s1.ends < s2.starts)) ))"
+            },
+            {
+                "label": "inv_Record_no_record_of_non_attending_module",
+                "ocl": "Record.allInstances() ->forAll(r| r.sessions->forAll(s|s.module_period = r.module_period))"
+            },
+            {
+                "label": "inv_Registration_Exam_no_overlapping_exam",
+                "ocl": "Registration_Exam.allInstances() ->forAll(re1| Registration_Exam.allInstances() ->forAll(re2| re1.record.student = re2.record.student implies (re1 <> re2 implies (re1.exam.starts > re2.exam.ends or re1.exam.ends < re2.exam.starts))))"
+            },
+            {
+                "label": "inv_Registration_Exam_same_module_period_attending",
+                "ocl": "Registration_Exam.allInstances() ->forAll(re| re.record.module_period = re.exam.module_period)"
+            },
+            {
+                "label": "inv_Registration_Exam_only_if_not_passed",
+                "ocl": "Registration_Exam.allInstances() ->forAll(re1| re1.record.status = 'passed' implies Registration_Exam.allInstances() ->forAll(re2|re2 = re1 or re2.exam.module_period.module <> re1.exam.module_period.module or re1.datetime > re2.datetime)) "
+            },
+            {
+                "label": "inv_Registration_Exam_only_if_not_exceed_deadline",
+                "ocl": "Registration_Exam.allInstances() ->forAll(re| re.datetime <= re.exam.deadline)"
+            },
+            {
+                "label": "inv_Registration_Exam_only_enrolled_module",
+                "ocl": "Registration_Exam.allInstances() ->forAll(re| re.record.module_period = re.exam.module_period)"
+            },
+            {
+                "label": "inv_Session_start_within_its_period",
+                "ocl": "Session.allInstances() ->forAll(s| s.date > s.module_period.starts and s.date < s.module_period.ends)"
+            },
+            {
+                "label": "inv_Session_starts_earlier_than_ends",
+                "ocl": "Session.allInstances() ->forAll(s| s.starts < s.ends)"
+            },
+            {
+                "label": "inv_Session_no_overlapping_same_module_period",
+                "ocl": "Session.allInstances() ->forAll(s1| Session.allInstances() ->forAll(s2| (s1 = s2) or (s1.module_period = s2.module_period implies s1.date <> s2.date or s1.starts > s2.ends or s1.ends < s2.starts)))"
+            },
+            {
+                "label": "inv_Session_no_overlapping_same_room",
+                "ocl": "Session.allInstances() ->forAll(s1| Session.allInstances() ->forAll(s2| (s1 = s2) or (s1.room = s2.room implies s1.date <> s2.date or s1.starts > s2.ends or s1.ends < s2.starts)))"
+            },
+            {
+                "label": "inv_Session_no_overlapping_same_lecturer",
+                "ocl": "Session.allInstances() ->forAll(s1| Session.allInstances() ->forAll(s2| (s1 <> s2 implies (s1.module_period.lecturer = s2.module_period.lecturer implies (s1.date = s2.date implies (s1.starts > s2.ends or s1.ends < s2.starts))))))"
+            },
+            {
+                "label": "inv_Student_age_greater_than_or_equal_18",
+                "ocl": "Student.allInstances() ->forAll(s|@SQL(TIMESTAMPDIFF(year,s.dob,@SQL(CURDATE()))) > 17)"
+            },
+            {
+                "label": "inv_University_unique_program_names",
+                "ocl": "University.allInstances() ->forAll(u|u.programs->collect(p|p.name)->isUnique())"
+            },
+            {
+                "label": "inv_University_unique_program_code",
+                "ocl": "University.allInstances() ->forAll(u|u.programs->collect(p|p.code)->isUnique())"
+            },
+            {
+                "label": "inv_University_doe_before_today",
+                "ocl": "University.allInstances() ->forAll(u|u.doe < @SQL(CURDATE()))"
+            }
+        ]
+    }
 ]

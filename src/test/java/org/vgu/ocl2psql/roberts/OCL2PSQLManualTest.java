@@ -89,6 +89,7 @@ public class OCL2PSQLManualTest {
     }
 
     private static String test(Ocl2PsqlSvc o2p, String oclExp) {
+        System.out.println("\n=====\n" + oclExp + "\n=====\n");
         String finalStatementWithDescription = o2p.mapToString(oclExp);
         System.out.println(finalStatementWithDescription);
         return finalStatementWithDescription;
@@ -244,9 +245,58 @@ public class OCL2PSQLManualTest {
 //            "@SQL(TimeStampDiff(year, @SQL(curdate()) , @SQL(curdate()) ))",
 //            "Student.allInstances()->exists(s| @SQL(TIMESTAMPDIFF(year, s.dob, @SQL(CURDATE()))) > 18)",
 //            "Student.allInstances()->forAll(s|s.gender = 'M' implies s.gender = 'M')",
-            "Student.allInstances()->collect(s|s.enrolls->asSet())",
-//            "Student.allInstances()->collect(s|s.gender)->size()"
-//            "Student.allInstances()->collect(s|s.gender)->asSet()"
+//            "Student.allInstances()->collect(s|s.enrolls->asSet())",
+//            "Student.allInstances()->collect(s|s.gender)->size()",
+//            "Student.allInstances()->collect(s|s.gender)->asSet()",
+//            "Module_Period.allInstances() ->forAll(m|m.ends < m.period.ends and m.starts > m.period.starts)",
+            
+            
+//            Test the invariants
+
+                "Account.allInstances()->forAll(a| not a.student.oclIsUndefined() implies a.lecturer.oclIsUndefined() and a.assistant.oclIsUndefined())",
+                "Account.allInstances()->forAll(a| not a.lecturer.oclIsUndefined() implies a.student.oclIsUndefined() and a.assistant.oclIsUndefined())",
+                "Account.allInstances()->forAll(a| not a.assistant.oclIsUndefined() implies a.lecturer.oclIsUndefined() and a.student.oclIsUndefined())",
+                "Enrollment.allInstances() ->forAll(e|e.ends.oclIsUndefined() or e.ends > e.starts)",
+                "Enrollment.allInstances() ->forAll(e|e.starts > e.program.doe)",
+                "Enrollment.allInstances() ->forAll(e1| Enrollment.allInstances() ->forAll(e2| e1 <> e2 implies (e1.program.university = e2.program.university implies (e1.student <> e2.student implies e1.student.code <> e2.student.code))))",
+                "Enrollment.allInstances() ->forAll(e1|Enrollment.allInstances() ->forAll(e2|e1.student = e2.student implies e1.starts > e2.ends or e1.ends < e2.starts))",
+                "Exam.allInstances() ->forAll(e|e.starts < e.ends)",
+                "Exam.allInstances() ->forAll(e|@SQL(TIMESTAMPDIFF(day,e.date,e.deadline)) >= 2)",
+                "Exam.allInstances() ->forAll(e1|Exam.allInstances() ->select(e2|e2.module_period = e1.module_period) ->size() <= 2)",
+                "Exam.allInstances() ->forAll(e1|Exam.allInstances() ->forAll(e2| (e2 = e1) or (e2.module_period <> e1.module_period) or e2.starts > e1.ends or e2.ends < e1.starts))",
+                "Exam.allInstances() ->forAll(e1|Exam.allInstances() ->forAll(e2| e1 = e2 or e1.module_period.module.module_group = e2.module_period.module.module_group implies e1.starts > e2.ends or e1.ends < e2.starts))",
+                "Exam.allInstances() ->forAll(e| Session.allInstances() ->select(s| s.module_period = e.module_period) ->forAll(s| s.date < e.date))",
+                "Exam.allInstances() ->forAll(e1| Exam.allInstances() ->forAll(e2| e1 <> e2 implies (e1.module_period = e2.module_period implies (e1.date <> e2.date) or (e1.starts > e2.ends or e1.ends < e2.starts))))",
+                "Exam.allInstances()->forAll(e1| Exam.allInstances() ->forAll(e2| e1 <> e2 implies e1.rooms -> forAll( r1 | e2.rooms -> forAll( r2 | r1 <> r2 ))))",
+                "Module.allInstances() ->forAll(m|m.prerequisites ->forAll(p| m <> p))",
+                "Program.allInstances()->forAll(p|p.modules->collect(m|m.module_group.group_name)->isUnique())",
+                "Program.allInstances()->forAll(p|p.modules->collect(m|m.module_group.code)->isUnique())",
+                "Program.allInstances()->forAll(p| p.modules->collect(m| m.name)->isUnique())",
+                "Program.allInstances()->forAll(p| p.modules->collect(m| m.code)->isUnique())",
+                "Module_Period.allInstances() ->forAll(mp1|Module_Period.allInstances() ->forAll(mp2| (mp1 = mp2) or ((mp1.module.code = mp2.module.code and mp1.period.starts = mp2.period.starts) implies mp1.lecturer <> mp2.lecturer)))",
+                "Module_Period.allInstances() ->forAll(m|m.starts < m.ends)",
+                "Module_Period.allInstances() ->forAll(m|m.ends < m.period.ends and m.starts > m.period.starts)",
+                "Period.allInstances() ->forAll(p| p.starts < p.ends)",
+                "Program.allInstances() ->forAll(p|p.doe > p.university.doe)",
+                "Program.allInstances() ->forAll(p|p.doe < @SQL(CURDATE()))",
+                "Record.allInstances() ->forAll(r1| Record.allInstances() ->collect(r3| r1.student = r3.student and r3.module_period.module = r1.module_period.module and r3.status = 'failed' ) ->size() <=3)",
+                "Record.allInstances() ->forAll(r1| Record.allInstances() ->forAll(r2| (r1 = r2) or (r1.student = r2.student and r1.module_period.module = r2.module_period.module and r1.status = 'passed') implies r1.module_period.starts > r2.module_period.ends))",
+                "Record.allInstances() ->forAll(r1| Record.allInstances() ->forAll(r2| (r1 = r2) or (r1.student <> r2.student) or r1.sessions->forAll(s1| r2.sessions-> forAll(s2| s1.starts > s2.ends or s1.ends < s2.starts)) ))",
+                "Record.allInstances() ->forAll(r| r.sessions->forAll(s|s.module_period = r.module_period))",
+                "Registration_Exam.allInstances() ->forAll(re1| Registration_Exam.allInstances() ->forAll(re2| re1.record.student = re2.record.student implies (re1 <> re2 implies (re1.exam.starts > re2.exam.ends or re1.exam.ends < re2.exam.starts))))",
+                "Registration_Exam.allInstances() ->forAll(re| re.record.module_period = re.exam.module_period)",
+                "Registration_Exam.allInstances() ->forAll(re1| re1.record.status = 'passed' implies Registration_Exam.allInstances() ->forAll(re2|re2 = re1 or re2.exam.module_period.module <> re1.exam.module_period.module or re1.datetime > re2.datetime)) ",
+                "Registration_Exam.allInstances() ->forAll(re| re.datetime <= re.exam.deadline)",
+                "Registration_Exam.allInstances() ->forAll(re| re.record.module_period = re.exam.module_period)",
+                "Session.allInstances() ->forAll(s| s.date > s.module_period.starts and s.date < s.module_period.ends)",
+                "Session.allInstances() ->forAll(s| s.starts < s.ends)",
+                "Session.allInstances() ->forAll(s1| Session.allInstances() ->forAll(s2| (s1 = s2) or (s1.module_period = s2.module_period implies s1.date <> s2.date or s1.starts > s2.ends or s1.ends < s2.starts)))",
+                "Session.allInstances() ->forAll(s1| Session.allInstances() ->forAll(s2| (s1 = s2) or (s1.room = s2.room implies s1.date <> s2.date or s1.starts > s2.ends or s1.ends < s2.starts)))",
+                "Session.allInstances() ->forAll(s1| Session.allInstances() ->forAll(s2| (s1 <> s2 implies (s1.module_period.lecturer = s2.module_period.lecturer implies (s1.date = s2.date implies (s1.starts > s2.ends or s1.ends < s2.starts))))))",
+                "Student.allInstances() ->forAll(s|@SQL(TIMESTAMPDIFF(year,s.dob,@SQL(CURDATE()))) > 17)",
+                "University.allInstances() ->forAll(u|u.programs->collect(p|p.name)->isUnique())",
+                "University.allInstances() ->forAll(u|u.programs->collect(p|p.code)->isUnique())",
+                "University.allInstances() ->forAll(u|u.doe < @SQL(CURDATE()))",
     };
 
 }

@@ -91,8 +91,8 @@ public class DM2Schema {
         schema.addAll(associationStatements.stream().map(Statement::toString)
             .collect(Collectors.toList()));
 
-        List<String> invariantFunctions = generateInvariantFunctions(dataModel);
-        schema.addAll(invariantFunctions);
+//        List<String> invariantFunctions = generateInvariantFunctions(dataModel);
+//        schema.addAll(invariantFunctions);
         
 //        List<String> invariantTriggers = generateInvariantTriggers(dataModel);
 //        schema.addAll(invariantTriggers);
