@@ -707,34 +707,6 @@
     {
         "invariants": [
             {
-                "label": "valid_student_age_at_least_18",
-                "ocl": "Student.allInstances()->forAll(s|@SQL(TIMESTAMPDIFF(year, s.dob, @SQL(CURDATE()))) > 17)"
-            },
-            {
-                "label": "valid_program_doe_before_today",
-                "ocl": "Program.allInstances()->forAll(p|p.doe < @SQL(CURDATE()))"
-            },
-            {
-                "label": "valid_enrollment_starts_before_ends",
-                "ocl": "Enrollment.allInstances()->forAll(e|e.ends.oclIsUndefined() or e.ends > e.starts)"
-            },
-            {
-                "label": "valid_enrollment_starts_after_program_doe",
-                "ocl": "Enrollment.allInstances()->forAll(e|e.starts < e.program.doe)"
-            },
-            {
-                "label": "valid_module_name_unique_by_program",
-                "ocl": "Program.allInstances()->forAll(p|p.modules->collect(m|m.name)->isUnique())"
-            },
-            {
-                "label": "valid_record_no_duplicate_student_moduleperiod",
-                "ocl": "Record.allInstances()->forAll(r1|Record.allInstances()->forAll(r2|r2 = r1 or r2.module_period <> r1.module_period))"
-            },
-            
-            
-            
-            
-            {
                 "label": "inv_Account_student_only",
                 "ocl": "Account.allInstances()->forAll(a| not a.student.oclIsUndefined() implies a.lecturer.oclIsUndefined() and a.assistant.oclIsUndefined())"
             },
@@ -768,7 +740,7 @@
             },
             {
                 "label": "inv_Exam_reg_deadline_2_days_earlier",
-                "ocl": "Exam.allInstances() ->forAll(e|@SQL(TIMESTAMPDIFF(day,e.date,e.deadline)) >= 2)"
+                "ocl": "Exam.allInstances() ->forAll(e|@SQL(TIMESTAMPDIFF(day,e.deadline,e.date)) >= 2)"
             },
             {
                 "label": "inv_Exam_no_more_than_2_exams_same_module_period",
