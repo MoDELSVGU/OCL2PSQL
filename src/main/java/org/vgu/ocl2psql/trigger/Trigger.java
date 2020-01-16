@@ -52,7 +52,7 @@ public class Trigger {
                 .parse(new FileReader(model.getAbsolutePath())));
         
         String SQL_STATEMENT = "INSERT INTO Exam (module_period, date, starts, ends, deadline) " + 
-                "VALUES  (1, \"20191227\", \"10:00:00\", \"11:30:00\", \"20191224\");";
+                "VALUES  (1, \"20191227\", \"15:00:00\", \"16:30:00\", \"20191224\");";
         
         runTriggers(SQL_STATEMENT, dm, propertiesFile);
         
@@ -67,12 +67,14 @@ public class Trigger {
             conn.setAutoCommit(false);
             ps.execute();
             
-            System.out.println(ps.toString());
 
             boolean isDbAllRight = validateInvariants(conn, dm);
             
+//            conn.commit();
+            
             if (isDbAllRight) {
                 conn.commit();
+                System.out.println("OK: " + isDbAllRight);
             } else {
                 conn.rollback();
             }
@@ -93,7 +95,7 @@ public class Trigger {
                 prop.getProperty("db.host") + "/" + 
                 prop.getProperty("db.name");
         
-        System.out.println(dbUrl);
+//        System.out.println(dbUrl);
 
         String dbUser = prop.getProperty("db.user");
         String dbPassword = prop.getProperty("db.password");
@@ -115,7 +117,7 @@ public class Trigger {
         try(InputStream input = new FileInputStream(propertiesFile)){
             prop.load(input);
             
-            System.out.println(prop);
+//            System.out.println(prop);
             
             return prop;
         } catch (IOException e) {
@@ -135,6 +137,7 @@ public class Trigger {
 
         OCL2PSQL_2 ocl2psql = new OCL2PSQL_2();
         ocl2psql.setDataModel(dm);
+        ocl2psql.setDescriptionMode(true);
 
         for (Invariants invs : invSet) {
             for (Invariant inv : invs) {
@@ -144,15 +147,19 @@ public class Trigger {
                     ResultSet rs = st.executeQuery(sqlInv);
                     
                     while (rs.next()) {
+//                        System.out.println("\n=======\n" + 
+//                                inv.getLabel() + "\n" 
+//                                + inv.getOcl() + "\n\n" + sqlInv + "\n\n" + 
+//                                "---> result:" + rs.getInt("res") + "\n=======\n");
                         if (rs.getInt("res") == 0) {
-                            System.out.println("\n======\n" + 
-                                    inv.getOcl() + "\n======\n");
-
                             return false;
                         }
                     }
 
                 } catch (IOException|ParseException|OclParseException|SQLException e) {
+//                    System.out.println("\n=======\n" + 
+//                            inv.getLabel() + "\n" 
+//                            + inv.getOcl() + "\n\n" );
                     e.printStackTrace();
                     return false;
                 } catch (Exception e) {

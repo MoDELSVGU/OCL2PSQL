@@ -301,9 +301,7 @@ public class SimpleOclParser implements ParserVisitor {
                     return plainSelect;
                 }
             }
-        } else if (exp.getNavigationSource() instanceof AssociationClassCallExp) {
-            return mapShortcut((AssociationClassCallExp) exp.getNavigationSource());
-        }
+        } 
         
         
         return map(exp);
@@ -346,9 +344,8 @@ public class SimpleOclParser implements ParserVisitor {
 
                 }
             }
-        } else if (exp.getNavigationSource() instanceof AssociationClassCallExp) {
-            return mapShortcut((AssociationClassCallExp) exp.getNavigationSource());
-        }
+        } 
+
         return map(exp);
 
     }
@@ -864,11 +861,14 @@ public class SimpleOclParser implements ParserVisitor {
     }
 
     private PlainSelect map(PropertyCallExp exp) {
+        boolean isSourceVarExp = exp
+                .getNavigationSource() instanceof VariableExp;
+        boolean isSourceAssociationExp = exp
+                .getNavigationSource() instanceof AssociationClassCallExp;
 
-//        if (!(exp.getNavigationSource() instanceof VariableExp)) {
-//            throw new OclException(
-//                    "Cannot parse non Variable expression");
-//        }
+        if (!(isSourceVarExp|| isSourceAssociationExp)) {
+            throw new OclException( "Cannot parse expression");
+        }
 
         PlainSelect plainSelect = new PlainSelect();
 
@@ -911,9 +911,15 @@ public class SimpleOclParser implements ParserVisitor {
         plainSelect.setJoins(Arrays.asList(leftJ));
 
         String varName = VariableUtils.FVars(srcExp).get(0).getName();
+        
+        Expression onExpRefCol = null;
+        if (isSourceVarExp) {
+            onExpRefCol = new Column(Arrays.asList(tmpObjAlias, "ref_".concat(varName)));
+        } else if (isSourceAssociationExp) {
+            onExpRefCol = new Column(Arrays.asList(tmpObjAlias, "res"));
+        }
 
-        BinaryExpression refVEqId = buildBinExp("=",
-            new Column(Arrays.asList(tmpObjAlias, "ref_".concat(varName))),
+        BinaryExpression refVEqId = buildBinExp("=", onExpRefCol,
             new Column(Arrays.asList(srcType, srcType.concat("_id"))));
 
         BinaryExpression valEq1 = buildBinExp("=",
@@ -927,9 +933,11 @@ public class SimpleOclParser implements ParserVisitor {
 
     private PlainSelect map(AssociationClassCallExp exp) {
 
-        if (!(exp.getNavigationSource() instanceof VariableExp)) {
-            throw new OclException("Cannot parse non Variable expression");
-        }
+//        if (!(exp.getNavigationSource() instanceof VariableExp)) {
+//            throw new OclException("Cannot parse non Variable expression");
+//        } else if (exp.getNavigationSource() instanceof AssociationClassCallExp) {
+//            return mapShortcut((AssociationClassCallExp) exp.getNavigationSource());
+//        }
 
         PlainSelect plainSelect;
 
@@ -1045,8 +1053,11 @@ public class SimpleOclParser implements ParserVisitor {
             ValSelectExpression val = new ValSelectExpression(caseVal);
             plainSelect.setVal(val);
 
+//            ResSelectExpression res = new ResSelectExpression(
+//                new Column(Arrays.asList(referredEndType, referredEndName)));
+            // JP's testing
             ResSelectExpression res = new ResSelectExpression(
-                new Column(Arrays.asList(referredEndType, referredEndName)));
+                new Column(Arrays.asList(referredEndType, referredEndIdColumn)));
             plainSelect.setRes(res);
 
             CaseExpression caseType = new CaseExpression();
@@ -1076,10 +1087,18 @@ public class SimpleOclParser implements ParserVisitor {
             leftJ.setLeft(true);
             leftJ.setRightItem(new Table(referredEndType));
 
-            VariableExp varExp = (VariableExp) exp.getNavigationSource();
-            BinaryExpression refVEqOppos = buildBinExp("=",
-                new Column(Arrays.asList(tmpObjAlias,
-                    "ref_".concat(varExp.getVariable().getName()))),
+            boolean isVarExpSrc = exp.getNavigationSource() instanceof VariableExp;
+            boolean isAssociationExpSrc = exp.getNavigationSource() instanceof AssociationClassCallExp;
+            
+            Expression refCol = null;
+            if (isVarExpSrc) {
+                refCol = new Column(Arrays.asList(tmpObjAlias,
+                    "ref_".concat(((VariableExp) exp.getNavigationSource()).getVariable().getName())));
+            } else if (isAssociationExpSrc) {
+                refCol = new Column(Arrays.asList(tmpObjAlias, "res"));
+            }
+
+            BinaryExpression refVEqOppos = buildBinExp("=", refCol,
                 new Column(
                     Arrays.asList(referredEndType, referredEndIdColumn)));
 
@@ -1599,16 +1618,24 @@ public class SimpleOclParser implements ParserVisitor {
         if (!isEmptySvIntxn) {
             join.setLeft(true);
 
+            BinaryExpression onExp = null;
+
             for (Variable v : sVarsIntxn) {
                 VarSelectExpression var = new VarSelectExpression(v.getName());
                 String refName = var.getRef().getAlias().getName();
 
-                BinaryExpression onExp = buildBinExp("=",
+                BinaryExpression onExp_1 = buildBinExp("=",
                     new Column(Arrays.asList(tmpLeftAlias, refName)),
                     new Column(Arrays.asList(tmpRightAlias, refName)));
-
-                join.setOnExpression(onExp);
+                
+                if (onExp == null) {
+                    onExp = onExp_1;
+                } else {
+                    onExp = buildBinExp("and", onExp, onExp_1);
+                }
             }
+
+            join.setOnExpression(onExp);
         }
 
         // Case 2
@@ -2654,7 +2681,7 @@ public class SimpleOclParser implements ParserVisitor {
 
             IsNullExpression isNullSrcRef = new IsNullExpression();
             isNullSrcRef.setLeftExpression(new Column(Arrays
-                .asList(tmpBodyAlias, "ref_".concat(outerVar.getName()))));
+                .asList(tmpSourceAlias, "ref_".concat(outerVar.getName()))));
 
             resCase.setSwitchExpression(isNullSrcRef);
 
@@ -2697,6 +2724,8 @@ public class SimpleOclParser implements ParserVisitor {
 
             List<Variable> sVarsBodyLessV = new ArrayList<Variable>(sVarsBody);
             sVarsBodyLessV.remove(v);
+            
+//            System.out.println("Exp:" + exp.getOclStr() + "\nBody Exp:" + bodyExp.getOclStr() + "\n" + sVarsBody);
 
             VariableUtils.addVar(sVarsBodyLessV, plainSelectInJoin,
                 tmpBodyAlias);
@@ -2720,7 +2749,7 @@ public class SimpleOclParser implements ParserVisitor {
 
             BinaryExpression whereCond = buildBinExp("and", ifNullEq0,
                 tmpBodyValEq1);
-            plainSelect.setWhere(whereCond);
+            plainSelectInJoin.setWhere(whereCond);
 
             List<Expression> groupByExps = new ArrayList<Expression>();
             VariableUtils.addVarToList(sVarsBodyLessV, groupByExps,
@@ -2741,6 +2770,7 @@ public class SimpleOclParser implements ParserVisitor {
             BinaryExpression onExp = null;
 
             for (Variable refSrc : sVarsSrc) {
+
                 BinaryExpression refSrcEqRefBody = buildBinExp("=",
                     new Column(Arrays.asList(tmpSourceAlias,
                         "ref_".concat(refSrc.getName()))),

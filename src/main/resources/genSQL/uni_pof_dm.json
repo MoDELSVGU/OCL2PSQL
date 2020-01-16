@@ -743,28 +743,8 @@
                 "ocl": "Exam.allInstances() ->forAll(e|@SQL(TIMESTAMPDIFF(day,e.deadline,e.date)) >= 2)"
             },
             {
-                "label": "inv_Exam_no_more_than_2_exams_same_module_period",
-                "ocl": "Exam.allInstances() ->forAll(e1|Exam.allInstances() ->select(e2|e2.module_period = e1.module_period) ->size() <= 2)"
-            },
-            {
-                "label": "inv_Exam_no_overlapping_same_module_period",
-                "ocl": "Exam.allInstances() ->forAll(e1|Exam.allInstances() ->forAll(e2| (e2 = e1) or (e2.module_period <> e1.module_period) or e2.starts > e1.ends or e2.ends < e1.starts))"
-            },
-            {
-                "label": "inv_Exam_no_overlapping_same_module_group",
-                "ocl": "Exam.allInstances() ->forAll(e1|Exam.allInstances() ->forAll(e2| e1 = e2 or e1.module_period.module.module_group = e2.module_period.module.module_group implies e1.starts > e2.ends or e1.ends < e2.starts))"
-            },
-            {
                 "label": "inv_Exam_date_after_final_session",
                 "ocl": "Exam.allInstances() ->forAll(e| Session.allInstances() ->select(s| s.module_period = e.module_period) ->forAll(s| s.date < e.date))"
-            },
-            {
-                "label": "inv_Exam_no_overlapping_for_same_module",
-                "ocl": "Exam.allInstances() ->forAll(e1| Exam.allInstances() ->forAll(e2| e1 <> e2 implies (e1.module_period = e2.module_period implies (e1.date <> e2.date) or (e1.starts > e2.ends or e1.ends < e2.starts))))"
-            },
-            {
-                "label": "inv_Exam_no_2_exams_same_room",
-                "ocl": "Exam.allInstances()->forAll(e1| Exam.allInstances() ->forAll(e2| e1 <> e2 implies e1.rooms -> forAll( r1 | e2.rooms -> forAll( r2 | r1 <> r2 ))))"
             },
             {
                 "label": "inv_Module_prerequisite_not_containing_itself",
@@ -785,10 +765,6 @@
             {
                 "label": "inv_Program_module_code_in_module_group_unique",
                 "ocl": "Program.allInstances()->forAll(p| p.modules->collect(m| m.code)->isUnique())"
-            },
-            {
-                "label": "inv_Module_Period_same_module_same_period_diff_lecturer",
-                "ocl": "Module_Period.allInstances() ->forAll(mp1|Module_Period.allInstances() ->forAll(mp2| (mp1 = mp2) or ((mp1.module.code = mp2.module.code and mp1.period.starts = mp2.period.starts) implies mp1.lecturer <> mp2.lecturer)))"
             },
             {
                 "label": "inv_Module_Period_start_earlier_than_end",
@@ -813,18 +789,6 @@
             {
                 "label": "inv_Record_max_3_fails_per_module",
                 "ocl": "Record.allInstances() ->forAll(r1| Record.allInstances() ->collect(r3| r1.student = r3.student and r3.module_period.module = r1.module_period.module and r3.status = 'failed' ) ->size() <=3)"
-            },
-            {
-                "label": "inv_Record_no_record_after_pass",
-                "ocl": "Record.allInstances() ->forAll(r1| Record.allInstances() ->forAll(r2| (r1 = r2) or (r1.student = r2.student and r1.module_period.module = r2.module_period.module and r1.status = 'passed') implies r1.module_period.starts > r2.module_period.ends))"
-            },
-            {
-                "label": "inv_Record_no_overlapping_session_per_student",
-                "ocl": "Record.allInstances() ->forAll(r1| Record.allInstances() ->forAll(r2| (r1 = r2) or (r1.student <> r2.student) or r1.sessions->forAll(s1| r2.sessions-> forAll(s2| s1.starts > s2.ends or s1.ends < s2.starts)) ))"
-            },
-            {
-                "label": "inv_Record_no_record_of_non_attending_module",
-                "ocl": "Record.allInstances() ->forAll(r| r.sessions->forAll(s|s.module_period = r.module_period))"
             },
             {
                 "label": "inv_Registration_Exam_no_overlapping_exam",
@@ -853,18 +817,6 @@
             {
                 "label": "inv_Session_starts_earlier_than_ends",
                 "ocl": "Session.allInstances() ->forAll(s| s.starts < s.ends)"
-            },
-            {
-                "label": "inv_Session_no_overlapping_same_module_period",
-                "ocl": "Session.allInstances() ->forAll(s1| Session.allInstances() ->forAll(s2| (s1 = s2) or (s1.module_period = s2.module_period implies s1.date <> s2.date or s1.starts > s2.ends or s1.ends < s2.starts)))"
-            },
-            {
-                "label": "inv_Session_no_overlapping_same_room",
-                "ocl": "Session.allInstances() ->forAll(s1| Session.allInstances() ->forAll(s2| (s1 = s2) or (s1.room = s2.room implies s1.date <> s2.date or s1.starts > s2.ends or s1.ends < s2.starts)))"
-            },
-            {
-                "label": "inv_Session_no_overlapping_same_lecturer",
-                "ocl": "Session.allInstances() ->forAll(s1| Session.allInstances() ->forAll(s2| (s1 <> s2 implies (s1.module_period.lecturer = s2.module_period.lecturer implies (s1.date = s2.date implies (s1.starts > s2.ends or s1.ends < s2.starts))))))"
             },
             {
                 "label": "inv_Student_age_greater_than_or_equal_18",
