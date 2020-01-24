@@ -1043,7 +1043,7 @@ public class SimpleOclParser implements ParserVisitor {
             CaseExpression caseVal = new CaseExpression();
             IsNullExpression isOpposNull = new IsNullExpression();
             isOpposNull.setLeftExpression(new Column(
-                Arrays.asList(referredEndType, referredEndIdColumn)));
+                Arrays.asList(oppositeEndType, oppositeEndIdColumn)));
             caseVal.setSwitchExpression(isOpposNull);
             WhenClause whenClause = new WhenClause();
             whenClause.setWhenExpression(new LongValue(1L));
@@ -1057,7 +1057,7 @@ public class SimpleOclParser implements ParserVisitor {
 //                new Column(Arrays.asList(referredEndType, referredEndName)));
             // JP's testing
             ResSelectExpression res = new ResSelectExpression(
-                new Column(Arrays.asList(referredEndType, referredEndIdColumn)));
+                new Column(Arrays.asList(oppositeEndType, referredEndName)));
             plainSelect.setRes(res);
 
             CaseExpression caseType = new CaseExpression();
@@ -1085,7 +1085,7 @@ public class SimpleOclParser implements ParserVisitor {
 
             Join leftJ = new Join();
             leftJ.setLeft(true);
-            leftJ.setRightItem(new Table(referredEndType));
+            leftJ.setRightItem(new Table(oppositeEndType));
 
             boolean isVarExpSrc = exp.getNavigationSource() instanceof VariableExp;
             boolean isAssociationExpSrc = exp.getNavigationSource() instanceof AssociationClassCallExp;
@@ -1100,7 +1100,7 @@ public class SimpleOclParser implements ParserVisitor {
 
             BinaryExpression refVEqOppos = buildBinExp("=", refCol,
                 new Column(
-                    Arrays.asList(referredEndType, referredEndIdColumn)));
+                    Arrays.asList(oppositeEndType, oppositeEndIdColumn)));
 
             BinaryExpression valEq1 = buildBinExp("=",
                 new Column(Arrays.asList(tmpObjAlias, "val")),
