@@ -80,6 +80,10 @@ public class VariableUtils {
             case "oclIsTypeOf":
             case "oclIsKindOf":
             case "oclAsType":
+            case "size":
+            case "isEmpty":
+            case "notEmpty":
+            case "flatten":
                 return FVarsAux(opCallExpSrc.getSource(), fVars);
             case "=":
             case "<>":

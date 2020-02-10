@@ -122,4 +122,27 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
         this.setDataModel(dataModel);
     }
 
+    @Override
+    public String mapToString(Expression oclExp) {
+        Select finalStatement = this.mapToSQL(oclExp);
+
+        if (descriptionMode == true) {
+            String finalStatementString = finalStatement
+                    .toStringWithDescription();
+
+            return SQLAsStringUtils.applyIndent(finalStatementString);
+
+        } else {
+            return finalStatement.toString();
+        }
+    }
+
+    @Override
+    public Select mapToSQL(Expression oclExp) {
+        o2pParser.setDataModel(dm);
+        oclExp.accept(o2pParser);
+
+        return cookFinalStatement(o2pParser.getSelect());
+    }
+
 }
