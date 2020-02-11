@@ -18,7 +18,10 @@ limitations under the License.
 
 package org.vgu.ocl2psql.main;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import org.json.simple.JSONArray;
@@ -28,6 +31,9 @@ import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
 import org.vgu.ocl2psql.ocl.parser.simple.SimpleO2PApi;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
 import org.vgu.ocl2psql.sql.statement.select.Select;
+import org.vgu.se.ocl.parser.OCLParser;
+
+import com.vgu.se.jocl.expressions.OclExp;
 
 public class OCL2PSQL_2 {
 
@@ -38,15 +44,49 @@ public class OCL2PSQL_2 {
         ocl2PsqlSvc.setDescriptionMode(false);
     }
 
-    public String mapToString(String oclExpression)
+    public String mapOCLStringToSQLString(String oclExpression)
             throws OclParseException, ParseException, IOException {
         return ocl2PsqlSvc.mapToString(oclExpression);
     }
 
-    public Select mapToSQL(String oclExpression)
+    public Select mapOCLStringToSQLModel(String oclExpression)
             throws OclParseException, ParseException, IOException {
-
         return ocl2PsqlSvc.mapToSQL(oclExpression);
+    }
+    
+    public String mapOCLXMIToSQLString(String dataModelName, String dataModel, String oclXMIExpression) throws IOException {
+        BufferedWriter output = null;
+        File dataModelFile = null;
+        try {
+            dataModelFile = new File(dataModelName.concat(".xmi"));
+            output = new BufferedWriter(new FileWriter(dataModelFile));
+            output.write(dataModel);
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        } finally {
+          if ( output != null ) {
+            output.close();
+          }
+        }
+        File file = null;
+        try {
+            file = new File("input.xmi");
+            output = new BufferedWriter(new FileWriter(file));
+            output.write(oclXMIExpression);
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        } finally {
+          if ( output != null ) {
+            output.close();
+          }
+        }
+        String filePath = file.getAbsolutePath();
+        DataModel dm = OCLParser.extractDataModel(filePath);
+        OclExp ocl = (OclExp) OCLParser.convertToExp(filePath);
+        Ocl2PsqlSvc simpleO2P = new SimpleO2PApi();
+        simpleO2P.setDataModel(dm);
+        String finalSQLString = simpleO2P.mapToString(ocl);
+        return finalSQLString;
     }
 
     public Boolean getDescriptionMode() {
@@ -61,8 +101,8 @@ public class OCL2PSQL_2 {
         ocl2PsqlSvc.setContextualType(varName, varType);
     }
     
-    public void setDataModelFromFile(String filePath) throws FileNotFoundException, IOException, ParseException, Exception {
-        ocl2PsqlSvc.setDataModelFromFile(filePath);
+    public void setDataModelFromFilePath(String filePath) throws FileNotFoundException, IOException, ParseException, Exception {
+        ocl2PsqlSvc.setDataModelFromFilePath(filePath);
     }
     
     public void setDataModelFromFile(JSONArray filePath) throws FileNotFoundException, IOException, ParseException, Exception {

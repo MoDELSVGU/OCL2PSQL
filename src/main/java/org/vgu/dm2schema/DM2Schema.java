@@ -157,7 +157,7 @@ public class DM2Schema {
         OCL2PSQL_2 ocl2sql = new OCL2PSQL_2();
         ocl2sql.setDescriptionMode(false);
         ocl2sql.setDataModel(dataModel);
-        return ocl2sql.mapToString(ocl);
+        return ocl2sql.mapOCLStringToSQLString(ocl);
     }
 
     private static List<Statement> generateAssociationStatements(

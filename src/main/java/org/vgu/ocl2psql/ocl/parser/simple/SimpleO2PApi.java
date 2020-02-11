@@ -103,7 +103,7 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
     }
 
     @Override
-    public void setDataModelFromFile(String filePath)
+    public void setDataModelFromFilePath(String filePath)
         throws FileNotFoundException, IOException, ParseException, Exception {
         File dataModelFile = new File(filePath);
         DataModel dataModel = new DataModel(new JSONParser().parse(

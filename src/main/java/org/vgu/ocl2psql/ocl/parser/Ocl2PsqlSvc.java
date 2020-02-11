@@ -31,7 +31,7 @@ public abstract class Ocl2PsqlSvc {
 
     protected Boolean descriptionMode = false;
 
-    public abstract void setDataModelFromFile(String filePath)
+    public abstract void setDataModelFromFilePath(String filePath)
         throws FileNotFoundException, IOException, ParseException, Exception;
 
     public boolean getDescriptionMode() {

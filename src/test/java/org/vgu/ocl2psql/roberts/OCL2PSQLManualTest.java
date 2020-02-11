@@ -48,7 +48,7 @@ public class OCL2PSQLManualTest {
 //        robertO2P.setContextualType("Car");
 
         Ocl2PsqlSvc simpleO2P = new SimpleO2PApi();
-        simpleO2P.setDataModelFromFile(contextModel.getAbsolutePath());
+        simpleO2P.setDataModelFromFilePath(contextModel.getAbsolutePath());
 //        simpleO2P.setDescriptionMode(true);
 //        simpleO2P.setContextualType("self", "Person");
 //        simpleO2P.setContextualType("caller", "Person");
