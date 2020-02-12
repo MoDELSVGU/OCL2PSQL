@@ -55,10 +55,11 @@ public class OCL2PSQL_2 {
     }
     
     public String mapOCLXMIToSQLString(String dataModelName, String dataModel, String oclXMIExpression) throws IOException {
+        final String dirPath = System.getProperty("java.io.tmpdir");
         BufferedWriter output = null;
         File dataModelFile = null;
         try {
-            dataModelFile = new File(dataModelName.concat(".xmi"));
+            dataModelFile = new File(dirPath.concat("//").concat(dataModelName).concat(".xmi"));
             output = new BufferedWriter(new FileWriter(dataModelFile));
             output.write(dataModel);
         } catch ( IOException e ) {
@@ -70,7 +71,7 @@ public class OCL2PSQL_2 {
         }
         File file = null;
         try {
-            file = new File("input.xmi");
+            file = new File(dirPath.concat("//").concat("input.xmi"));
             output = new BufferedWriter(new FileWriter(file));
             output.write(oclXMIExpression);
         } catch ( IOException e ) {
