@@ -30,10 +30,13 @@ import org.vgu.dm2schema.dm.DataModel;
 import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
 import org.vgu.ocl2psql.ocl.parser.simple.SimpleO2PApi;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
-import org.vgu.ocl2psql.sql.statement.select.Select;
 import org.vgu.se.ocl.parser.OCLParser;
+import org.vgu.se.sql.EStatement;
+import org.vgu.se.sql.parser.SQLParser;
 
 import com.vgu.se.jocl.expressions.OclExp;
+
+import net.sf.jsqlparser.statement.Statement;
 
 public class OCL2PSQL_2 {
 
@@ -43,13 +46,53 @@ public class OCL2PSQL_2 {
         ocl2PsqlSvc = new SimpleO2PApi();
         ocl2PsqlSvc.setDescriptionMode(false);
     }
+    
+    public EStatement mapOCLStringToSQLXMI(String oclExpression) {
+        Statement statement = ocl2PsqlSvc.mapToSQL(oclExpression);
+        return SQLParser.transform(statement);
+    }
+    
+    public EStatement mapOCLXMIToSQLXMI(String dataModelName, String dataModel, String oclXMIExpression) throws IOException {
+        final String dirPath = System.getProperty("java.io.tmpdir");
+        BufferedWriter output = null;
+        File dataModelFile = null;
+        try {
+            dataModelFile = new File(dirPath.concat("//").concat(dataModelName).concat(".xmi"));
+            output = new BufferedWriter(new FileWriter(dataModelFile));
+            output.write(dataModel);
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        } finally {
+          if ( output != null ) {
+            output.close();
+          }
+        }
+        File file = null;
+        try {
+            file = new File(dirPath.concat("//").concat("input.xmi"));
+            output = new BufferedWriter(new FileWriter(file));
+            output.write(oclXMIExpression);
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        } finally {
+          if ( output != null ) {
+            output.close();
+          }
+        }
+        String filePath = file.getAbsolutePath();
+        DataModel dm = OCLParser.extractDataModel(filePath);
+        OclExp ocl = (OclExp) OCLParser.convertToExp(filePath);
+        ocl2PsqlSvc.setDataModel(dm);
+        Statement statement = ocl2PsqlSvc.mapToSQL(ocl);
+        return SQLParser.transform(statement);
+    }
 
     public String mapOCLStringToSQLString(String oclExpression)
             throws OclParseException, ParseException, IOException {
         return ocl2PsqlSvc.mapToString(oclExpression);
     }
 
-    public Select mapOCLStringToSQLModel(String oclExpression)
+    public Statement mapOCLStringToSQLModel(String oclExpression)
             throws OclParseException, ParseException, IOException {
         return ocl2PsqlSvc.mapToSQL(oclExpression);
     }
@@ -84,9 +127,8 @@ public class OCL2PSQL_2 {
         String filePath = file.getAbsolutePath();
         DataModel dm = OCLParser.extractDataModel(filePath);
         OclExp ocl = (OclExp) OCLParser.convertToExp(filePath);
-        Ocl2PsqlSvc simpleO2P = new SimpleO2PApi();
-        simpleO2P.setDataModel(dm);
-        String finalSQLString = simpleO2P.mapToString(ocl);
+        ocl2PsqlSvc.setDataModel(dm);
+        String finalSQLString = ocl2PsqlSvc.mapToString(ocl);
         return finalSQLString;
     }
 

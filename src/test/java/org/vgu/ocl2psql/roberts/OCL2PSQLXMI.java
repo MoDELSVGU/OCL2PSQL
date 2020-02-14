@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.util.Scanner;
 
 import org.vgu.ocl2psql.main.OCL2PSQL_2;
+import org.vgu.se.sql.EStatement;
+import org.vgu.se.sql.parser.SQLParser;
 
 public class OCL2PSQLXMI {
     public static void main(String[] args) {
@@ -31,8 +33,8 @@ public class OCL2PSQLXMI {
         String input = sc.nextLine();
         OCL2PSQL_2 ocl2psql_2 = new OCL2PSQL_2();
         try {
-            String sql = ocl2psql_2.mapOCLXMIToSQLString("CarPerson", dataModel, input);
-            System.out.println(sql);
+            EStatement sql = ocl2psql_2.mapOCLXMIToSQLXMI("CarPerson", dataModel, input);
+            System.out.println(SQLParser.outputEStatementAsXMI(sql));
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

@@ -50,5 +50,6 @@
 	<classpathentry exported="true" kind="lib" path="src/main/resources/org.eclipse.equinox.preferences_3.7.300.v20190218-2100.jar"/>
 	<classpathentry exported="true" kind="lib" path="src/main/resources/org.eclipse.osgi_3.13.300.v20190218-1622.jar"/>
 	<classpathentry exported="true" kind="lib" path="ocl.jar"/>
+	<classpathentry kind="lib" path="sql.jar" sourcepath="/org.vgu.se.sql/src"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
