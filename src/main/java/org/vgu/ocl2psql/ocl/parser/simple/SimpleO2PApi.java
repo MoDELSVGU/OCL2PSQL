@@ -33,7 +33,6 @@ import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
-import org.vgu.ocl2psql.sql.statement.select.TypeSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.utils.SQLAsStringUtils;
 
@@ -90,8 +89,7 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
 
         for (SelectItem item : finalPlainSelect.getSelectItems()) {
             if (item instanceof ResSelectExpression
-                    || item instanceof ValSelectExpression
-                    || item instanceof TypeSelectExpression) {
+                    || item instanceof ValSelectExpression) {
                 newSelectItems.add(item);
             }
         }
