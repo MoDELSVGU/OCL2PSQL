@@ -97,43 +97,43 @@ public class OCL2PSQLManualTest {
     }
 
     private static String[] simpleCases = {
-        "2",
-        "'Peter'",
-        "true",
+//        "2",
+//        "'Peter'",
+//        "true",
+//
+//        "2=3",
+//        "'no-name' = 'Peter'",
+//        "true or true",
+//
+//        "Car.allInstances()",
+//
+//        "Car.allInstances()->size()",
+//        "Car.allInstances()->size() = 1",
+//
+//        "Car.allInstances()->collect(c|5)",
+//        "Car.allInstances()->collect(c|c)",
+//        "Car.allInstances()->collect(c|5 = 1)",
+//
+//        "Car.allInstances()->collect(c|c.color)",
+//        "Car.allInstances()->collect(c|c.color = 'black')",
+//
+//        "Car.allInstances()->collect(c|c.owners->size())",
+//        "Car.allInstances()->collect(c|c.owners->size() = 0)",
+//
+//        "Car.allInstances()->exists(c|true)",
+//        "Car.allInstances()->exists(c|false)",
+//        "Car.allInstances()->exists(c|c.color = 'black')",
+//        "Car.allInstances()->exists(c|c.owners->size() = 1)",
+//
+//        "Car.allInstances()->forAll(c|false)",
+//        "Car.allInstances()->forAll(c|true)",
+//        "Car.allInstances()->forAll(c|c.color='black')",
+//        "Car.allInstances()->forAll(c|c.owners->size() = 1)",
 
-        "2=3",
-        "'no-name' = 'Peter'",
-        "true or true",
-
-        "Car.allInstances()",
-
-        "Car.allInstances()->size()",
-        "Car.allInstances()->size() = 1",
-
-        "Car.allInstances()->collect(c|5)",
-        "Car.allInstances()->collect(c|c)",
-        "Car.allInstances()->collect(c|5 = 1)",
-
-        "Car.allInstances()->collect(c|c.color)",
-        "Car.allInstances()->collect(c|c.color = 'black')",
-
-        "Car.allInstances()->collect(c|c.owners->size())",
-        "Car.allInstances()->collect(c|c.owners->size() = 0)",
-
-        "Car.allInstances()->exists(c|true)",
-        "Car.allInstances()->exists(c|false)",
-        "Car.allInstances()->exists(c|c.color = 'black')",
-        "Car.allInstances()->exists(c|c.owners->size() = 1)",
-
-        "Car.allInstances()->forAll(c|false)",
-        "Car.allInstances()->forAll(c|true)",
-        "Car.allInstances()->forAll(c|c.color='black')",
-        "Car.allInstances()->forAll(c|c.owners->size() = 1)",
-
-        "Car.allInstances()->forAll(c|c.owners->exists(p|p.name = 'Peter'))",
+//        "Car.allInstances()->forAll(c|c.owners->exists(p|p.name = 'Peter'))",
         "Car.allInstances()->exists(c|c.owners->forAll(p|p.name = 'Peter'))",
-        "Car.allInstances()->exists(c|c.owners->exists(p|p.name = 'Peter'))",
-        "Car.allInstances()->forAll(c|c.owners->forAll(p|p.name = 'Peter'))"
+//        "Car.allInstances()->exists(c|c.owners->exists(p|p.name = 'Peter'))",
+//        "Car.allInstances()->forAll(c|c.owners->forAll(p|p.name = 'Peter'))"
     };
 
 }

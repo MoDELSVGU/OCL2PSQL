@@ -3175,7 +3175,7 @@ public class SimpleOclParser implements ParserVisitor {
 
             IsNullExpression isNullSrcRef = new IsNullExpression();
             isNullSrcRef.setLeftExpression(new Column(Arrays
-                .asList(tmpSourceAlias, "ref_".concat(outerVar.getName()))));
+                .asList(tmpBodyAlias, "ref_".concat(outerVar.getName()))));
 
             resCase.setSwitchExpression(isNullSrcRef);
 
