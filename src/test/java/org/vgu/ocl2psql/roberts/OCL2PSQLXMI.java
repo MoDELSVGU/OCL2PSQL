@@ -33,7 +33,7 @@ public class OCL2PSQLXMI {
         String input = sc.nextLine();
         OCL2PSQL_2 ocl2psql_2 = new OCL2PSQL_2();
         try {
-            EStatement sql = ocl2psql_2.mapOCLXMIToSQLXMI("CarPerson", dataModel, input);
+            EStatement sql = ocl2psql_2.mapOCLXMIToSQLXMI("CarPerson", dataModel, input).getEStatement();
             System.out.println(SQLParser.outputEStatementAsXMI(sql));
         } catch (IOException e) {
             // TODO Auto-generated catch block

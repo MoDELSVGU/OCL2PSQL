@@ -142,7 +142,7 @@ public class Trigger {
         for (Invariants invs : invSet) {
             for (Invariant inv : invs) {
                 try {
-                    String sqlInv = ocl2psql.mapOCLStringToSQLString(inv.getOcl());
+                    String sqlInv = ocl2psql.mapOCLStringToSQLString(inv.getOcl()).getStatement();
                     Statement st = conn.createStatement();
                     ResultSet rs = st.executeQuery(sqlInv);
                     

@@ -52,7 +52,10 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
 
     public String mapToString(String oclExp) {
         Select finalStatement = this.mapToSQL(oclExp);
+        return m2t(finalStatement);
+    }
 
+    public String m2t(Select finalStatement) {
         if (descriptionMode == true) {
             String finalStatementString = finalStatement
                     .toStringWithDescription();
@@ -124,15 +127,7 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
     public String mapToString(Expression oclExp) {
         Select finalStatement = this.mapToSQL(oclExp);
 
-        if (descriptionMode == true) {
-            String finalStatementString = finalStatement
-                    .toStringWithDescription();
-
-            return SQLAsStringUtils.applyIndent(finalStatementString);
-
-        } else {
-            return finalStatement.toString();
-        }
+        return m2t(finalStatement);
     }
 
     @Override

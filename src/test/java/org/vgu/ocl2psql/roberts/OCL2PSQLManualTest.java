@@ -50,8 +50,8 @@ public class OCL2PSQLManualTest {
         Ocl2PsqlSvc simpleO2P = new SimpleO2PApi();
         simpleO2P.setDataModelFromFilePath(contextModel.getAbsolutePath());
 //        simpleO2P.setDescriptionMode(true);
-//        simpleO2P.setContextualType("self", "Person");
-//        simpleO2P.setContextualType("caller", "Person");
+        simpleO2P.setContextualType("self", "Person");
+        simpleO2P.setContextualType("caller", "Person");
 //        simpleO2P.setContextualType("kself", "Staff");
 //        simpleO2P.setContextualType("kcaller", "Staff");
 
@@ -131,7 +131,8 @@ public class OCL2PSQLManualTest {
 //        "Car.allInstances()->forAll(c|c.owners->size() = 1)",
 
 //        "Car.allInstances()->forAll(c|c.owners->exists(p|p.name = 'Peter'))",
-        "Car.allInstances()->exists(c|c.owners->forAll(p|p.name = 'Peter'))",
+//        "Car.allInstances()->exists(c|c.owners->forAll(p|p.name = 'Peter'))",
+        "Car.allInstances()->collect(c|c.owners->collect(p|p))"
 //        "Car.allInstances()->exists(c|c.owners->exists(p|p.name = 'Peter'))",
 //        "Car.allInstances()->forAll(c|c.owners->forAll(p|p.name = 'Peter'))"
     };

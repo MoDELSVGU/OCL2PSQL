@@ -18,7 +18,6 @@ limitations under the License.
 
 package org.vgu.dm2schema;
 
-import static org.vgu.dm2schema.dm.MySQLConstraint.AUTO_INCREMENT;
 import static org.vgu.dm2schema.dm.MySQLConstraint.NOT_NULL;
 import static org.vgu.dm2schema.dm.MySQLConstraint.PRIMARY_KEY;
 
@@ -67,6 +66,30 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 public class DM2Schema {
 
+    public static String generateDatabase(DataModel context,
+        String databaseName) {
+        List<String> schema = new ArrayList<String>();
+
+        List<String> DBStatements = generateDBStatements(databaseName);
+        schema.addAll(DBStatements);
+
+        List<Statement> entityStatements = generateEntityStatements(context);
+        schema.addAll(entityStatements.stream().map(Statement::toString)
+            .collect(Collectors.toList()));
+
+        List<Statement> associationStatements = generateAssociationStatements(
+            context);
+        schema.addAll(associationStatements.stream().map(Statement::toString)
+            .collect(Collectors.toList()));
+
+        String script = "";
+
+        for (String schemata : schema) {
+            script += SQLStatementHelper.transform(schemata);
+        }
+        return script;
+    }
+
     public static void main(String[] args) throws Exception {
         File dataModelFile = new File(
             "src/main/resources/genSQL/uni_pof_dm.json");
@@ -93,7 +116,7 @@ public class DM2Schema {
 
 //        List<String> invariantFunctions = generateInvariantFunctions(dataModel);
 //        schema.addAll(invariantFunctions);
-        
+
 //        List<String> invariantTriggers = generateInvariantTriggers(dataModel);
 //        schema.addAll(invariantTriggers);
 
@@ -109,8 +132,9 @@ public class DM2Schema {
         fileWriter.close();
     }
 
+    @SuppressWarnings("unused")
     private static List<String> generateInvariantTriggers(DataModel dataModel) {
-        //TODO: A proof-of-concept
+        // TODO: A proof-of-concept
         List<String> invariantTriggers = new ArrayList<String>();
         List<Invariant> invariants = dataModel.getInvariantsFlatten();
         for (Invariant invariant : invariants) {
@@ -132,6 +156,7 @@ public class DM2Schema {
         return invariantTriggers;
     }
 
+    @SuppressWarnings("unused")
     private static List<String> generateInvariantFunctions(DataModel dataModel)
         throws OclParseException, ParseException, IOException {
         List<String> invariantFunctions = new ArrayList<String>();
@@ -157,7 +182,7 @@ public class DM2Schema {
         OCL2PSQL_2 ocl2sql = new OCL2PSQL_2();
         ocl2sql.setDescriptionMode(false);
         ocl2sql.setDataModel(dataModel);
-        return ocl2sql.mapOCLStringToSQLString(ocl);
+        return ocl2sql.mapOCLStringToSQLString(ocl).getStatement();
     }
 
     private static List<Statement> generateAssociationStatements(
@@ -325,8 +350,8 @@ public class DM2Schema {
         column.setColumnName(name);
         // Set column type
         ColDataType colDataType = new ColDataType();
-        colDataType.setDataType("INT");
-        colDataType.setArgumentsStringList(Arrays.asList("11"));
+        colDataType.setDataType("VARCHAR");
+        colDataType.setArgumentsStringList(Arrays.asList("100"));
         column.setColDataType(colDataType);
         return column;
     }
@@ -353,8 +378,22 @@ public class DM2Schema {
                 ColumnDefinition column = createAttributeColumn(attribute);
                 columns.add(column);
             }
+            if(entity.isUserClass()) {
+                ColumnDefinition roleColumn = createRoleColumn();
+                columns.add(roleColumn);
+            }
         }
         return tables;
+    }
+
+    private static ColumnDefinition createRoleColumn() {
+        ColumnDefinition roleColumn = new ColumnDefinition();
+        roleColumn.setColumnName("role");
+        ColDataType roleDataType = new ColDataType();
+        roleDataType.setDataType("VARCHAR");
+        roleDataType.setArgumentsStringList(Arrays.asList("100"));
+        roleColumn.setColDataType(roleDataType);
+        return roleColumn;
     }
 
     private static ColumnDefinition createAttributeColumn(Attribute attribute) {
@@ -380,11 +419,11 @@ public class DM2Schema {
         ColumnDefinition idColumn = new ColumnDefinition();
         idColumn.setColumnName(String.format("%1$s_id", table.getName()));
         ColDataType idDataType = new ColDataType();
-        idDataType.setDataType("INT");
-        idDataType.setArgumentsStringList(Arrays.asList("11"));
+        idDataType.setDataType("VARCHAR");
+        idDataType.setArgumentsStringList(Arrays.asList("100"));
         idColumn.setColDataType(idDataType);
         idColumn.setColumnSpecStrings(
-            Arrays.asList(NOT_NULL, AUTO_INCREMENT, PRIMARY_KEY));
+            Arrays.asList(NOT_NULL, PRIMARY_KEY));
         return idColumn;
     }
 

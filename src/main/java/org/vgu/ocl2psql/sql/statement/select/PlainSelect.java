@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.schema.Table;
@@ -18,25 +17,6 @@ public class PlainSelect
 
     public PlainSelect() {
         super();
-    }
-
-    public void setType(TypeSelectExpression type) {
-        TypeSelectExpression curType = this.getType();
-        if (Objects.isNull(curType)) {
-            super.addSelectItems(type);
-        } else {
-            curType.setExpression(type.getExpression());
-        }
-    }
-
-    public TypeSelectExpression getType() {
-        if (Objects.isNull(super.getSelectItems())) {
-            return null;
-        } else {
-            return super.getSelectItems().stream()
-                .filter(item -> item instanceof TypeSelectExpression)
-                .map(TypeSelectExpression.class::cast).findFirst().orElse(null);
-        }
     }
 
     public void setAllColumn() {
@@ -391,13 +371,9 @@ public class PlainSelect
                 ans.append("(");
 //                ans += "(";
             }
-            List<?> newList = list.stream()
-                .filter(i -> !(i instanceof TypeSelectExpression
-                    && !((TypeSelectExpression) i).isTypeMode))
-                .collect(Collectors.toList());
-            for (int i = 0; i < newList.size(); i++) {
-                ans.append(newList.get(i))
-                    .append((i < newList.size() - 1) ? comma + " " : "");
+            for (int i = 0; i < list.size(); i++) {
+                ans.append(list.get(i))
+                    .append((i < list.size() - 1) ? comma + " " : "");
 //                ans += "" + list.get(i) + ((i < list.size() - 1) ? comma + " " : "");
             }
 
