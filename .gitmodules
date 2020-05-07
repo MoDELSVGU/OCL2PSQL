@@ -1,6 +1,6 @@
 [submodule "jocl"]
 	path = jocl
-	url = https://github.com/ocl-vgu/jocl
+    url = git@saigontech.space:ocl-vgu/jocl.git
 [submodule "dm2schema"]
 	path = dm2schema
-	url = https://github.com/ocl-vgu/dm2schema
+    url = git@saigontech.space:ocl-vgu/dm2schema.git

@@ -33,7 +33,6 @@ import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
-import org.vgu.ocl2psql.sql.statement.select.TypeSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.utils.SQLAsStringUtils;
 
@@ -53,7 +52,10 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
 
     public String mapToString(String oclExp) {
         Select finalStatement = this.mapToSQL(oclExp);
+        return m2t(finalStatement);
+    }
 
+    public String m2t(Select finalStatement) {
         if (descriptionMode == true) {
             String finalStatementString = finalStatement
                     .toStringWithDescription();
@@ -90,8 +92,7 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
 
         for (SelectItem item : finalPlainSelect.getSelectItems()) {
             if (item instanceof ResSelectExpression
-                    || item instanceof ValSelectExpression
-                    || item instanceof TypeSelectExpression) {
+                    || item instanceof ValSelectExpression) {
                 newSelectItems.add(item);
             }
         }
@@ -103,7 +104,7 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
     }
 
     @Override
-    public void setDataModelFromFile(String filePath)
+    public void setDataModelFromFilePath(String filePath)
         throws FileNotFoundException, IOException, ParseException, Exception {
         File dataModelFile = new File(filePath);
         DataModel dataModel = new DataModel(new JSONParser().parse(
@@ -120,6 +121,21 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
     public void setDataModelFromFile(JSONArray json) throws Exception {
         DataModel dataModel = new DataModel(json);
         this.setDataModel(dataModel);
+    }
+
+    @Override
+    public String mapToString(Expression oclExp) {
+        Select finalStatement = this.mapToSQL(oclExp);
+
+        return m2t(finalStatement);
+    }
+
+    @Override
+    public Select mapToSQL(Expression oclExp) {
+        o2pParser.setDataModel(dm);
+        oclExp.accept(o2pParser);
+
+        return cookFinalStatement(o2pParser.getSelect());
     }
 
 }

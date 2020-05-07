@@ -32,7 +32,6 @@ import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 import org.vgu.ocl2psql.sql.statement.select.SubSelect;
-import org.vgu.ocl2psql.sql.statement.select.TypeSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.VarSelectExpression;
 
@@ -44,6 +43,7 @@ import com.vgu.se.jocl.expressions.IteratorKind;
 import com.vgu.se.jocl.expressions.LiteralExp;
 import com.vgu.se.jocl.expressions.M2MAssociationClassCallExp;
 import com.vgu.se.jocl.expressions.M2OAssociationClassCallExp;
+import com.vgu.se.jocl.expressions.O2OAssociationClassCallExp;
 import com.vgu.se.jocl.expressions.OclExp;
 import com.vgu.se.jocl.expressions.OperationCallExp;
 import com.vgu.se.jocl.expressions.PropertyCallExp;
@@ -52,8 +52,8 @@ import com.vgu.se.jocl.expressions.StringLiteralExp;
 import com.vgu.se.jocl.expressions.TypeExp;
 import com.vgu.se.jocl.expressions.Variable;
 import com.vgu.se.jocl.expressions.VariableExp;
-import com.vgu.se.jocl.expressions.sql.SqlExp;
-import com.vgu.se.jocl.expressions.sql.SqlFunctionExp;
+import com.vgu.se.jocl.expressions.sql.functions.SqlFnCurdate;
+import com.vgu.se.jocl.expressions.sql.functions.SqlFnTimestampdiff;
 import com.vgu.se.jocl.visit.ParserVisitor;
 
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -61,6 +61,7 @@ import net.sf.jsqlparser.expression.CaseExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.NotExpression;
 import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.WhenClause;
@@ -77,6 +78,7 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.Distinct;
 import net.sf.jsqlparser.statement.select.GroupByElement;
 
 public class SimpleOclParser implements ParserVisitor {
@@ -100,8 +102,11 @@ public class SimpleOclParser implements ParserVisitor {
         this.select = select;
     }
 
-    private void addComment(OclExp exp, PlainSelect plainSelect) {
-        plainSelect.setCorrespondOCLExpression(exp.getOclStr());
+    private void addComment(com.vgu.se.jocl.expressions.Expression exp,
+        PlainSelect plainSelect) {
+        if (exp.getOclStr() != null) {
+            plainSelect.setCorrespondOCLExpression(exp.getOclStr());
+        }
     }
 
     @Override
@@ -118,6 +123,7 @@ public class SimpleOclParser implements ParserVisitor {
         case asSequence:
             break;
         case asSet:
+            plainSelect = mapAsSet(iteratorExp);
             break;
         case at:
             break;
@@ -219,6 +225,31 @@ public class SimpleOclParser implements ParserVisitor {
         case "or":
             plainSelect = mapBinary(operationCallExp);
             break;
+        case "not":
+            plainSelect = mapNot(operationCallExp);
+            break;
+        case "implies":
+            plainSelect = mapImplies(operationCallExp);
+            break;
+        // TODO: This is a lazy attempt to map size from iteratorExp to
+        // OperationCallExp.
+        // Disclaimer: According to the OCL 2.4, size, isEmpty, flatten...
+        // should be placed here!
+        case "size":
+            plainSelect = mapSize(operationCallExp);
+            break;
+        case "isEmpty":
+            plainSelect = mapIsEmpty(operationCallExp);
+            break;
+        case "notEmpty":
+            plainSelect = mapNotEmpty(operationCallExp);
+            break;
+        case "isUnique":
+            plainSelect = mapIsUnique(operationCallExp);
+            break;
+        case "flatten":
+            plainSelect = mapFlatten(operationCallExp);
+            break;
         default:
             break;
         }
@@ -227,6 +258,446 @@ public class SimpleOclParser implements ParserVisitor {
 
         this.select = new Select();
         this.select.setSelectBody(plainSelect);
+    }
+
+    private PlainSelect mapFlatten(OperationCallExp exp) {
+        if (!(exp.getSource() instanceof IteratorExp)) {
+            throw new OclException(
+                "Cannot flatten a source which is " + "not a collection.");
+        }
+
+        PlainSelect plainSelect = new PlainSelect();
+        String tmpSourceAlias = "TEMP_src";
+
+        IteratorExp tmpSourceExp = (IteratorExp) exp.getSource();
+        tmpSourceExp.accept(this);
+        Select tmpSourceMap = this.getSelect();
+
+        SubSelect tmpSource = new SubSelect(tmpSourceMap.getSelectBody(),
+            tmpSourceAlias);
+
+        List<Variable> fVarsExp = VariableUtils.FVars(exp);
+        boolean isEmptyFvExp = fVarsExp.isEmpty();
+
+        if (isEmptyFvExp) {
+            plainSelect.createTrueValColumn();
+
+            ResSelectExpression res = new ResSelectExpression(
+                new Column(Arrays.asList(tmpSourceAlias, "res")));
+            plainSelect.setRes(res);
+
+            plainSelect.setFromItem(tmpSource);
+
+            BinaryExpression where = buildBinExp("=",
+                new Column(Arrays.asList(tmpSourceAlias, "val")),
+                new LongValue(1L));
+            plainSelect.setWhere(where);
+
+        } else {
+            String tmpFlattenAlias = "TEMP_flat";
+            String tmpAlias = "TEMP";
+
+            Variable v = ((IteratorExp) exp.getSource()).getIterator();
+
+            com.vgu.se.jocl.expressions.Expression srcOfSrcExp = ((IteratorExp) exp
+                .getSource()).getSource();
+            srcOfSrcExp.accept(this);
+            Select srcOfSrcMap = this.getSelect();
+            SubSelect tmpSourceOfSource = new SubSelect(
+                srcOfSrcMap.getSelectBody(), tmpSourceAlias);
+
+            List<Variable> sVarsSrcOfSrcExp = VariableUtils
+                .SVars(((IteratorExp) exp.getSource()).getSource());
+
+            boolean isVarInBody = true; // assumtion on paper
+
+            if (isVarInBody) {
+                CaseExpression valCase = new CaseExpression();
+
+                IsNullExpression isNull = new IsNullExpression();
+                isNull.setLeftExpression(
+                    new Column(Arrays.asList(tmpFlattenAlias, "val")));
+
+                valCase.setSwitchExpression(isNull);
+
+                WhenClause when1Then0 = new WhenClause();
+                when1Then0.setWhenExpression(new LongValue(1L));
+                when1Then0.setThenExpression(new LongValue(0L));
+
+                valCase.setWhenClauses(Arrays.asList(when1Then0));
+
+                valCase.setElseExpression(
+                    new Column(Arrays.asList(tmpFlattenAlias, "val")));
+
+                ValSelectExpression val = new ValSelectExpression(valCase);
+                plainSelect.setVal(val);
+
+                CaseExpression resCase = new CaseExpression();
+
+                resCase.setSwitchExpression(isNull);
+
+                WhenClause when1ThenNull = new WhenClause();
+                when1ThenNull.setWhenExpression(new LongValue(1L));
+                when1ThenNull.setThenExpression(new NullValue());
+
+                resCase.setWhenClauses(Arrays.asList(when1ThenNull));
+
+                resCase.setElseExpression(
+                    new Column(Arrays.asList(tmpFlattenAlias, "res")));
+
+                ResSelectExpression res = new ResSelectExpression(resCase);
+                plainSelect.setRes(res);
+
+                VariableUtils.addVar(sVarsSrcOfSrcExp, plainSelect,
+                    tmpFlattenAlias);
+
+                plainSelect.setFromItem(tmpSourceOfSource);
+
+                Join join = new Join();
+                join.setLeft(true);
+
+                // Right item of left join
+                PlainSelect plainSelectInJoin = new PlainSelect();
+                plainSelectInJoin.addSelectItems(new AllColumns());
+
+                SubSelect tmp = new SubSelect(tmpSourceMap.getSelectBody(),
+                    tmpAlias);
+                plainSelectInJoin.setFromItem(tmp);
+
+                BinaryExpression valEq1 = buildBinExp("=",
+                    new Column(Arrays.asList(tmpAlias, "val")),
+                    new LongValue(1L));
+                plainSelectInJoin.setWhere(valEq1);
+
+                SubSelect tmpFlatten = new SubSelect(plainSelectInJoin,
+                    tmpFlattenAlias);
+                join.setRightItem(tmpFlatten);
+                // .END Right item
+
+                List<Variable> sVarsSrcOfSrcAndV = new ArrayList<Variable>(
+                    sVarsSrcOfSrcExp);
+                sVarsSrcOfSrcAndV.add(v);
+
+                BinaryExpression onExp = null;
+                for (Variable var : sVarsSrcOfSrcExp) {
+                    BinaryExpression refSrcEqRefFlatten = buildBinExp("=",
+                        new Column(Arrays.asList(tmpSourceAlias,
+                            "ref_".concat(var.getName()))),
+                        new Column(Arrays.asList(tmpFlattenAlias,
+                            "ref_".concat(var.getName()))));
+
+                    if (onExp == null) {
+                        onExp = refSrcEqRefFlatten;
+                    } else {
+                        onExp = buildBinExp("and", onExp, refSrcEqRefFlatten);
+                    }
+                }
+
+                join.setOnExpression(onExp);
+
+                plainSelect.setJoins(Arrays.asList(join));
+            }
+        }
+
+        return plainSelect;
+    }
+
+    private PlainSelect mapIsUnique(OperationCallExp exp) {
+        PlainSelect plainSelect = new PlainSelect();
+
+        // Begin preparation
+        String tmpSrcAlias = "TEMP_SRC";
+
+        com.vgu.se.jocl.expressions.Expression srcExp = exp.getSource();
+        srcExp.accept(this);
+
+        Select srcMap = this.getSelect();
+        SubSelect tmpSrc = new SubSelect(srcMap.getSelectBody(), tmpSrcAlias);
+
+        List<Variable> fvExp = VariableUtils.FVars(exp);
+        boolean isFvExpEmpty = fvExp.isEmpty();
+
+        // . End preparation
+        plainSelect.createTrueValColumn();
+
+        Function countRes = new Function();
+        countRes.setName("COUNT");
+        ExpressionList expLs = new ExpressionList(
+            new Column(Arrays.asList(tmpSrcAlias, "res")));
+        countRes.setParameters(expLs);
+
+        Function countDistinctRes = new Function();
+        countDistinctRes.setName("COUNT");
+        countDistinctRes.setDistinct(true);
+        expLs = new ExpressionList(
+            new Column(Arrays.asList(tmpSrcAlias, "res")));
+        countDistinctRes.setParameters(expLs);
+
+        BinaryExpression countExp = buildBinExp("=", countRes,
+            countDistinctRes);
+
+        if (isFvExpEmpty) {
+            ResSelectExpression res = new ResSelectExpression(countExp);
+            plainSelect.setRes(res);
+
+            plainSelect.setFromItem(tmpSrc);
+
+        } else {
+            // Begin Preparation
+            List<Variable> svSrc = VariableUtils.SVars(srcExp);
+            // . End Preparation
+
+            CaseExpression resCase = new CaseExpression();
+
+            BinaryExpression srcValEq0 = buildBinExp("=",
+                new Column(Arrays.asList(tmpSrcAlias, "val")),
+                new LongValue(0L));
+            resCase.setSwitchExpression(srcValEq0);
+
+            WhenClause whenClause = new WhenClause();
+            whenClause.setWhenExpression(new LongValue(1L));
+            whenClause.setThenExpression(new LongValue(1L));
+
+            resCase.setWhenClauses(Arrays.asList(whenClause));
+
+            resCase.setElseExpression(countExp);
+
+            ResSelectExpression res = new ResSelectExpression(resCase);
+            plainSelect.setRes(res);
+
+            VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
+
+            plainSelect.setFromItem(tmpSrc);
+
+            GroupByElement groupBy = new GroupByElement();
+
+            List<Expression> groupByList = new ArrayList<Expression>();
+            for (Variable v : svSrc) {
+                groupByList.add(new Column(
+                    Arrays.asList(tmpSrcAlias, "ref_".concat(v.getName()))));
+            }
+            groupByList.add(new Column(Arrays.asList(tmpSrcAlias, "val")));
+
+            groupBy.setGroupByExpressions(groupByList);
+
+            plainSelect.setGroupByElement(groupBy);
+        }
+
+        return plainSelect;
+    }
+
+    private PlainSelect mapNotEmpty(OperationCallExp exp) {
+        PlainSelect plainSelect = new PlainSelect();
+
+        // Begin preparation
+
+        String tmpSrcAlias = "TEMP_SRC";
+        com.vgu.se.jocl.expressions.Expression srcExp = exp.getSource();
+        srcExp.accept(this);
+
+        Select srcMap = this.getSelect();
+        SubSelect tmpSrc = new SubSelect(srcMap.getSelectBody(), tmpSrcAlias);
+
+        List<Variable> fvExp = VariableUtils.FVars(exp);
+        boolean isFvExpEmpty = fvExp.isEmpty();
+
+        // . End preparation
+
+        plainSelect.createTrueValColumn();
+
+        if (isFvExpEmpty) {
+            Function count = new Function();
+            count.setName("COUNT");
+            count.setAllColumns(true);
+
+            BinaryExpression resExp = buildBinExp(">", count,
+                new LongValue(0L));
+
+            ResSelectExpression res = new ResSelectExpression(resExp);
+            plainSelect.setRes(res);
+
+            plainSelect.setFromItem(tmpSrc);
+
+        } else {
+            List<Variable> svSrc = VariableUtils.SVars(srcExp);
+
+            CaseExpression resCase = new CaseExpression();
+
+            BinaryExpression srcValEq0 = buildBinExp("=",
+                new Column(Arrays.asList(tmpSrcAlias, "val")),
+                new LongValue(0L));
+            resCase.setSwitchExpression(srcValEq0);
+
+            WhenClause whenClause = new WhenClause();
+            whenClause.setWhenExpression(new LongValue(1L));
+            whenClause.setThenExpression(new LongValue(0L));
+
+            resCase.setWhenClauses(Arrays.asList(whenClause));
+
+            resCase.setElseExpression(new LongValue(1L));
+
+            ResSelectExpression res = new ResSelectExpression(resCase);
+            plainSelect.setRes(res);
+
+            VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
+
+            plainSelect.setFromItem(tmpSrc);
+
+            GroupByElement groupBy = new GroupByElement();
+
+            List<Expression> groupByExps = new ArrayList<Expression>();
+            for (Variable v : svSrc) {
+                groupByExps.add(new Column(
+                    Arrays.asList(tmpSrcAlias, "ref_".concat(v.getName()))));
+            }
+            groupByExps.add(new Column(Arrays.asList(tmpSrcAlias, "val")));
+
+            groupBy.setGroupByExpressions(groupByExps);
+
+            plainSelect.setGroupByElement(groupBy);
+
+        }
+
+        return plainSelect;
+    }
+
+    private PlainSelect mapIsEmpty(OperationCallExp exp) {
+        PlainSelect plainSelect = new PlainSelect();
+
+        // Begin preparation
+
+        String tmpSrcAlias = "TEMP_SRC";
+        com.vgu.se.jocl.expressions.Expression srcExp = exp.getSource();
+        srcExp.accept(this);
+
+        Select srcMap = this.getSelect();
+        SubSelect tmpSrc = new SubSelect(srcMap.getSelectBody(), tmpSrcAlias);
+
+        List<Variable> fvExp = VariableUtils.FVars(exp);
+        boolean isFvExpEmpty = fvExp.isEmpty();
+
+        // . End preparation
+
+        plainSelect.createTrueValColumn();
+
+        if (isFvExpEmpty) {
+            Function count = new Function();
+            count.setName("COUNT");
+            count.setAllColumns(true);
+
+            BinaryExpression resExp = buildBinExp("=", count,
+                new LongValue(0L));
+
+            ResSelectExpression res = new ResSelectExpression(resExp);
+            plainSelect.setRes(res);
+
+            plainSelect.setFromItem(tmpSrc);
+
+        } else {
+            List<Variable> svSrc = VariableUtils.SVars(srcExp);
+
+            CaseExpression resCase = new CaseExpression();
+
+            BinaryExpression srcValEq0 = buildBinExp("=",
+                new Column(Arrays.asList(tmpSrcAlias, "val")),
+                new LongValue(0L));
+            resCase.setSwitchExpression(srcValEq0);
+
+            WhenClause whenClause = new WhenClause();
+            whenClause.setWhenExpression(new LongValue(1L));
+            whenClause.setThenExpression(new LongValue(1L));
+
+            resCase.setWhenClauses(Arrays.asList(whenClause));
+
+            resCase.setElseExpression(new LongValue(0L));
+
+            ResSelectExpression res = new ResSelectExpression(resCase);
+            plainSelect.setRes(res);
+
+            VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
+
+            plainSelect.setFromItem(tmpSrc);
+
+            GroupByElement groupBy = new GroupByElement();
+
+            List<Expression> groupByExps = new ArrayList<Expression>();
+            for (Variable v : svSrc) {
+                groupByExps.add(new Column(
+                    Arrays.asList(tmpSrcAlias, "ref_".concat(v.getName()))));
+            }
+            groupByExps.add(new Column(Arrays.asList(tmpSrcAlias, "val")));
+
+            groupBy.setGroupByExpressions(groupByExps);
+
+            plainSelect.setGroupByElement(groupBy);
+
+        }
+
+        return plainSelect;
+    }
+
+    private PlainSelect mapSize(OperationCallExp exp) {
+        PlainSelect plainSelect = new PlainSelect();
+        plainSelect.createTrueValColumn();
+
+        exp.getSource().accept(this);
+        Select source = this.getSelect();
+
+        String tmpSourceAlias = "TEMP_src";
+        SubSelect tmpSource = new SubSelect(source.getSelectBody(),
+            tmpSourceAlias);
+        plainSelect.setFromItem(tmpSource);
+
+        Function count = new Function();
+        count.setName("COUNT");
+        count.setAllColumns(true);
+
+        if (VariableUtils.FVars(exp).isEmpty()) {
+            ResSelectExpression res = new ResSelectExpression(count);
+            plainSelect.setRes(res);
+
+            return plainSelect;
+
+        } else {
+            BinaryExpression isValZero = buildBinExp("=",
+                new Column(Arrays.asList(tmpSourceAlias, "val")),
+                new LongValue(0L));
+
+            WhenClause whenCase = new WhenClause();
+            whenCase.setWhenExpression(new LongValue(1L));
+            whenCase.setThenExpression(new LongValue(0L));
+
+            CaseExpression caseRes = new CaseExpression();
+            caseRes.setSwitchExpression(isValZero);
+            caseRes.setWhenClauses(Arrays.asList(whenCase));
+            caseRes.setElseExpression(count);
+
+            ResSelectExpression res = new ResSelectExpression(caseRes);
+            plainSelect.setRes(res);
+
+            List<Expression> groupByFields = new ArrayList<Expression>();
+
+            List<Variable> sVars = VariableUtils.SVars(exp);
+            VariableUtils.addVar(sVars, plainSelect, tmpSourceAlias);
+
+            for (Variable v : sVars) {
+                VarSelectExpression refVar = new VarSelectExpression(
+                    v.getName());
+                Expression varCol = new Column(Arrays.asList(tmpSourceAlias,
+                    refVar.getRef().getAlias().getName()));
+                refVar.setRefExpression(varCol);
+
+                groupByFields.add(varCol);
+            }
+
+            groupByFields.add(new Column(Arrays.asList(tmpSourceAlias, "val")));
+
+            GroupByElement groupByEl = new GroupByElement();
+            groupByEl.setGroupByExpressions(groupByFields);
+            plainSelect.setGroupByElement(groupByEl);
+
+            return plainSelect;
+        }
     }
 
     @Override
@@ -272,22 +743,19 @@ public class SimpleOclParser implements ParserVisitor {
                         new Column(
                             Arrays.asList(varType, exp.getReferredProperty())));
                     plainSelect.setRes(res);
-                    
-                    plainSelect.createTrueValColumn();
 
-                    TypeSelectExpression type = new TypeSelectExpression(
-                        exp.getType().getReferredType());
-                    plainSelect.setType(type);
+                    plainSelect.createTrueValColumn();
 
                     VarSelectExpression var = new VarSelectExpression(varName);
                     var.setRefExpression(new Column(
                         Arrays.asList(varType, varType.concat("_id"))));
                     plainSelect.addVar(var);
-                    
+
                     return plainSelect;
                 }
             }
         }
+
         return map(exp);
 
     }
@@ -296,10 +764,10 @@ public class SimpleOclParser implements ParserVisitor {
     public void visit(AssociationClassCallExp associationClassCallExp) {
         // This is the implementation follow the definition
         // in the paper. Here we introduce a "short-cut".
-//        PlainSelect plainSelect = map(associationClassCallExp);
+        PlainSelect plainSelect = map(associationClassCallExp);
 
         // Here is the short-cut
-        PlainSelect plainSelect = mapShortcut(associationClassCallExp);
+//        PlainSelect plainSelect = mapShortcut(associationClassCallExp);
 
         addComment(associationClassCallExp, plainSelect);
 
@@ -318,48 +786,48 @@ public class SimpleOclParser implements ParserVisitor {
                 if (operationCallExp.getReferredOperation().getName()
                     .equals("allInstances")) {
 
-                    if (exp instanceof M2MAssociationClassCallExp) {
-                        return mapShortcutM2M(exp, variableExp);
+                    if (exp instanceof O2OAssociationClassCallExp) {
+                        return mapShortcutO2O(exp, variableExp);
                     } else if (exp instanceof M2OAssociationClassCallExp) {
                         return mapShortcutM2O(exp, variableExp);
                     } else {
-                        return mapShortcutO2O(exp, variableExp);
+                        return mapShortcutM2M(exp, variableExp);
                     }
 
                 }
             }
         }
+
         return map(exp);
 
     }
 
     private PlainSelect mapShortcutO2O(AssociationClassCallExp exp,
         VariableExp variableExp) {
-        
+
         PlainSelect plainSelect = new PlainSelect();
 
         String varName = variableExp.getVariable().getName();
+        @SuppressWarnings("unused")
         String referredEndType = exp.getReferredAssociationEndType()
             .getReferredType();
         String referredEndName = exp.getReferredAssociationEnd();
-        String oppositeEndType = exp.getOppositeAssociationEndType().getReferredType();
-        
+        String oppositeEndType = exp.getOppositeAssociationEndType()
+            .getReferredType();
+
         plainSelect.createTrueValColumn();
-        
+
         ResSelectExpression res = new ResSelectExpression(
             new Column(Arrays.asList(oppositeEndType, referredEndName)));
         plainSelect.setRes(res);
 
-        TypeSelectExpression type = new TypeSelectExpression(referredEndType);
-        plainSelect.setType(type);
-
         VarSelectExpression var = new VarSelectExpression(varName);
-        var.setRefExpression(new Column(Arrays.asList(oppositeEndType,
-            oppositeEndType.concat("_id"))));
+        var.setRefExpression(new Column(
+            Arrays.asList(oppositeEndType, oppositeEndType.concat("_id"))));
         plainSelect.addVar(var);
 
         plainSelect.setFromItem(new Table(oppositeEndType));
-        
+
         return plainSelect;
     }
 
@@ -372,30 +840,28 @@ public class SimpleOclParser implements ParserVisitor {
         String referredEndType = exp.getReferredAssociationEndType()
             .getReferredType();
         String referredEndName = exp.getReferredAssociationEnd();
-        String oppositeEndType = exp.getOppositeAssociationEndType().getReferredType();
+        String oppositeEndType = exp.getOppositeAssociationEndType()
+            .getReferredType();
         String oppositeEndName = exp.getOppositeAssociationEnd();
 
         if (((M2OAssociationClassCallExp) exp).isOneEndAssociationCall()) {
             ResSelectExpression res = new ResSelectExpression(
                 new Column(Arrays.asList(oppositeEndType, referredEndName)));
             plainSelect.setRes(res);
-            
+
             plainSelect.createTrueValColumn();
 
-            TypeSelectExpression type = new TypeSelectExpression(referredEndType);
-            plainSelect.setType(type);
-
             VarSelectExpression var = new VarSelectExpression(varName);
-            var.setRefExpression(new Column(Arrays.asList(oppositeEndType,
-                oppositeEndType.concat("_id"))));
+            var.setRefExpression(new Column(
+                Arrays.asList(oppositeEndType, oppositeEndType.concat("_id"))));
             plainSelect.addVar(var);
 
             plainSelect.setFromItem(new Table(oppositeEndType));
         } else {
             CaseExpression caseVal = new CaseExpression();
             IsNullExpression isOpposNull = new IsNullExpression();
-            isOpposNull
-                .setLeftExpression(new Column(Arrays.asList(referredEndType, oppositeEndName)));
+            isOpposNull.setLeftExpression(
+                new Column(Arrays.asList(referredEndType, oppositeEndName)));
             caseVal.setSwitchExpression(isOpposNull);
             WhenClause whenClause = new WhenClause();
             whenClause.setWhenExpression(new LongValue(1L));
@@ -405,8 +871,8 @@ public class SimpleOclParser implements ParserVisitor {
             ValSelectExpression val = new ValSelectExpression(caseVal);
             plainSelect.setVal(val);
 
-            ResSelectExpression res = new ResSelectExpression(
-                new Column(Arrays.asList(referredEndType, referredEndType.concat("_id"))));
+            ResSelectExpression res = new ResSelectExpression(new Column(
+                Arrays.asList(referredEndType, referredEndType.concat("_id"))));
             plainSelect.setRes(res);
 
             CaseExpression caseType = new CaseExpression();
@@ -416,12 +882,10 @@ public class SimpleOclParser implements ParserVisitor {
             typeWhenClause.setThenExpression(new StringValue("EmptyCol"));
             caseType.setWhenClauses(Arrays.asList(typeWhenClause));
             caseType.setElseExpression(new StringValue(referredEndType));
-            TypeSelectExpression type = new TypeSelectExpression(caseType);
-            plainSelect.setType(type);
-            
+
             VarSelectExpression var = new VarSelectExpression(varName);
-            var.setRefExpression(new Column(Arrays.asList(oppositeEndType,
-                oppositeEndType.concat("_id"))));
+            var.setRefExpression(new Column(
+                Arrays.asList(oppositeEndType, oppositeEndType.concat("_id"))));
             plainSelect.addVar(var);
 
             plainSelect.setFromItem(new Table(referredEndType));
@@ -450,10 +914,10 @@ public class SimpleOclParser implements ParserVisitor {
         String associationTableName = exp.getAssociation();
         String referredEndType = exp.getReferredAssociationEndType()
             .getReferredType();
-        String oppositeEndType = exp.getOppositeAssociationEndType().getReferredType();
+        String oppositeEndType = exp.getOppositeAssociationEndType()
+            .getReferredType();
         String referredEndName = exp.getReferredAssociationEnd();
         String oppositeEndName = exp.getOppositeAssociationEnd();
-        
 
         plainSelect.setFromItem(new Table(oppositeEndType));
 
@@ -461,8 +925,8 @@ public class SimpleOclParser implements ParserVisitor {
         leftJoin.setLeft(true);
         leftJoin.setRightItem(new Table(associationTableName));
         BinaryExpression refVEqOppos = buildBinExp("=",
-            new Column(Arrays.asList(oppositeEndType,
-                oppositeEndType.concat("_id"))),
+            new Column(
+                Arrays.asList(oppositeEndType, oppositeEndType.concat("_id"))),
             new Column(Arrays.asList(associationTableName, oppositeEndName)));
         leftJoin.setOnExpression(refVEqOppos);
         plainSelect.setJoins(Arrays.asList(leftJoin));
@@ -492,8 +956,6 @@ public class SimpleOclParser implements ParserVisitor {
         whenTypeClause.setThenExpression(new StringValue("EmptyCol"));
         caseType.setWhenClauses(Arrays.asList(whenTypeClause));
         caseType.setElseExpression(new StringValue(referredEndType));
-        TypeSelectExpression type = new TypeSelectExpression(caseType);
-        plainSelect.setType(type);
 
         VarSelectExpression var = new VarSelectExpression(varName);
         var.setRefExpression(new Column(
@@ -554,23 +1016,175 @@ public class SimpleOclParser implements ParserVisitor {
     }
 
     @Override
-    public void visit(SqlFunctionExp sqlFunctionExp) {
+    public void visit(com.vgu.se.jocl.expressions.Expression exp) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void visit(SqlFnCurdate sqlFnCurdate) {
         PlainSelect plainSelect = new PlainSelect();
         plainSelect.createTrueValColumn();
-        String fnStr = sqlFunctionExp.getName();
 
         Function fn = new Function();
-        fn.setName(fnStr.replaceAll("(\\w+)\\(.*", "$1"));
+        fn.setName(sqlFnCurdate.getName());
 
         ResSelectExpression res = new ResSelectExpression(fn);
         plainSelect.setRes(res);
 
+        addComment(sqlFnCurdate, plainSelect);
+
         this.select = new Select();
         this.select.setSelectBody(plainSelect);
+    }
+
+    @Override
+    public void visit(SqlFnTimestampdiff sqlFnTimestampdiff) {
+        PlainSelect plainSelect = mapSqlFnTimestampdiff(sqlFnTimestampdiff);
+
+        addComment(sqlFnTimestampdiff, plainSelect);
+
+        this.select = new Select();
+        this.select.setSelectBody(plainSelect);
+
     }
     // ***********************************************
     // * Helpers
     // ***********************************************
+
+    private PlainSelect mapSqlFnTimestampdiff(SqlFnTimestampdiff exp) {
+        PlainSelect plainSelect = new PlainSelect();
+
+        com.vgu.se.jocl.expressions.Expression leftExp = exp.getParams().get(0);
+        com.vgu.se.jocl.expressions.Expression rightExp = exp.getParams()
+            .get(1);
+        String unit = exp.getLiteralParams().get(0).getParam();
+
+        String tmpLeftAlias = "TEMP_LEFT";
+        String tmpRightAlias = "TEMP_RIGHT";
+
+        List<Variable> fVarsLeft = VariableUtils.FVars(leftExp);
+        List<Variable> fVarsRight = VariableUtils.FVars(rightExp);
+
+        boolean isEmptyFvLeft = fVarsLeft.isEmpty();
+        boolean isEmptyFvRight = fVarsRight.isEmpty();
+
+        Function fn = new Function();
+        fn.setName(exp.getName());
+
+        List<Expression> ls = new ArrayList<>();
+        ls.add(new Column(unit));
+        ls.add(new Column(Arrays.asList(tmpLeftAlias, "res")));
+        ls.add(new Column(Arrays.asList(tmpRightAlias, "res")));
+
+        fn.setParameters(new ExpressionList(ls));
+
+        ResSelectExpression res = new ResSelectExpression(fn);
+        plainSelect.setRes(res);
+
+        leftExp.accept(this);
+        Select leftMap = this.getSelect();
+        SubSelect tmpLeft = new SubSelect(leftMap.getSelectBody(),
+            tmpLeftAlias);
+
+        rightExp.accept(this);
+        Select rightMap = this.getSelect();
+        SubSelect tmpRight = new SubSelect(rightMap.getSelectBody(),
+            tmpRightAlias);
+
+        // Case 1
+        if (isEmptyFvLeft && isEmptyFvRight) {
+            plainSelect.createTrueValColumn();
+
+            plainSelect.setFromItem(tmpLeft);
+
+            Join join = new Join();
+            join.setRightItem(tmpRight);
+
+            plainSelect.setJoins(Arrays.asList(join));
+
+            return plainSelect;
+        }
+
+        // Preparation for Case 2, 3, 4
+        List<Variable> sVarsLeft = VariableUtils.SVars(leftExp);
+        List<Variable> sVarsRight = VariableUtils.SVars(rightExp);
+
+        boolean isSubsetSvLeftOfSvRight = sVarsRight.containsAll(sVarsLeft);
+        boolean isSubsetSvRightOfSvLeft = sVarsLeft.containsAll(sVarsRight);
+
+        List<Variable> sVarsIntxn = new ArrayList<Variable>(sVarsLeft);
+        sVarsIntxn.retainAll(sVarsRight);
+
+        boolean isEmptySvIntxn = sVarsIntxn.isEmpty();
+
+        CaseExpression caseVal = new CaseExpression();
+
+        BinaryExpression leftValEq0 = buildBinExp("=",
+            new Column(Arrays.asList(tmpLeftAlias, "val")), new LongValue(0L));
+
+        BinaryExpression rightValEq0 = buildBinExp("=",
+            new Column(Arrays.asList(tmpRightAlias, "val")), new LongValue(0L));
+
+        OrExpression orExp = new OrExpression(leftValEq0, rightValEq0);
+        caseVal.setSwitchExpression(orExp);
+
+        WhenClause whenClause = new WhenClause();
+        whenClause.setWhenExpression(new LongValue(1L));
+        whenClause.setThenExpression(new LongValue(0L));
+        caseVal.setWhenClauses(Arrays.asList(whenClause));
+
+        caseVal.setElseExpression(new LongValue(1L));
+
+        ValSelectExpression val = new ValSelectExpression(caseVal);
+        plainSelect.setVal(val);
+
+        Join join = new Join();
+
+        if (!isEmptySvIntxn) {
+            join.setLeft(true);
+
+            for (Variable v : sVarsIntxn) {
+                VarSelectExpression var = new VarSelectExpression(v.getName());
+                String refName = var.getRef().getAlias().getName();
+
+                BinaryExpression onExp = buildBinExp("=",
+                    new Column(Arrays.asList(tmpLeftAlias, refName)),
+                    new Column(Arrays.asList(tmpRightAlias, refName)));
+
+                join.setOnExpression(onExp);
+            }
+        }
+
+        // Case 2
+        if (!isEmptyFvLeft && isSubsetSvRightOfSvLeft) {
+            VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
+
+            plainSelect.setFromItem(tmpLeft);
+            join.setRightItem(tmpRight);
+        }
+        // case 3
+        else if (!isEmptyFvRight && isSubsetSvLeftOfSvRight) {
+            VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
+
+            plainSelect.setFromItem(tmpRight);
+            join.setRightItem(tmpLeft);
+        }
+        // case 4
+        else if (!isEmptyFvLeft && !isEmptyFvLeft && !isSubsetSvLeftOfSvRight
+            && !isSubsetSvRightOfSvLeft) {
+
+            VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
+            VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
+
+            plainSelect.setFromItem(tmpLeft);
+            join.setRightItem(tmpRight);
+        }
+
+        plainSelect.setJoins(Arrays.asList(join));
+
+        return plainSelect;
+    }
 
     private PlainSelect map(BooleanLiteralExp exp) {
         PlainSelect plainSelect = new PlainSelect();
@@ -579,10 +1193,6 @@ public class SimpleOclParser implements ParserVisitor {
         ResSelectExpression res = new ResSelectExpression(
             new Column(exp.getValue().toString()));
         plainSelect.setRes(res);
-
-        TypeSelectExpression type = new TypeSelectExpression(
-            exp.getType().getReferredType());
-        plainSelect.setType(type);
 
         return plainSelect;
     }
@@ -595,10 +1205,6 @@ public class SimpleOclParser implements ParserVisitor {
             new LongValue(exp.getValue().toString()));
         plainSelect.setRes(res);
 
-        TypeSelectExpression type = new TypeSelectExpression(
-            exp.getType().getReferredType());
-        plainSelect.setType(type);
-
         return plainSelect;
     }
 
@@ -609,10 +1215,6 @@ public class SimpleOclParser implements ParserVisitor {
         ResSelectExpression res = new ResSelectExpression(
             new LongValue(exp.getValue().toString()));
         plainSelect.setRes(res);
-
-        TypeSelectExpression type = new TypeSelectExpression(
-            exp.getType().getReferredType());
-        plainSelect.setType(type);
 
         return plainSelect;
     }
@@ -625,17 +1227,13 @@ public class SimpleOclParser implements ParserVisitor {
             new StringValue(exp.getValue().toString()));
         plainSelect.setRes(res);
 
-        TypeSelectExpression type = new TypeSelectExpression(
-            exp.getType().getReferredType());
-        plainSelect.setType(type);
-
         return plainSelect;
     }
 
     private PlainSelect map(VariableExp exp) {
         PlainSelect plainSelect = new PlainSelect();
 
-        String tmpDmnAlias = "TEMP_DMN";
+        String tmpDmnAlias = "TEMP_dmn";
         String varName = exp.getVariable().getName();
 
         com.vgu.se.jocl.expressions.Expression sourceExp = exp.getVariable()
@@ -651,10 +1249,6 @@ public class SimpleOclParser implements ParserVisitor {
             VarSelectExpression var = new VarSelectExpression(varName);
             var.setRefExpression(new Column(varName));
             plainSelect.addVar(var);
-
-            TypeSelectExpression type = new TypeSelectExpression(
-                exp.getType().getReferredType());
-            plainSelect.setType(type);
 
             return plainSelect;
         }
@@ -672,10 +1266,6 @@ public class SimpleOclParser implements ParserVisitor {
             new Column(Arrays.asList(tmpDmnAlias, "res")));
         plainSelect.setRes(res);
 
-        TypeSelectExpression type = new TypeSelectExpression(
-            exp.getType().getReferredType());
-        plainSelect.setType(type);
-
         VarSelectExpression v = new VarSelectExpression(varName);
         v.setRefExpression(new Column(Arrays.asList(tmpDmnAlias, "res")));
         plainSelect.addVar(v);
@@ -689,16 +1279,19 @@ public class SimpleOclParser implements ParserVisitor {
     }
 
     private PlainSelect map(PropertyCallExp exp) {
+        boolean isSourceVarExp = exp
+            .getNavigationSource() instanceof VariableExp;
+        boolean isSourceAssociationExp = exp
+            .getNavigationSource() instanceof AssociationClassCallExp;
 
-//        if (!(exp.getNavigationSource() instanceof VariableExp)) {
-//            throw new OclException(
-//                    "Cannot parse non Variable expression");
-//        }
+        if (!(isSourceVarExp || isSourceAssociationExp)) {
+            throw new OclException("Cannot parse expression");
+        }
 
         PlainSelect plainSelect = new PlainSelect();
 
         // Preparation
-        String tmpObjAlias = "TEMP_OBJ";
+        String tmpObjAlias = "TEMP_obj";
 
 //        VariableExp varExp = (VariableExp) exp.getNavigationSource();
         com.vgu.se.jocl.expressions.Expression srcExp = exp
@@ -717,10 +1310,6 @@ public class SimpleOclParser implements ParserVisitor {
             new Column(Arrays.asList(tmpObjAlias, "val")));
         plainSelect.setVal(val);
 
-        TypeSelectExpression type = new TypeSelectExpression(
-            exp.getType().getReferredType());
-        plainSelect.setType(type);
-
         ResSelectExpression res = new ResSelectExpression(
             new Column(Arrays.asList(srcType, exp.getReferredProperty())));
         plainSelect.setRes(res);
@@ -737,8 +1326,15 @@ public class SimpleOclParser implements ParserVisitor {
 
         String varName = VariableUtils.FVars(srcExp).get(0).getName();
 
-        BinaryExpression refVEqId = buildBinExp("=",
-            new Column(Arrays.asList(tmpObjAlias, "ref_".concat(varName))),
+        Expression onExpRefCol = null;
+        if (isSourceVarExp) {
+            onExpRefCol = new Column(
+                Arrays.asList(tmpObjAlias, "ref_".concat(varName)));
+        } else if (isSourceAssociationExp) {
+            onExpRefCol = new Column(Arrays.asList(tmpObjAlias, "res"));
+        }
+
+        BinaryExpression refVEqId = buildBinExp("=", onExpRefCol,
             new Column(Arrays.asList(srcType, srcType.concat("_id"))));
 
         BinaryExpression valEq1 = buildBinExp("=",
@@ -752,9 +1348,11 @@ public class SimpleOclParser implements ParserVisitor {
 
     private PlainSelect map(AssociationClassCallExp exp) {
 
-        if (!(exp.getNavigationSource() instanceof VariableExp)) {
-            throw new OclException("Cannot parse non Variable expression");
-        }
+//        if (!(exp.getNavigationSource() instanceof VariableExp)) {
+//            throw new OclException("Cannot parse non Variable expression");
+//        } else if (exp.getNavigationSource() instanceof AssociationClassCallExp) {
+//            return mapShortcut((AssociationClassCallExp) exp.getNavigationSource());
+//        }
 
         PlainSelect plainSelect;
 
@@ -804,8 +1402,6 @@ public class SimpleOclParser implements ParserVisitor {
         typeWhenClause.setThenExpression(new StringValue("EmptyCol"));
         caseType.setWhenClauses(Arrays.asList(typeWhenClause));
         caseType.setElseExpression(new StringValue(referredEndType));
-        TypeSelectExpression type = new TypeSelectExpression(caseType);
-        plainSelect.setType(type);
 
         com.vgu.se.jocl.expressions.Expression sourceExp = exp
             .getNavigationSource();
@@ -848,6 +1444,7 @@ public class SimpleOclParser implements ParserVisitor {
         String tmpObjAlias = "TEMP_OBJ";
         String referredEndType = exp.getReferredAssociationEndType()
             .getReferredType();
+        @SuppressWarnings("unused")
         String referredEndIdColumn = String.format("%1$s_id", referredEndType);
         String referredEndName = exp.getReferredAssociationEnd();
         String oppositeEndType = exp.getOppositeAssociationEndType()
@@ -860,7 +1457,7 @@ public class SimpleOclParser implements ParserVisitor {
             CaseExpression caseVal = new CaseExpression();
             IsNullExpression isOpposNull = new IsNullExpression();
             isOpposNull.setLeftExpression(new Column(
-                Arrays.asList(referredEndType, referredEndIdColumn)));
+                Arrays.asList(oppositeEndType, oppositeEndIdColumn)));
             caseVal.setSwitchExpression(isOpposNull);
             WhenClause whenClause = new WhenClause();
             whenClause.setWhenExpression(new LongValue(1L));
@@ -870,8 +1467,11 @@ public class SimpleOclParser implements ParserVisitor {
             ValSelectExpression val = new ValSelectExpression(caseVal);
             plainSelect.setVal(val);
 
+//            ResSelectExpression res = new ResSelectExpression(
+//                new Column(Arrays.asList(referredEndType, referredEndName)));
+            // JP's testing
             ResSelectExpression res = new ResSelectExpression(
-                new Column(Arrays.asList(referredEndType, referredEndName)));
+                new Column(Arrays.asList(oppositeEndType, referredEndName)));
             plainSelect.setRes(res);
 
             CaseExpression caseType = new CaseExpression();
@@ -881,8 +1481,6 @@ public class SimpleOclParser implements ParserVisitor {
             typeWhenClause.setThenExpression(new StringValue("EmptyCol"));
             caseType.setWhenClauses(Arrays.asList(typeWhenClause));
             caseType.setElseExpression(new StringValue(referredEndType));
-            TypeSelectExpression type = new TypeSelectExpression(caseType);
-            plainSelect.setType(type);
 
             com.vgu.se.jocl.expressions.Expression sourceExp = exp
                 .getNavigationSource();
@@ -899,14 +1497,24 @@ public class SimpleOclParser implements ParserVisitor {
 
             Join leftJ = new Join();
             leftJ.setLeft(true);
-            leftJ.setRightItem(new Table(referredEndType));
+            leftJ.setRightItem(new Table(oppositeEndType));
 
-            VariableExp varExp = (VariableExp) exp.getNavigationSource();
-            BinaryExpression refVEqOppos = buildBinExp("=",
-                new Column(Arrays.asList(tmpObjAlias,
-                    "ref_".concat(varExp.getVariable().getName()))),
-                new Column(
-                    Arrays.asList(referredEndType, referredEndIdColumn)));
+            boolean isVarExpSrc = exp
+                .getNavigationSource() instanceof VariableExp;
+            boolean isAssociationExpSrc = exp
+                .getNavigationSource() instanceof AssociationClassCallExp;
+
+            Expression refCol = null;
+            if (isVarExpSrc) {
+                refCol = new Column(Arrays.asList(tmpObjAlias,
+                    "ref_".concat(((VariableExp) exp.getNavigationSource())
+                        .getVariable().getName())));
+            } else if (isAssociationExpSrc) {
+                refCol = new Column(Arrays.asList(tmpObjAlias, "res"));
+            }
+
+            BinaryExpression refVEqOppos = buildBinExp("=", refCol, new Column(
+                Arrays.asList(oppositeEndType, oppositeEndIdColumn)));
 
             BinaryExpression valEq1 = buildBinExp("=",
                 new Column(Arrays.asList(tmpObjAlias, "val")),
@@ -943,8 +1551,6 @@ public class SimpleOclParser implements ParserVisitor {
             typeWhenClause.setThenExpression(new StringValue("EmptyCol"));
             caseType.setWhenClauses(Arrays.asList(typeWhenClause));
             caseType.setElseExpression(new StringValue(referredEndType));
-            TypeSelectExpression type = new TypeSelectExpression(caseType);
-            plainSelect.setType(type);
 
             com.vgu.se.jocl.expressions.Expression sourceExp = exp
                 .getNavigationSource();
@@ -986,7 +1592,7 @@ public class SimpleOclParser implements ParserVisitor {
 
         PlainSelect plainSelect = new PlainSelect();
 
-        String tmpObjAlias = "TEMP_OBJ";
+        String tmpObjAlias = "TEMP_obj";
 
         String associationTableName = exp.getAssociation();
         String oppositeEndName = exp.getOppositeAssociationEnd();
@@ -1019,8 +1625,6 @@ public class SimpleOclParser implements ParserVisitor {
         caseType.setWhenClauses(Arrays.asList(typeWhenClause));
         String resType = referredEndType.replaceAll("Col\\((\\w+)\\)", "$1");
         caseType.setElseExpression(new StringValue(resType));
-        TypeSelectExpression type = new TypeSelectExpression(caseType);
-        plainSelect.setType(type);
 
         com.vgu.se.jocl.expressions.Expression sourceExp = exp
             .getNavigationSource();
@@ -1066,9 +1670,6 @@ public class SimpleOclParser implements ParserVisitor {
             new Column(tableName.concat("_id")));
         plainSelect.setRes(res);
 
-        TypeSelectExpression type = new TypeSelectExpression(tableName);
-        plainSelect.setType(type);
-
         plainSelect.setFromItem(new Table(tableName));
 
         return plainSelect;
@@ -1077,7 +1678,7 @@ public class SimpleOclParser implements ParserVisitor {
     private PlainSelect mapOclIsUndefined(OperationCallExp exp) {
         PlainSelect plainSelect = new PlainSelect();
 
-        String tmpSourceAlias = "TEMP_SOURCE";
+        String tmpSourceAlias = "TEMP_src";
 
         com.vgu.se.jocl.expressions.Expression srcExp = exp.getSource();
         srcExp.accept(this);
@@ -1113,10 +1714,6 @@ public class SimpleOclParser implements ParserVisitor {
 
         ResSelectExpression res = new ResSelectExpression(resCase);
         plainSelect.setRes(res);
-
-        TypeSelectExpression type = new TypeSelectExpression(
-            new StringValue("Boolean"));
-        plainSelect.setType(type);
 
         VariableUtils.addVar(sVarsSrc, plainSelect, tmpSourceAlias);
 
@@ -1173,9 +1770,6 @@ public class SimpleOclParser implements ParserVisitor {
         ResSelectExpression res = new ResSelectExpression(resCase);
         plainSelect.setRes(res);
 
-        TypeSelectExpression type = new TypeSelectExpression("Boolean");
-        plainSelect.setType(type);
-
         plainSelect.setFromItem(tmpSrc);
 
         VariableUtils.addVar(sVarsSrc, plainSelect, tmpSrcAlias);
@@ -1231,9 +1825,6 @@ public class SimpleOclParser implements ParserVisitor {
         ResSelectExpression res = new ResSelectExpression(resCase);
         plainSelect.setRes(res);
 
-        TypeSelectExpression type = new TypeSelectExpression("Boolean");
-        plainSelect.setType(type);
-
         VariableUtils.addVar(sVarsSrc, plainSelect, tmpSrcAlias);
 
         plainSelect.setFromItem(tmpSrc);
@@ -1282,9 +1873,6 @@ public class SimpleOclParser implements ParserVisitor {
 
         typeCase.setElseExpression(new StringValue(typeCastedTo));
 
-        TypeSelectExpression type = new TypeSelectExpression(typeCase);
-        plainSelect.setType(type);
-
         VariableUtils.addVar(sVarsSrc, plainSelect, tmpSrcAlias);
 
         plainSelect.setFromItem(tmpSrc);
@@ -1304,6 +1892,36 @@ public class SimpleOclParser implements ParserVisitor {
         return plainSelect;
     }
 
+    private PlainSelect mapNot(OperationCallExp exp) {
+        PlainSelect plainSelect = new PlainSelect();
+
+        com.vgu.se.jocl.expressions.Expression tmpExp = exp.getArguments()
+            .get(0);
+
+        String tmpAlias = "TEMP";
+        tmpExp.accept(this);
+
+        Select tmpMap = this.getSelect();
+        SubSelect tmp = new SubSelect(tmpMap.getSelectBody(), tmpAlias);
+
+        List<Variable> sVarsTmp = VariableUtils.SVars(tmpExp);
+
+        NotExpression notExp = new NotExpression(
+            new Column(Arrays.asList(tmpAlias, "res")));
+        ResSelectExpression res = new ResSelectExpression(notExp);
+        plainSelect.setRes(res);
+
+        ValSelectExpression val = new ValSelectExpression(
+            new Column(Arrays.asList(tmpAlias, "val")));
+        plainSelect.setVal(val);
+
+        VariableUtils.addVar(sVarsTmp, plainSelect, tmpAlias);
+
+        plainSelect.setFromItem(tmp);
+
+        return plainSelect;
+    }
+
     private PlainSelect mapBinary(OperationCallExp exp) {
         PlainSelect plainSelect = new PlainSelect();
 
@@ -1311,8 +1929,8 @@ public class SimpleOclParser implements ParserVisitor {
         com.vgu.se.jocl.expressions.Expression rightExp = exp.getArguments()
             .get(0);
 
-        String tmpLeftAlias = "TEMP_LEFT";
-        String tmpRightAlias = "TEMP_RIGHT";
+        String tmpLeftAlias = "TEMP_left";
+        String tmpRightAlias = "TEMP_right";
 
         List<Variable> fVarsLeft = VariableUtils.FVars(leftExp);
         List<Variable> fVarsRight = VariableUtils.FVars(rightExp);
@@ -1328,9 +1946,125 @@ public class SimpleOclParser implements ParserVisitor {
         ResSelectExpression res = new ResSelectExpression(binExp);
         plainSelect.setRes(res);
 
-        TypeSelectExpression type = new TypeSelectExpression(
-            new StringValue("Boolean"));
-        plainSelect.setType(type);
+        leftExp.accept(this);
+        Select leftMap = this.getSelect();
+        SubSelect tmpLeft = new SubSelect(leftMap.getSelectBody(),
+            tmpLeftAlias);
+
+        rightExp.accept(this);
+        Select rightMap = this.getSelect();
+        SubSelect tmpRight = new SubSelect(rightMap.getSelectBody(),
+            tmpRightAlias);
+
+        // Case 1
+        if (isEmptyFvLeft && isEmptyFvRight) {
+            plainSelect.createTrueValColumn();
+
+            plainSelect.setFromItem(tmpLeft);
+
+            Join join = new Join();
+            join.setRightItem(tmpRight);
+
+            plainSelect.setJoins(Arrays.asList(join));
+
+            return plainSelect;
+        }
+
+        // Preparation for Case 2, 3, 4
+        List<Variable> sVarsLeft = VariableUtils.SVars(leftExp);
+        List<Variable> sVarsRight = VariableUtils.SVars(rightExp);
+
+        boolean isSubsetSvLeftOfSvRight = sVarsRight.containsAll(sVarsLeft);
+        boolean isSubsetSvRightOfSvLeft = sVarsLeft.containsAll(sVarsRight);
+
+        List<Variable> sVarsIntxn = new ArrayList<Variable>(sVarsLeft);
+        sVarsIntxn.retainAll(sVarsRight);
+
+        boolean isEmptySvIntxn = sVarsIntxn.isEmpty();
+
+        CaseExpression caseVal = new CaseExpression();
+
+        BinaryExpression leftValEq0 = buildBinExp("=",
+            new Column(Arrays.asList(tmpLeftAlias, "val")), new LongValue(0L));
+
+        BinaryExpression rightValEq0 = buildBinExp("=",
+            new Column(Arrays.asList(tmpRightAlias, "val")), new LongValue(0L));
+
+        OrExpression orExp = new OrExpression(leftValEq0, rightValEq0);
+        caseVal.setSwitchExpression(orExp);
+
+        WhenClause whenClause = new WhenClause();
+        whenClause.setWhenExpression(new LongValue(1L));
+        whenClause.setThenExpression(new LongValue(0L));
+        caseVal.setWhenClauses(Arrays.asList(whenClause));
+
+        caseVal.setElseExpression(new LongValue(1L));
+
+        ValSelectExpression val = new ValSelectExpression(caseVal);
+        plainSelect.setVal(val);
+
+        Join join = new Join();
+
+        if (!isEmptySvIntxn) {
+            BinaryExpression onExp = null;
+            join.setLeft(true);
+            for (Variable v : sVarsIntxn) {
+                VarSelectExpression var = new VarSelectExpression(v.getName());
+                String refName = var.getRef().getAlias().getName();
+
+                BinaryExpression onExp_1 = buildBinExp("=",
+                    new Column(Arrays.asList(tmpLeftAlias, refName)),
+                    new Column(Arrays.asList(tmpRightAlias, refName)));
+
+                if (onExp == null) {
+                    onExp = onExp_1;
+                } else {
+                    onExp = buildBinExp("and", onExp, onExp_1);
+                }
+            }
+
+            join.setOnExpression(onExp);
+        }
+
+        // Case 2
+        if (!isEmptyFvLeft && isSubsetSvRightOfSvLeft) {
+            VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
+
+            plainSelect.setFromItem(tmpLeft);
+            join.setRightItem(tmpRight);
+        }
+        // case 3
+        else if (!isEmptyFvRight && isSubsetSvLeftOfSvRight) {
+            VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
+
+            plainSelect.setFromItem(tmpRight);
+            join.setRightItem(tmpLeft);
+        }
+        // case 4
+        else if (!isEmptyFvLeft && !isEmptyFvLeft && !isSubsetSvLeftOfSvRight
+            && !isSubsetSvRightOfSvLeft) {
+
+            VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
+            VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
+
+            plainSelect.setFromItem(tmpLeft);
+            join.setRightItem(tmpRight);
+        }
+
+        plainSelect.setJoins(Arrays.asList(join));
+
+        return plainSelect;
+    }
+
+    private PlainSelect mapImplies(OperationCallExp exp) {
+        PlainSelect plainSelect = new PlainSelect();
+
+        com.vgu.se.jocl.expressions.Expression leftExp = exp.getSource();
+        com.vgu.se.jocl.expressions.Expression rightExp = exp.getArguments()
+            .get(0);
+
+        String tmpLeftAlias = "TEMP_LEFT";
+        String tmpRightAlias = "TEMP_RIGHT";
 
         leftExp.accept(this);
         Select leftMap = this.getSelect();
@@ -1341,6 +2075,26 @@ public class SimpleOclParser implements ParserVisitor {
         Select rightMap = this.getSelect();
         SubSelect tmpRight = new SubSelect(rightMap.getSelectBody(),
             tmpRightAlias);
+
+        List<Variable> fVarsLeft = VariableUtils.FVars(leftExp);
+        List<Variable> fVarsRight = VariableUtils.FVars(rightExp);
+
+        boolean isEmptyFvLeft = fVarsLeft.isEmpty();
+        boolean isEmptyFvRight = fVarsRight.isEmpty();
+
+        CaseExpression caseImplies = new CaseExpression();
+
+        WhenClause caseWhen = new WhenClause();
+        caseWhen
+            .setWhenExpression(new Column(Arrays.asList(tmpLeftAlias, "res")));
+        caseWhen
+            .setThenExpression(new Column(Arrays.asList(tmpRightAlias, "res")));
+        caseImplies.setWhenClauses(Arrays.asList(caseWhen));
+
+        caseImplies.setElseExpression(new LongValue(1L));
+
+        ResSelectExpression res = new ResSelectExpression(caseImplies);
+        plainSelect.setRes(res);
 
         // Case 1
         if (isEmptyFvLeft && isEmptyFvRight) {
@@ -1448,9 +2202,6 @@ public class SimpleOclParser implements ParserVisitor {
             tmpSourceAlias);
         plainSelect.setFromItem(tmpSource);
 
-        TypeSelectExpression type = new TypeSelectExpression("Integer");
-        plainSelect.setType(type);
-
         Function count = new Function();
         count.setName("COUNT");
         count.setAllColumns(true);
@@ -1503,6 +2254,20 @@ public class SimpleOclParser implements ParserVisitor {
         }
     }
 
+    private PlainSelect mapAsSet(IteratorExp exp) {
+        PlainSelect plainSelect = new PlainSelect();
+        exp.getSource().accept(this);
+        Select source = this.getSelect();
+
+        plainSelect = (PlainSelect) source.getSelectBody();
+
+        Distinct distinctRes = new Distinct();
+        plainSelect.setDistinct(distinctRes);
+
+        return plainSelect;
+
+    }
+
     private PlainSelect mapCollect(IteratorExp exp) {
         PlainSelect plainSelect = new PlainSelect();
 
@@ -1515,10 +2280,6 @@ public class SimpleOclParser implements ParserVisitor {
         ResSelectExpression res = new ResSelectExpression(
             new Column(Arrays.asList(tmpBodyAlias, "res")));
         plainSelect.setRes(res);
-
-        TypeSelectExpression type = new TypeSelectExpression(
-            new Column(Arrays.asList(tmpBodyAlias, "type")));
-        plainSelect.setType(type);
 
         exp.getBody().accept(this);
         Select body = this.getSelect();
@@ -1537,7 +2298,7 @@ public class SimpleOclParser implements ParserVisitor {
             plainSelect.setFromItem(tmpBody);
 
         } else {
-            String tmpSourceAlias = "TEMP_source";
+            String tmpSourceAlias = "TEMP_src";
 
             exp.getSource().accept(this);
             Select source = this.getSelect();
@@ -1565,6 +2326,7 @@ public class SimpleOclParser implements ParserVisitor {
                 }
             }
 
+            join.setOnExpression(onExp);
             plainSelect.setJoins(Arrays.asList(join));
         }
 
@@ -1613,8 +2375,6 @@ public class SimpleOclParser implements ParserVisitor {
 
         plainSelect.createTrueValColumn();
 
-        TypeSelectExpression type = new TypeSelectExpression("Boolean");
-
         if (isFvExpEmpty) {
             Function count = new Function();
             count.setName("COUNT");
@@ -1625,8 +2385,6 @@ public class SimpleOclParser implements ParserVisitor {
 
             ResSelectExpression res = new ResSelectExpression(resExp);
             plainSelect.setRes(res);
-
-            plainSelect.setType(type);
 
             plainSelect.setFromItem(tmpSrc);
 
@@ -1650,8 +2408,6 @@ public class SimpleOclParser implements ParserVisitor {
 
             ResSelectExpression res = new ResSelectExpression(resCase);
             plainSelect.setRes(res);
-
-            plainSelect.setType(type);
 
             VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
 
@@ -1694,8 +2450,6 @@ public class SimpleOclParser implements ParserVisitor {
 
         plainSelect.createTrueValColumn();
 
-        TypeSelectExpression type = new TypeSelectExpression("Boolean");
-
         if (isFvExpEmpty) {
             Function count = new Function();
             count.setName("COUNT");
@@ -1706,8 +2460,6 @@ public class SimpleOclParser implements ParserVisitor {
 
             ResSelectExpression res = new ResSelectExpression(resExp);
             plainSelect.setRes(res);
-
-            plainSelect.setType(type);
 
             plainSelect.setFromItem(tmpSrc);
 
@@ -1732,8 +2484,6 @@ public class SimpleOclParser implements ParserVisitor {
             ResSelectExpression res = new ResSelectExpression(resCase);
             plainSelect.setRes(res);
 
-            plainSelect.setType(type);
-
             VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
 
             plainSelect.setFromItem(tmpSrc);
@@ -1746,7 +2496,7 @@ public class SimpleOclParser implements ParserVisitor {
                     Arrays.asList(tmpSrcAlias, "ref_".concat(v.getName()))));
             }
             groupByExps.add(new Column(Arrays.asList(tmpSrcAlias, "val")));
-            
+
             groupBy.setGroupByExpressions(groupByExps);
 
             plainSelect.setGroupByElement(groupBy);
@@ -1774,8 +2524,6 @@ public class SimpleOclParser implements ParserVisitor {
         // . End preparation
         plainSelect.createTrueValColumn();
 
-        TypeSelectExpression type = new TypeSelectExpression("Boolean");
-
         Function countRes = new Function();
         countRes.setName("COUNT");
         ExpressionList expLs = new ExpressionList(
@@ -1795,8 +2543,6 @@ public class SimpleOclParser implements ParserVisitor {
         if (isFvExpEmpty) {
             ResSelectExpression res = new ResSelectExpression(countExp);
             plainSelect.setRes(res);
-
-            plainSelect.setType(type);
 
             plainSelect.setFromItem(tmpSrc);
 
@@ -1860,9 +2606,6 @@ public class SimpleOclParser implements ParserVisitor {
         com.vgu.se.jocl.expressions.Expression srcExp = exp.getSource();
         srcExp.accept(this);
 
-        String srcType = srcExp.getType().getReferredType()
-            .replaceAll("Col\\((\\w+)\\)", "$1");
-
         Select srcMap = this.getSelect();
         SubSelect tmpSrc = new SubSelect(srcMap.getSelectBody(), tmpSrcAlias);
 
@@ -1877,8 +2620,10 @@ public class SimpleOclParser implements ParserVisitor {
         List<Variable> svBody = VariableUtils.SVars(bodyExp);
         List<Variable> svSrc = VariableUtils.SVars(srcExp);
 
-        List<Variable> svBodyComplement = VariableUtils.getComplement(svSrc, svBody);
-        List<Variable> svBodyComplementExcludeCurrentVar = VariableUtils.getComplement(svBodyComplement, Arrays.asList(v));
+        List<Variable> svBodyComplement = VariableUtils.getComplement(svSrc,
+            svBody);
+        List<Variable> svBodyComplementExcludeCurrentVar = VariableUtils
+            .getComplement(svBodyComplement, Arrays.asList(v));
 
         // . End preparation
 
@@ -1891,10 +2636,6 @@ public class SimpleOclParser implements ParserVisitor {
             ResSelectExpression res = new ResSelectExpression(new Column(
                 Arrays.asList(tmpBodyAlias, ("ref_").concat(v.getName()))));
             plainSelect.setRes(res);
-
-            TypeSelectExpression type = new TypeSelectExpression(
-                new StringValue(srcType));
-            plainSelect.setType(type);
 
             plainSelect.setFromItem(tmpBody);
 
@@ -1954,12 +2695,9 @@ public class SimpleOclParser implements ParserVisitor {
             ResSelectExpression res = new ResSelectExpression(resCase);
             plainSelect.setRes(res);
 
-            TypeSelectExpression type = new TypeSelectExpression(
-                new Column(Arrays.asList(tmpSrcAlias, "type")));
-            plainSelect.setType(type);
-
             VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
-            VariableUtils.addVar(svBodyComplementExcludeCurrentVar, plainSelect, tmpBodyAlias);
+            VariableUtils.addVar(svBodyComplementExcludeCurrentVar, plainSelect,
+                tmpBodyAlias);
 
             plainSelect.setFromItem(tmpSrc);
 
@@ -2015,7 +2753,7 @@ public class SimpleOclParser implements ParserVisitor {
         PlainSelect plainSelect = new PlainSelect();
 
         // Preparation
-        String tmpBodyAlias = "TEMP_BODY";
+        String tmpBodyAlias = "TEMP_body";
 
         com.vgu.se.jocl.expressions.Expression bodyExp = exp.getBody();
 
@@ -2024,7 +2762,7 @@ public class SimpleOclParser implements ParserVisitor {
         SubSelect tmpBody = new SubSelect(bodyMap.getSelectBody(),
             tmpBodyAlias);
 
-        String tmpSourceAlias = "TEMP_SOURCE";
+        String tmpSourceAlias = "TEMP_src";
 
         com.vgu.se.jocl.expressions.Expression sourceExp = exp.getSource();
 
@@ -2040,12 +2778,14 @@ public class SimpleOclParser implements ParserVisitor {
 
         List<Variable> fvBody = VariableUtils.FVars(bodyExp);
         boolean isVarInFvBody = fvBody.contains(vExp);
-        
+
         List<Variable> svBody = VariableUtils.SVars(bodyExp);
         List<Variable> svSrc = VariableUtils.SVars(sourceExp);
 
-        List<Variable> svBodyComplement = VariableUtils.getComplement(svSrc, svBody);
-        List<Variable> svBodyComplementExcludeCurrentVar = VariableUtils.getComplement(svBodyComplement, Arrays.asList(vExp));
+        List<Variable> svBodyComplement = VariableUtils.getComplement(svSrc,
+            svBody);
+        List<Variable> svBodyComplementExcludeCurrentVar = VariableUtils
+            .getComplement(svBodyComplement, Arrays.asList(vExp));
 
         String vName = exp.getIterator().getName();
 
@@ -2061,15 +2801,8 @@ public class SimpleOclParser implements ParserVisitor {
             ResSelectExpression res = new ResSelectExpression(resCol);
             plainSelect.setRes(res);
 
-            Column typeCol = new Column(fromTable, "type");
-            TypeSelectExpression type = new TypeSelectExpression(typeCol);
-            plainSelect.setType(type);
-
             // Case 1
             if (isVarInFvBody) {
-                String srcType = sourceExp.getType().getReferredType()
-                    .replaceAll("Col\\((\\w+)\\)", "$1");
-                type.setExpression(new StringValue(srcType));
 
                 fromTable.setName(tmpBodyAlias);
 
@@ -2142,14 +2875,10 @@ public class SimpleOclParser implements ParserVisitor {
             ResSelectExpression res = new ResSelectExpression(resCase);
             plainSelect.setRes(res);
 
-            // Type column
-            TypeSelectExpression type = new TypeSelectExpression(
-                new Column(Arrays.asList(tmpSourceAlias, "type")));
-            plainSelect.setType(type);
-            
             // Ref columns
             VariableUtils.addVar(svSrc, plainSelect, tmpSourceAlias);
-            VariableUtils.addVar(svBodyComplementExcludeCurrentVar, plainSelect, tmpBodyAlias);
+            VariableUtils.addVar(svBodyComplementExcludeCurrentVar, plainSelect,
+                tmpBodyAlias);
 
             plainSelect.setFromItem(tmpSource);
 
@@ -2213,10 +2942,6 @@ public class SimpleOclParser implements ParserVisitor {
         PlainSelect plainSelect = new PlainSelect();
         plainSelect.createTrueValColumn();
 
-        TypeSelectExpression type = new TypeSelectExpression(
-            new StringValue("Boolean"));
-        plainSelect.setType(type);
-
         Function countAll = new Function();
         countAll.setName("COUNT");
         countAll.setAllColumns(true);
@@ -2226,23 +2951,22 @@ public class SimpleOclParser implements ParserVisitor {
         // .END preparation
 
         String tmpSourceAlias = "TEMP_SOURCE";
-        // Hoang: I fast fixed the issue by using shortcuts. Sorry anh
-        // An, I explained later...
+        OclExp sourceExp = (OclExp) exp.getSource();
         VariableExp outerVarExp = exp
             .getSource() instanceof AssociationClassCallExp
                 ? (VariableExp) ((AssociationClassCallExp) exp.getSource())
                     .getNavigationSource()
                 : null;
-        com.vgu.se.jocl.expressions.Expression sourceExp = Optional
-            .ofNullable((com.vgu.se.jocl.expressions.Expression) outerVarExp)
-            .orElse(exp.getSource());
+//        com.vgu.se.jocl.expressions.Expression sourceExp = Optional
+//            .ofNullable((com.vgu.se.jocl.expressions.Expression) outerVarExp)
+//            .orElse(exp.getSource());
         sourceExp.accept(this);
 
         Select sourceMap = this.getSelect();
         SubSelect tmpSource = new SubSelect(sourceMap.getSelectBody(),
             tmpSourceAlias);
 
-        String tmpBodyAlias = "TEMP_BODY";
+        String tmpBodyAlias = "TEMP_body";
         com.vgu.se.jocl.expressions.Expression bodyExp = exp.getBody();
         bodyExp.accept(this);
 
@@ -2286,7 +3010,8 @@ public class SimpleOclParser implements ParserVisitor {
             // Preparation for Case 2, 4
             List<Variable> sVarsSrc = VariableUtils.SVars(sourceExp);
             List<Variable> sVarsBody = VariableUtils.SVars(bodyExp);
-            Variable outerVar = outerVarExp.getVariable();
+//            Variable outerVar = outerVarExp.getVariable();
+            Variable outerVar = v;
 
             List<Variable> sVarsComplement = new ArrayList<Variable>(sVarsBody);
             sVarsComplement.removeAll(sVarsSrc);
@@ -2331,7 +3056,7 @@ public class SimpleOclParser implements ParserVisitor {
 
             // Right item of left join
             PlainSelect plainSelectInJoin = new PlainSelect();
-            
+
             plainSelectInJoin.createTrueValColumn();
 
             ResSelectExpression resInJoin = new ResSelectExpression(
@@ -2340,6 +3065,8 @@ public class SimpleOclParser implements ParserVisitor {
 
             List<Variable> sVarsBodyLessV = new ArrayList<Variable>(sVarsBody);
             sVarsBodyLessV.remove(v);
+
+//            System.out.println("Exp:" + exp.getOclStr() + "\nBody Exp:" + bodyExp.getOclStr() + "\n" + sVarsBody);
 
             VariableUtils.addVar(sVarsBodyLessV, plainSelectInJoin,
                 tmpBodyAlias);
@@ -2363,7 +3090,7 @@ public class SimpleOclParser implements ParserVisitor {
 
             BinaryExpression whereCond = buildBinExp("and", ifNullEq0,
                 tmpBodyValEq1);
-            plainSelect.setWhere(whereCond);
+            plainSelectInJoin.setWhere(whereCond);
 
             List<Expression> groupByExps = new ArrayList<Expression>();
             VariableUtils.addVarToList(sVarsBodyLessV, groupByExps,
@@ -2380,10 +3107,9 @@ public class SimpleOclParser implements ParserVisitor {
             join.setRightItem(tmpBodyInJoin);
 
             plainSelect.setJoins(Arrays.asList(join));
-
             BinaryExpression onExp = null;
-
             for (Variable refSrc : sVarsSrc) {
+
                 BinaryExpression refSrcEqRefBody = buildBinExp("=",
                     new Column(Arrays.asList(tmpSourceAlias,
                         "ref_".concat(refSrc.getName()))),
@@ -2398,6 +3124,7 @@ public class SimpleOclParser implements ParserVisitor {
             }
 
             join.setOnExpression(onExp);
+
         }
 
         return plainSelect;
@@ -2408,10 +3135,6 @@ public class SimpleOclParser implements ParserVisitor {
         PlainSelect plainSelect = new PlainSelect();
         plainSelect.createTrueValColumn();
 
-        TypeSelectExpression type = new TypeSelectExpression(
-            new StringValue("Boolean"));
-        plainSelect.setType(type);
-
         Function countAll = new Function();
         countAll.setName("COUNT");
         countAll.setAllColumns(true);
@@ -2421,7 +3144,7 @@ public class SimpleOclParser implements ParserVisitor {
         // .END preparation
 
         String tmpSourceAlias = "TEMP_SOURCE";
-//        OclExp sourceExp = exp.getSource();
+        OclExp sourceExp = (OclExp) exp.getSource();
         // Hoang: I fast fixed the issue by using shortcuts. Sorry anh
         // An, I explained later...
         VariableExp outerVarExp = exp
@@ -2429,16 +3152,16 @@ public class SimpleOclParser implements ParserVisitor {
                 ? (VariableExp) ((AssociationClassCallExp) exp.getSource())
                     .getNavigationSource()
                 : null;
-        com.vgu.se.jocl.expressions.Expression sourceExp = Optional
-            .ofNullable((com.vgu.se.jocl.expressions.Expression) outerVarExp)
-            .orElse(exp.getSource());
+//        com.vgu.se.jocl.expressions.Expression sourceExp = Optional
+//            .ofNullable((com.vgu.se.jocl.expressions.Expression) outerVarExp)
+//            .orElse(exp.getSource());
         sourceExp.accept(this);
 
         Select sourceMap = this.getSelect();
         SubSelect tmpSource = new SubSelect(sourceMap.getSelectBody(),
             tmpSourceAlias);
 
-        String tmpBodyAlias = "TEMP_BODY";
+        String tmpBodyAlias = "TEMP_body";
         com.vgu.se.jocl.expressions.Expression bodyExp = exp.getBody();
         bodyExp.accept(this);
 
@@ -2482,7 +3205,8 @@ public class SimpleOclParser implements ParserVisitor {
             // Preparation for Case 2, 4
             List<Variable> sVarsSrc = VariableUtils.SVars(sourceExp);
             List<Variable> sVarsBody = VariableUtils.SVars(bodyExp);
-            Variable outerVar = outerVarExp.getVariable();
+//            Variable outerVar = outerVarExp.getVariable();
+            Variable outerVar = v;
 
             List<Variable> sVarsComplement = new ArrayList<Variable>(sVarsBody);
             sVarsComplement.removeAll(sVarsSrc);
@@ -2516,19 +3240,15 @@ public class SimpleOclParser implements ParserVisitor {
             plainSelect.setFromItem(tmpSource);
 
             Join join = new Join();
-
             // Case 2
             if (isVarInFvBody) {
                 join.setLeft(true);
-
             } else { // Case 4
                 // No need!
             }
 
             // Right item of left join
             PlainSelect plainSelectInJoin = new PlainSelect();
-            
-            plainSelectInJoin.createTrueValColumn();
 
             ResSelectExpression resInJoin = new ResSelectExpression(
                 countAllEq0);
@@ -2562,9 +3282,7 @@ public class SimpleOclParser implements ParserVisitor {
             join.setRightItem(tmpBodyInJoin);
 
             plainSelect.setJoins(Arrays.asList(join));
-
             BinaryExpression onExp = null;
-
             for (Variable refSrc : sVarsSrc) {
                 BinaryExpression refSrcEqRefBody = buildBinExp("=",
                     new Column(Arrays.asList(tmpSourceAlias,
@@ -2601,9 +3319,6 @@ public class SimpleOclParser implements ParserVisitor {
         SubSelect tmpSource = new SubSelect(tmpSourceMap.getSelectBody(),
             tmpSourceAlias);
 
-        TypeSelectExpression type = new TypeSelectExpression(
-            new Column(Arrays.asList(tmpSourceAlias, "type")));
-
         List<Variable> fVarsExp = VariableUtils.FVars(exp);
         boolean isEmptyFvExp = fVarsExp.isEmpty();
 
@@ -2613,8 +3328,6 @@ public class SimpleOclParser implements ParserVisitor {
             ResSelectExpression res = new ResSelectExpression(
                 new Column(Arrays.asList(tmpSourceAlias, "res")));
             plainSelect.setRes(res);
-
-            plainSelect.setType(type);
 
             plainSelect.setFromItem(tmpSource);
 
@@ -2679,8 +3392,6 @@ public class SimpleOclParser implements ParserVisitor {
 
                 ResSelectExpression res = new ResSelectExpression(resCase);
                 plainSelect.setRes(res);
-
-                plainSelect.setType(type);
 
                 VariableUtils.addVar(sVarsSrcOfSrcExp, plainSelect,
                     tmpFlattenAlias);
@@ -2772,24 +3483,6 @@ public class SimpleOclParser implements ParserVisitor {
         binExp.setRightExpression(rightExp);
 
         return binExp;
-    }
-
-    @Override
-    public void visit(com.vgu.se.jocl.expressions.Expression exp) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void visit(OclExp oclExp) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void visit(SqlExp sqlExp) {
-        // TODO Auto-generated method stub
-
     }
 
 }

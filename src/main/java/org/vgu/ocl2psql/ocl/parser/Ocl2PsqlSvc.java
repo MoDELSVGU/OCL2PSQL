@@ -25,11 +25,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 
+import com.vgu.se.jocl.expressions.Expression;
+
 public abstract class Ocl2PsqlSvc {
 
     protected Boolean descriptionMode = false;
 
-    public abstract void setDataModelFromFile(String filePath)
+    public abstract void setDataModelFromFilePath(String filePath)
         throws FileNotFoundException, IOException, ParseException, Exception;
 
     public boolean getDescriptionMode() {
@@ -41,8 +43,12 @@ public abstract class Ocl2PsqlSvc {
     }
 
     public abstract String mapToString(String oclExp);
+    
+    public abstract String mapToString(Expression oclExp);
 
     public abstract Select mapToSQL(String oclExp);
+    
+    public abstract Select mapToSQL(Expression oclExp);
 
     public abstract void setDataModel(Object dm);
 
