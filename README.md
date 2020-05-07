@@ -1,5 +1,7 @@
 # OCL2PSQL
 
+***This branch (OCL2PSQL-fdse19-v1) is the first version of OCL2PSQL***
+
 The Object Constraint Language (OCL) is a textual, declarative language typically used as part of the UML standard for specifying constraints and queries on models.
 
 OCL2PSQL implements a novel mapping
