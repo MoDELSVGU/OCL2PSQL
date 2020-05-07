@@ -120,20 +120,20 @@ public class OCL2PSQLManualTest {
 //        "Car.allInstances()->collect(c|c.owners->size())",
 //        "Car.allInstances()->collect(c|c.owners->size() = 0)",
 //
-//        "Car.allInstances()->exists(c|true)",
-//        "Car.allInstances()->exists(c|false)",
-//        "Car.allInstances()->exists(c|c.color = 'black')",
-//        "Car.allInstances()->exists(c|c.owners->size() = 1)",
+        "Car.allInstances()->exists(c|true)",
+        "Car.allInstances()->exists(c|false)",
+        "Car.allInstances()->exists(c|c.color = 'black')",
+        "Car.allInstances()->exists(c|c.owners->size() = 1)",
 //
-//        "Car.allInstances()->forAll(c|false)",
-//        "Car.allInstances()->forAll(c|true)",
-//        "Car.allInstances()->forAll(c|c.color='black')",
-//        "Car.allInstances()->forAll(c|c.owners->size() = 1)",
+        "Car.allInstances()->forAll(c|false)",
+        "Car.allInstances()->forAll(c|true)",
+        "Car.allInstances()->forAll(c|c.color='black')",
+        "Car.allInstances()->forAll(c|c.owners->size() = 1)",
 
-//        "Car.allInstances()->forAll(c|c.owners->exists(p|p.name = 'Peter'))",
+        "Car.allInstances()->forAll(c|c.owners->exists(p|p.name = 'Peter'))",
         "Car.allInstances()->exists(c|c.owners->forAll(p|p.name = 'Peter'))",
-//        "Car.allInstances()->exists(c|c.owners->exists(p|p.name = 'Peter'))",
-//        "Car.allInstances()->forAll(c|c.owners->forAll(p|p.name = 'Peter'))"
+        "Car.allInstances()->exists(c|c.owners->exists(p|p.name = 'Peter'))",
+        "Car.allInstances()->forAll(c|c.owners->forAll(p|p.name = 'Peter'))"
     };
 
 }

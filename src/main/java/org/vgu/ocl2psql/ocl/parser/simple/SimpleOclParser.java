@@ -45,6 +45,7 @@ import com.vgu.se.jocl.expressions.LiteralExp;
 import com.vgu.se.jocl.expressions.M2MAssociationClassCallExp;
 import com.vgu.se.jocl.expressions.M2OAssociationClassCallExp;
 import com.vgu.se.jocl.expressions.O2OAssociationClassCallExp;
+import com.vgu.se.jocl.expressions.OclExp;
 import com.vgu.se.jocl.expressions.OperationCallExp;
 import com.vgu.se.jocl.expressions.PropertyCallExp;
 import com.vgu.se.jocl.expressions.RealLiteralExp;
@@ -3104,6 +3105,7 @@ public class SimpleOclParser implements ParserVisitor {
         // .END preparation
 
         String tmpSourceAlias = "TEMP_SOURCE";
+        OclExp sourceExp = (OclExp) exp.getSource();
         // Hoang: I fast fixed the issue by using shortcuts. Sorry anh
         // An, I explained later...
         VariableExp outerVarExp = exp
@@ -3111,9 +3113,9 @@ public class SimpleOclParser implements ParserVisitor {
                 ? (VariableExp) ((AssociationClassCallExp) exp.getSource())
                     .getNavigationSource()
                 : null;
-        com.vgu.se.jocl.expressions.Expression sourceExp = Optional
-            .ofNullable((com.vgu.se.jocl.expressions.Expression) outerVarExp)
-            .orElse(exp.getSource());
+//        com.vgu.se.jocl.expressions.Expression sourceExp = Optional
+//            .ofNullable((com.vgu.se.jocl.expressions.Expression) outerVarExp)
+//            .orElse(exp.getSource());
         sourceExp.accept(this);
 
         Select sourceMap = this.getSelect();
@@ -3164,7 +3166,8 @@ public class SimpleOclParser implements ParserVisitor {
             // Preparation for Case 2, 4
             List<Variable> sVarsSrc = VariableUtils.SVars(sourceExp);
             List<Variable> sVarsBody = VariableUtils.SVars(bodyExp);
-            Variable outerVar = outerVarExp.getVariable();
+//            Variable outerVar = outerVarExp.getVariable();
+            Variable outerVar = v;
 
             List<Variable> sVarsComplement = new ArrayList<Variable>(sVarsBody);
             sVarsComplement.removeAll(sVarsSrc);
@@ -3302,7 +3305,7 @@ public class SimpleOclParser implements ParserVisitor {
         // .END preparation
 
         String tmpSourceAlias = "TEMP_SOURCE";
-//        OclExp sourceExp = exp.getSource();
+        OclExp sourceExp = (OclExp) exp.getSource();
         // Hoang: I fast fixed the issue by using shortcuts. Sorry anh
         // An, I explained later...
         VariableExp outerVarExp = exp
@@ -3310,9 +3313,9 @@ public class SimpleOclParser implements ParserVisitor {
                 ? (VariableExp) ((AssociationClassCallExp) exp.getSource())
                     .getNavigationSource()
                 : null;
-        com.vgu.se.jocl.expressions.Expression sourceExp = Optional
-            .ofNullable((com.vgu.se.jocl.expressions.Expression) outerVarExp)
-            .orElse(exp.getSource());
+//        com.vgu.se.jocl.expressions.Expression sourceExp = Optional
+//            .ofNullable((com.vgu.se.jocl.expressions.Expression) outerVarExp)
+//            .orElse(exp.getSource());
         sourceExp.accept(this);
 
         Select sourceMap = this.getSelect();
@@ -3363,7 +3366,8 @@ public class SimpleOclParser implements ParserVisitor {
             // Preparation for Case 2, 4
             List<Variable> sVarsSrc = VariableUtils.SVars(sourceExp);
             List<Variable> sVarsBody = VariableUtils.SVars(bodyExp);
-            Variable outerVar = outerVarExp.getVariable();
+//            Variable outerVar = outerVarExp.getVariable();
+            Variable outerVar = v;
 
             List<Variable> sVarsComplement = new ArrayList<Variable>(sVarsBody);
             sVarsComplement.removeAll(sVarsSrc);
