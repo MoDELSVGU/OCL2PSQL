@@ -2007,7 +2007,7 @@ public class SimpleOclParser implements ParserVisitor {
 
         if (!isEmptySvIntxn) {
             BinaryExpression onExp = null;
-
+            join.setLeft(true);
             for (Variable v : sVarsIntxn) {
                 VarSelectExpression var = new VarSelectExpression(v.getName());
                 String refName = var.getRef().getAlias().getName();
@@ -2028,7 +2028,6 @@ public class SimpleOclParser implements ParserVisitor {
 
         // Case 2
         if (!isEmptyFvLeft && isSubsetSvRightOfSvLeft) {
-            join.setLeft(true);
             VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
 
             plainSelect.setFromItem(tmpLeft);
@@ -2036,7 +2035,6 @@ public class SimpleOclParser implements ParserVisitor {
         }
         // case 3
         else if (!isEmptyFvRight && isSubsetSvLeftOfSvRight) {
-            join.setLeft(true);
             VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
 
             plainSelect.setFromItem(tmpRight);
@@ -2954,8 +2952,6 @@ public class SimpleOclParser implements ParserVisitor {
 
         String tmpSourceAlias = "TEMP_SOURCE";
         OclExp sourceExp = (OclExp) exp.getSource();
-        // Hoang: I fast fixed the issue by using shortcuts. Sorry anh
-        // An, I explained later...
         VariableExp outerVarExp = exp
             .getSource() instanceof AssociationClassCallExp
                 ? (VariableExp) ((AssociationClassCallExp) exp.getSource())
@@ -3068,7 +3064,7 @@ public class SimpleOclParser implements ParserVisitor {
             plainSelectInJoin.setRes(resInJoin);
 
             List<Variable> sVarsBodyLessV = new ArrayList<Variable>(sVarsBody);
-            sVarsBodyLessV.remove(v);
+//            sVarsBodyLessV.remove(v);
 
 //            System.out.println("Exp:" + exp.getOclStr() + "\nBody Exp:" + bodyExp.getOclStr() + "\n" + sVarsBody);
 
@@ -3149,8 +3145,6 @@ public class SimpleOclParser implements ParserVisitor {
 
         String tmpSourceAlias = "TEMP_SOURCE";
         OclExp sourceExp = (OclExp) exp.getSource();
-        // Hoang: I fast fixed the issue by using shortcuts. Sorry anh
-        // An, I explained later...
         VariableExp outerVarExp = exp
             .getSource() instanceof AssociationClassCallExp
                 ? (VariableExp) ((AssociationClassCallExp) exp.getSource())
@@ -3259,7 +3253,7 @@ public class SimpleOclParser implements ParserVisitor {
             plainSelectInJoin.setRes(resInJoin);
 
             List<Variable> sVarsBodyLessV = new ArrayList<Variable>(sVarsBody);
-            sVarsBodyLessV.remove(v);
+//            sVarsBodyLessV.remove(v);
 
             VariableUtils.addVar(sVarsBodyLessV, plainSelectInJoin,
                 tmpBodyAlias);
