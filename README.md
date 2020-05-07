@@ -14,8 +14,8 @@ executed on mid- and large-size SQL databases.
 
 This web service is intended for readers of our manuscripts:
 
-* Mapping OCL into SQL: Challenges and Opportunities Ahead
-* OCL2PSQL: An OCL-to-SQL Code-Generator for Model-Driven Engineering
+* Mapping OCL into SQL: Challenges and Opportunities Ahead. ([pdf](http://ceur-ws.org/Vol-2513/paper1.pdf))
+* OCL2PSQL: An OCL-to-SQL Code-Generator for Model-Driven Engineering. ([doi.org/10.1007/978-3-030-35653-8_13](https://doi.org/10.1007/978-3-030-35653-8_13))
 
 Please, be aware that OCL2PSQL is an on-going research project.
 In particular, OCL2PSQL does **NOT** cover yet the full OCL language. 
