@@ -1,5 +1,11 @@
 # OCL2PSQL
 
+***(Dec, 2019) OCL2PSQL-fdse19-v1 is the first version of OCL2PSQL***
+
+***(Mar, 2020) OCL2PSQL-ttc2020-v2 is the second version of OCL2PSQL***
+
+***(???, ????) This branch (OCL2PSQL-v3) is the third version of OCL2PSQL***
+
 The Object Constraint Language (OCL) is a textual, declarative language typically used as part of the UML standard for specifying constraints and queries on models.
 
 OCL2PSQL implements a novel mapping
@@ -16,6 +22,7 @@ This web service is intended for readers of our manuscripts:
 
 * Mapping OCL into SQL: Challenges and Opportunities Ahead. ([pdf](http://ceur-ws.org/Vol-2513/paper1.pdf))
 * OCL2PSQL: An OCL-to-SQL Code-Generator for Model-Driven Engineering. ([doi.org/10.1007/978-3-030-35653-8_13](https://doi.org/10.1007/978-3-030-35653-8_13))
+* The TTC 2020 OCL2PSQL Case. ([pdf](https://www.transformation-tool-contest.eu/2020_ocl2sql.pdf))
 
 Please, be aware that OCL2PSQL is an on-going research project.
 In particular, OCL2PSQL does **NOT** cover yet the full OCL language. 
@@ -65,17 +72,7 @@ This table represents a detailed overview of supported Object Constraint Languag
 Interested readers can clone our project (and related submodules) using these commands:
 ```
 git clone https://github.com/ocl-vgu/OCL2PSQL.git
-```
-Then, please add the related submodules
-```
 git submodule update --init --recursive
-```
-And check out the corresponding branch OCL2PSQL-v2 for this project, for example:
-```
-cd jocl
-git checkout OCL2PSQL-v2
-cd ..\dm2schema
-git checkout OCL2PSQL-v2
 ```
 
 An easy way to use `OCL2PSQL` library is 
