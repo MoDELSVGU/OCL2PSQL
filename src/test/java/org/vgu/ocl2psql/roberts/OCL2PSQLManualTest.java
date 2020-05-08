@@ -60,28 +60,11 @@ public class OCL2PSQLManualTest {
         String resFile = "src/test/resources/bothResult_" + now + ".txt";
         try (FileWriter resWr = new FileWriter(resFile)) {
 
-//            for (int i = 0; i < legacyCases.length; i++) {
-//                resWr.append("\n\n================ ~ BEGIN ROBERT ~ ================\n\n");
-//                resWr.append(legacyCases[i]);
-//                resWr.append("\n\n===========================================");
-//
-//                resWr.append("\n================ ~ Robert ~ ================\n\n");
-//                String robert = test(robertO2P, legacyCases[i]);
-//                resWr.append(robert);
-//
-//                resWr.append("\n================ ~ //END ROBERT ~ ================\n\n");
-//            }
-
             for (int i = 0; i < simpleCases.length; i++) {
-//                resWr.append("\n\n================ ~ BEGIN SIMPLE ~ ================\n\n");
                 resWr.append(simpleCases[i]);
-//                resWr.append("\n\n===========================================");
                 resWr.append("\n");
-//                resWr.append("\n\n================ ~ Simple ~ ================\n\n");
                 String simple = test(simpleO2P, simpleCases[i]);
                 resWr.append(simple);
-
-//                resWr.append("\n================ ~ //END SIMPLE ~ ================\n\n");
             }
 
             resWr.flush();
@@ -89,7 +72,6 @@ public class OCL2PSQLManualTest {
     }
 
     private static String test(Ocl2PsqlSvc o2p, String oclExp) {
-//        System.out.println("\n=====\n" + oclExp + "\n=====\n");
         String finalStatementWithDescription = o2p.mapToString(oclExp);
         System.out.println(finalStatementWithDescription);
         System.out.println();
@@ -133,7 +115,12 @@ public class OCL2PSQLManualTest {
         "Car.allInstances()->forAll(c|c.owners->exists(p|p.name = 'Peter'))",
         "Car.allInstances()->exists(c|c.owners->forAll(p|p.name = 'Peter'))",
         "Car.allInstances()->exists(c|c.owners->exists(p|p.name = 'Peter'))",
-        "Car.allInstances()->forAll(c|c.owners->forAll(p|p.name = 'Peter'))"
+        "Car.allInstances()->forAll(c|c.owners->forAll(p|p.name = 'Peter'))",
+        
+//        "true",
+//        "self = caller",
+//        "self.supervisor->exists(s|s=caller)",
+//        "self = caller or self.supervisor->exists(s|s=caller)"
     };
 
 }
