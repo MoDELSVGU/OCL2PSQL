@@ -51,7 +51,8 @@ import org.vgu.dm2schema.sql.Function;
 import org.vgu.dm2schema.sql.Trigger;
 import org.vgu.dm2schema.sql.TriggerAction;
 import org.vgu.ocl2psql.main.OCL2PSQL_2;
-import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
+
+import com.vgu.se.jocl.exception.OclParserException;
 
 import net.sf.jsqlparser.schema.Database;
 import net.sf.jsqlparser.schema.Table;
@@ -158,7 +159,7 @@ public class DM2Schema {
 
     @SuppressWarnings("unused")
     private static List<String> generateInvariantFunctions(DataModel dataModel)
-        throws OclParseException, ParseException, IOException {
+        throws OclParserException, ParseException, IOException {
         List<String> invariantFunctions = new ArrayList<String>();
         List<Invariant> invariants = dataModel.getInvariantsFlatten();
         for (Invariant invariant : invariants) {
@@ -178,7 +179,7 @@ public class DM2Schema {
     }
 
     private static String translateToSQL(DataModel dataModel, String ocl)
-        throws OclParseException, ParseException, IOException {
+        throws OclParserException, ParseException, IOException {
         OCL2PSQL_2 ocl2sql = new OCL2PSQL_2();
         ocl2sql.setDescriptionMode(false);
         ocl2sql.setDataModel(dataModel);

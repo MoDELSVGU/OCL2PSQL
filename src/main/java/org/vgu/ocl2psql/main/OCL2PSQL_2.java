@@ -29,12 +29,12 @@ import org.json.simple.parser.ParseException;
 import org.vgu.dm2schema.dm.DataModel;
 import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
 import org.vgu.ocl2psql.ocl.parser.simple.SimpleO2PApi;
-import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 import org.vgu.se.ocl.parser.OCLParser;
 import org.vgu.se.sql.parser.SQLParser;
 import org.vgu.ttc2020.model.TTCReturnModel;
 
+import com.vgu.se.jocl.exception.OclParserException;
 import com.vgu.se.jocl.expressions.OclExp;
 
 import net.sf.jsqlparser.statement.Statement;
@@ -99,7 +99,7 @@ public class OCL2PSQL_2 {
     }
 
     public TTCReturnModel mapOCLStringToSQLString(String oclExpression)
-            throws OclParseException, ParseException, IOException {
+            throws OclParserException, ParseException, IOException {
         TTCReturnModel returnModel = new TTCReturnModel();
         final long startNanoTime = System.nanoTime();
         Statement statement = ocl2PsqlSvc.mapToSQL(oclExpression);
@@ -110,7 +110,7 @@ public class OCL2PSQL_2 {
     }
 
     public Statement mapOCLStringToSQLModel(String oclExpression)
-            throws OclParseException, ParseException, IOException {
+            throws OclParserException, ParseException, IOException {
         return ocl2PsqlSvc.mapToSQL(oclExpression);
     }
     

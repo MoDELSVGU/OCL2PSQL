@@ -21,7 +21,6 @@ package org.vgu.ocl2psql.ocl.parser.simple;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import org.vgu.dm2schema.dm.DataModel;
 import org.vgu.dm2schema.dm.DmUtils;
