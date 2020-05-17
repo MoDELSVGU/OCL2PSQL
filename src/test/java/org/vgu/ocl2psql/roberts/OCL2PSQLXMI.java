@@ -22,7 +22,7 @@ package org.vgu.ocl2psql.roberts;
 import java.io.IOException;
 import java.util.Scanner;
 
-import org.vgu.ocl2psql.main.OCL2PSQL_2;
+import org.vgu.ocl2psql.OCL2PSQL;
 import org.vgu.se.sql.EStatement;
 import org.vgu.se.sql.parser.SQLParser;
 
@@ -31,7 +31,7 @@ public class OCL2PSQLXMI {
         Scanner sc = new Scanner(System.in);
         String dataModel = sc.nextLine();
         String input = sc.nextLine();
-        OCL2PSQL_2 ocl2psql_2 = new OCL2PSQL_2();
+        OCL2PSQL ocl2psql_2 = new OCL2PSQL();
         try {
             EStatement sql = ocl2psql_2.mapOCLXMIToSQLXMI("CarPerson", dataModel, input).getEStatement();
             System.out.println(SQLParser.outputEStatementAsXMI(sql));

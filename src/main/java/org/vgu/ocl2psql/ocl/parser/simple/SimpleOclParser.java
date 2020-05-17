@@ -1,5 +1,5 @@
 /**************************************************************************
-Copyright 2019 Vietnamese-German-University
+Copyright 2019-2020 Vietnamese-German-University
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.vgu.dm2schema.dm.DataModel;
 import org.vgu.dm2schema.dm.DmUtils;
-import org.vgu.ocl2psql.ocl.parser.exception.OclException;
+import org.vgu.ocl2psql.ocl.parser.exception.MappingException;
 import org.vgu.ocl2psql.ocl.parser.utils.VariableUtils;
 import org.vgu.ocl2psql.sql.statement.select.Join;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
@@ -46,13 +46,10 @@ import com.vgu.se.jocl.expressions.O2OAssociationClassCallExp;
 import com.vgu.se.jocl.expressions.OclExp;
 import com.vgu.se.jocl.expressions.OperationCallExp;
 import com.vgu.se.jocl.expressions.PropertyCallExp;
-import com.vgu.se.jocl.expressions.RealLiteralExp;
 import com.vgu.se.jocl.expressions.StringLiteralExp;
 import com.vgu.se.jocl.expressions.TypeExp;
 import com.vgu.se.jocl.expressions.Variable;
 import com.vgu.se.jocl.expressions.VariableExp;
-import com.vgu.se.jocl.expressions.sql.functions.SqlFnCurdate;
-import com.vgu.se.jocl.expressions.sql.functions.SqlFnTimestampdiff;
 import com.vgu.se.jocl.visit.ParserVisitor;
 
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -261,7 +258,7 @@ public class SimpleOclParser implements ParserVisitor {
 
     private PlainSelect mapFlatten(OperationCallExp exp) {
         if (!(exp.getSource() instanceof IteratorExp)) {
-            throw new OclException(
+            throw new MappingException(
                 "Cannot flatten a source which is " + "not a collection.");
         }
 
@@ -995,16 +992,6 @@ public class SimpleOclParser implements ParserVisitor {
     }
 
     @Override
-    public void visit(RealLiteralExp realLiteralExp) {
-        PlainSelect plainSelect = map(realLiteralExp);
-
-        addComment(realLiteralExp, plainSelect);
-
-        this.select = new Select();
-        this.select.setSelectBody(plainSelect);
-    }
-
-    @Override
     public void visit(VariableExp variableExp) {
         PlainSelect plainSelect = map(variableExp);
 
@@ -1020,171 +1007,6 @@ public class SimpleOclParser implements ParserVisitor {
 
     }
 
-    @Override
-    public void visit(SqlFnCurdate sqlFnCurdate) {
-        PlainSelect plainSelect = new PlainSelect();
-        plainSelect.createTrueValColumn();
-
-        Function fn = new Function();
-        fn.setName(sqlFnCurdate.getName());
-
-        ResSelectExpression res = new ResSelectExpression(fn);
-        plainSelect.setRes(res);
-
-        addComment(sqlFnCurdate, plainSelect);
-
-        this.select = new Select();
-        this.select.setSelectBody(plainSelect);
-    }
-
-    @Override
-    public void visit(SqlFnTimestampdiff sqlFnTimestampdiff) {
-        PlainSelect plainSelect = mapSqlFnTimestampdiff(sqlFnTimestampdiff);
-
-        addComment(sqlFnTimestampdiff, plainSelect);
-
-        this.select = new Select();
-        this.select.setSelectBody(plainSelect);
-
-    }
-    // ***********************************************
-    // * Helpers
-    // ***********************************************
-
-    private PlainSelect mapSqlFnTimestampdiff(SqlFnTimestampdiff exp) {
-        PlainSelect plainSelect = new PlainSelect();
-
-        com.vgu.se.jocl.expressions.Expression leftExp = exp.getParams().get(0);
-        com.vgu.se.jocl.expressions.Expression rightExp = exp.getParams()
-            .get(1);
-        String unit = exp.getLiteralParams().get(0).getParam();
-
-        String tmpLeftAlias = "TEMP_LEFT";
-        String tmpRightAlias = "TEMP_RIGHT";
-
-        List<Variable> fVarsLeft = VariableUtils.FVars(leftExp);
-        List<Variable> fVarsRight = VariableUtils.FVars(rightExp);
-
-        boolean isEmptyFvLeft = fVarsLeft.isEmpty();
-        boolean isEmptyFvRight = fVarsRight.isEmpty();
-
-        Function fn = new Function();
-        fn.setName(exp.getName());
-
-        List<Expression> ls = new ArrayList<>();
-        ls.add(new Column(unit));
-        ls.add(new Column(Arrays.asList(tmpLeftAlias, "res")));
-        ls.add(new Column(Arrays.asList(tmpRightAlias, "res")));
-
-        fn.setParameters(new ExpressionList(ls));
-
-        ResSelectExpression res = new ResSelectExpression(fn);
-        plainSelect.setRes(res);
-
-        leftExp.accept(this);
-        Select leftMap = this.getSelect();
-        SubSelect tmpLeft = new SubSelect(leftMap.getSelectBody(),
-            tmpLeftAlias);
-
-        rightExp.accept(this);
-        Select rightMap = this.getSelect();
-        SubSelect tmpRight = new SubSelect(rightMap.getSelectBody(),
-            tmpRightAlias);
-
-        // Case 1
-        if (isEmptyFvLeft && isEmptyFvRight) {
-            plainSelect.createTrueValColumn();
-
-            plainSelect.setFromItem(tmpLeft);
-
-            Join join = new Join();
-            join.setRightItem(tmpRight);
-
-            plainSelect.setJoins(Arrays.asList(join));
-
-            return plainSelect;
-        }
-
-        // Preparation for Case 2, 3, 4
-        List<Variable> sVarsLeft = VariableUtils.SVars(leftExp);
-        List<Variable> sVarsRight = VariableUtils.SVars(rightExp);
-
-        boolean isSubsetSvLeftOfSvRight = sVarsRight.containsAll(sVarsLeft);
-        boolean isSubsetSvRightOfSvLeft = sVarsLeft.containsAll(sVarsRight);
-
-        List<Variable> sVarsIntxn = new ArrayList<Variable>(sVarsLeft);
-        sVarsIntxn.retainAll(sVarsRight);
-
-        boolean isEmptySvIntxn = sVarsIntxn.isEmpty();
-
-        CaseExpression caseVal = new CaseExpression();
-
-        BinaryExpression leftValEq0 = buildBinExp("=",
-            new Column(Arrays.asList(tmpLeftAlias, "val")), new LongValue(0L));
-
-        BinaryExpression rightValEq0 = buildBinExp("=",
-            new Column(Arrays.asList(tmpRightAlias, "val")), new LongValue(0L));
-
-        OrExpression orExp = new OrExpression(leftValEq0, rightValEq0);
-        caseVal.setSwitchExpression(orExp);
-
-        WhenClause whenClause = new WhenClause();
-        whenClause.setWhenExpression(new LongValue(1L));
-        whenClause.setThenExpression(new LongValue(0L));
-        caseVal.setWhenClauses(Arrays.asList(whenClause));
-
-        caseVal.setElseExpression(new LongValue(1L));
-
-        ValSelectExpression val = new ValSelectExpression(caseVal);
-        plainSelect.setVal(val);
-
-        Join join = new Join();
-
-        if (!isEmptySvIntxn) {
-            join.setLeft(true);
-
-            for (Variable v : sVarsIntxn) {
-                VarSelectExpression var = new VarSelectExpression(v.getName());
-                String refName = var.getRef().getAlias().getName();
-
-                BinaryExpression onExp = buildBinExp("=",
-                    new Column(Arrays.asList(tmpLeftAlias, refName)),
-                    new Column(Arrays.asList(tmpRightAlias, refName)));
-
-                join.setOnExpression(onExp);
-            }
-        }
-
-        // Case 2
-        if (!isEmptyFvLeft && isSubsetSvRightOfSvLeft) {
-            VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
-
-            plainSelect.setFromItem(tmpLeft);
-            join.setRightItem(tmpRight);
-        }
-        // case 3
-        else if (!isEmptyFvRight && isSubsetSvLeftOfSvRight) {
-            VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
-
-            plainSelect.setFromItem(tmpRight);
-            join.setRightItem(tmpLeft);
-        }
-        // case 4
-        else if (!isEmptyFvLeft && !isEmptyFvLeft && !isSubsetSvLeftOfSvRight
-            && !isSubsetSvRightOfSvLeft) {
-
-            VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
-            VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
-
-            plainSelect.setFromItem(tmpLeft);
-            join.setRightItem(tmpRight);
-        }
-
-        plainSelect.setJoins(Arrays.asList(join));
-
-        return plainSelect;
-    }
-
     private PlainSelect map(BooleanLiteralExp exp) {
         PlainSelect plainSelect = new PlainSelect();
         plainSelect.createTrueValColumn();
@@ -1197,17 +1019,6 @@ public class SimpleOclParser implements ParserVisitor {
     }
 
     private PlainSelect map(IntegerLiteralExp exp) {
-        PlainSelect plainSelect = new PlainSelect();
-        plainSelect.createTrueValColumn();
-
-        ResSelectExpression res = new ResSelectExpression(
-            new LongValue(exp.getValue().toString()));
-        plainSelect.setRes(res);
-
-        return plainSelect;
-    }
-
-    private PlainSelect map(RealLiteralExp exp) {
         PlainSelect plainSelect = new PlainSelect();
         plainSelect.createTrueValColumn();
 
@@ -1284,7 +1095,7 @@ public class SimpleOclParser implements ParserVisitor {
             .getNavigationSource() instanceof AssociationClassCallExp;
 
         if (!(isSourceVarExp || isSourceAssociationExp)) {
-            throw new OclException("Cannot parse expression");
+            throw new MappingException(String.format("PropertyCallExp %s's source is neither a VariableExp or an AssociationClassCallExp", exp.getOclStr()));
         }
 
         PlainSelect plainSelect = new PlainSelect();
@@ -1348,7 +1159,7 @@ public class SimpleOclParser implements ParserVisitor {
     private PlainSelect map(AssociationClassCallExp exp) {
 
 //        if (!(exp.getNavigationSource() instanceof VariableExp)) {
-//            throw new OclException("Cannot parse non Variable expression");
+//            throw new MappingException("Cannot parse non Variable expression");
 //        } else if (exp.getNavigationSource() instanceof AssociationClassCallExp) {
 //            return mapShortcut((AssociationClassCallExp) exp.getNavigationSource());
 //        }
@@ -3284,7 +3095,7 @@ public class SimpleOclParser implements ParserVisitor {
 
     private PlainSelect mapFlatten(IteratorExp exp) {
         if (!(exp.getSource() instanceof IteratorExp)) {
-            throw new OclException(
+            throw new MappingException(
                 "Cannot flatten a source which is " + "not a collection.");
         }
 

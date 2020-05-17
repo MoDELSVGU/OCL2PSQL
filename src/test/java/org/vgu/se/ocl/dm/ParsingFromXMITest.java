@@ -23,8 +23,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.vgu.dm2schema.dm.DataModel;
-import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
-import org.vgu.ocl2psql.ocl.parser.simple.SimpleO2PApi;
+import org.vgu.ocl2psql.OCL2PSQL;
+import org.vgu.ocl2psql.OCL2PSQLService;
+import org.vgu.ocl2psql.SimpleService;
 import org.vgu.se.ocl.parser.OCLParser;
 
 import com.vgu.se.jocl.expressions.OclExp;
@@ -64,10 +65,10 @@ public abstract class ParsingFromXMITest {
         for (String filePath : filePaths) {
             DataModel dm = OCLParser.extractDataModel(filePath);
             OclExp ocl = (OclExp) OCLParser.convertToExp(filePath);
-            Ocl2PsqlSvc simpleO2P = new SimpleO2PApi();
-            simpleO2P.setDataModel(dm);
-            simpleO2P.setDescriptionMode(true);
-            String finalStatementWithDescription = simpleO2P.mapToString(ocl);
+            OCL2PSQL ocl2PSQL = new OCL2PSQL();
+            ocl2PSQL.setDataModel(dm);
+            ocl2PSQL.setDescriptionMode(true);
+            String finalStatementWithDescription = ocl2PSQL.mapToString(ocl);
             System.out.println(finalStatementWithDescription);
         }
     }

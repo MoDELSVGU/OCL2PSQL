@@ -16,7 +16,7 @@ limitations under the License.
 @author: thian
 ***************************************************************************/
 
-package org.vgu.ocl2psql.ocl.parser.simple;
+package org.vgu.ocl2psql;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,7 +29,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.vgu.dm2schema.dm.DataModel;
-import org.vgu.ocl2psql.ocl.parser.Ocl2PsqlSvc;
+import org.vgu.ocl2psql.ocl.parser.simple.SimpleOclParser;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
 import org.vgu.ocl2psql.sql.statement.select.Select;
@@ -43,22 +43,29 @@ import com.vgu.se.jocl.types.Type;
 
 import net.sf.jsqlparser.statement.select.SelectItem;
 
-public class SimpleO2PApi extends Ocl2PsqlSvc {
+public class SimpleService extends OCL2PSQLService {
 
-    private DataModel dm;
-    
-    private SimpleParser parser = new SimpleParser();
-    private SimpleOclParser o2pParser = new SimpleOclParser();
+    protected DataModel dm;
 
-    public String mapToString(String oclExp) {
+    protected SimpleParser parser;
+    protected SimpleOclParser o2pParser;
+
+    public SimpleService() {
+        parser = new SimpleParser();
+        o2pParser = new SimpleOclParser();
+        setDescriptionMode(false);
+    }
+
+    @Override
+    protected String mapToString(String oclExp) {
         Select finalStatement = this.mapToSQL(oclExp);
         return m2t(finalStatement);
     }
 
-    public String m2t(Select finalStatement) {
+    protected String m2t(Select finalStatement) {
         if (descriptionMode == true) {
             String finalStatementString = finalStatement
-                    .toStringWithDescription();
+                .toStringWithDescription();
 
             return SQLAsStringUtils.applyIndent(finalStatementString);
 
@@ -68,7 +75,7 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
     }
 
     @Override
-    public Select mapToSQL(String oclExp) {
+    protected Select mapToSQL(String oclExp) {
 
         Expression newExp = parser.parse(oclExp, dm);
 
@@ -79,20 +86,19 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
     }
 
     @Override
-    public void setContextualType(String varName, String varType) {
-        parser.putAdhocContextualSet(
-                new Variable(varName, new Type(varType)));
+    protected void setContextualType(String varName, String varType) {
+        parser.putAdhocContextualSet(new Variable(varName, new Type(varType)));
     }
 
     private Select cookFinalStatement(Select finalStatement) {
         PlainSelect finalPlainSelect = (PlainSelect) finalStatement
-                .getSelectBody();
+            .getSelectBody();
 
         List<SelectItem> newSelectItems = new ArrayList<SelectItem>();
 
         for (SelectItem item : finalPlainSelect.getSelectItems()) {
             if (item instanceof ResSelectExpression
-                    || item instanceof ValSelectExpression) {
+                || item instanceof ValSelectExpression) {
                 newSelectItems.add(item);
             }
         }
@@ -104,34 +110,34 @@ public class SimpleO2PApi extends Ocl2PsqlSvc {
     }
 
     @Override
-    public void setDataModelFromFilePath(String filePath)
+    protected void setDataModelFromFilePath(String filePath)
         throws FileNotFoundException, IOException, ParseException, Exception {
         File dataModelFile = new File(filePath);
-        DataModel dataModel = new DataModel(new JSONParser().parse(
-                new FileReader(dataModelFile.getAbsolutePath())));
+        DataModel dataModel = new DataModel(new JSONParser()
+            .parse(new FileReader(dataModelFile.getAbsolutePath())));
         this.setDataModel(dataModel);
     }
 
     @Override
-    public void setDataModel(Object dm) {
+    protected void setDataModel(Object dm) {
         this.dm = (DataModel) dm;
     }
 
     @Override
-    public void setDataModelFromFile(JSONArray json) throws Exception {
+    protected void setDataModelFromFile(JSONArray json) throws Exception {
         DataModel dataModel = new DataModel(json);
         this.setDataModel(dataModel);
     }
 
     @Override
-    public String mapToString(Expression oclExp) {
+    protected String mapToString(Expression oclExp) {
         Select finalStatement = this.mapToSQL(oclExp);
 
         return m2t(finalStatement);
     }
 
     @Override
-    public Select mapToSQL(Expression oclExp) {
+    protected Select mapToSQL(Expression oclExp) {
         o2pParser.setDataModel(dm);
         oclExp.accept(o2pParser);
 

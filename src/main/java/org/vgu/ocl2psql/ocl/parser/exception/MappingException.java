@@ -7,7 +7,7 @@ package org.vgu.ocl2psql.ocl.parser.exception;
  * @author rherschke
  *
  */
-public class OclException extends RuntimeException {
+public class MappingException extends RuntimeException {
 
     /**
      * 
@@ -17,14 +17,14 @@ public class OclException extends RuntimeException {
     /**
      * 
      */
-    public OclException() {
+    public MappingException() {
 	// TODO Auto-generated constructor stub
     }
 
     /**
      * @param message
      */
-    public OclException(String message) {
+    public MappingException(String message) {
 	super(message);
 	// TODO Auto-generated constructor stub
     }
@@ -32,7 +32,7 @@ public class OclException extends RuntimeException {
     /**
      * @param cause
      */
-    public OclException(Throwable cause) {
+    public MappingException(Throwable cause) {
 	super(cause);
 	// TODO Auto-generated constructor stub
     }
@@ -41,7 +41,7 @@ public class OclException extends RuntimeException {
      * @param message
      * @param cause
      */
-    public OclException(String message, Throwable cause) {
+    public MappingException(String message, Throwable cause) {
 	super(message, cause);
 	// TODO Auto-generated constructor stub
     }

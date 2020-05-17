@@ -16,7 +16,7 @@ limitations under the License.
 @author: thian
 ***************************************************************************/
 
-package org.vgu.ocl2psql.ocl.parser;
+package org.vgu.ocl2psql;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -27,33 +27,33 @@ import org.vgu.ocl2psql.sql.statement.select.Select;
 
 import com.vgu.se.jocl.expressions.Expression;
 
-public abstract class Ocl2PsqlSvc {
+public abstract class OCL2PSQLService {
 
-    protected Boolean descriptionMode = false;
+    protected boolean descriptionMode;
 
-    public abstract void setDataModelFromFilePath(String filePath)
+    protected abstract void setDataModelFromFilePath(String filePath)
         throws FileNotFoundException, IOException, ParseException, Exception;
 
-    public boolean getDescriptionMode() {
+    protected boolean getDescriptionMode() {
         return this.getDescriptionMode();
     }
 
-    public void setDescriptionMode(Boolean descriptionMode) {
+    protected void setDescriptionMode(Boolean descriptionMode) {
         this.descriptionMode = descriptionMode;
     }
 
-    public abstract String mapToString(String oclExp);
+    protected abstract String mapToString(String oclExp);
     
-    public abstract String mapToString(Expression oclExp);
+    protected abstract String mapToString(Expression oclExp);
 
-    public abstract Select mapToSQL(String oclExp);
+    protected abstract Select mapToSQL(String oclExp);
     
-    public abstract Select mapToSQL(Expression oclExp);
+    protected abstract Select mapToSQL(Expression oclExp);
 
-    public abstract void setDataModel(Object dm);
+    protected abstract void setDataModel(Object dm);
 
-    public abstract void setContextualType(String varName, String varType);
+    protected abstract void setContextualType(String varName, String varType);
 
-    public abstract void setDataModelFromFile(JSONArray json) throws Exception;
+    protected abstract void setDataModelFromFile(JSONArray json) throws Exception;
 
 }
