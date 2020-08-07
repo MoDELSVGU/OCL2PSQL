@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.vgu.ocl2psql</groupId>
   <artifactId>ocl2psql</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.2</version>
   
   <dependencies>
   
@@ -10,7 +10,7 @@
 <dependency>
     <groupId>com.github.jsqlparser</groupId>
     <artifactId>jsqlparser</artifactId>
-    <version>2.1</version>
+    <version>3.1</version>
 </dependency>
   
  <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
