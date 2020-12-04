@@ -25,7 +25,6 @@ import java.util.List;
 import org.vgu.dm2schema.dm.DataModel;
 import org.vgu.dm2schema.dm.DmUtils;
 import org.vgu.ocl2psql.ocl.parser.exception.MappingException;
-import org.vgu.ocl2psql.ocl.parser.utils.VariableUtils;
 import org.vgu.ocl2psql.sql.statement.select.Join;
 import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
 import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
@@ -50,6 +49,7 @@ import com.vgu.se.jocl.expressions.StringLiteralExp;
 import com.vgu.se.jocl.expressions.TypeExp;
 import com.vgu.se.jocl.expressions.Variable;
 import com.vgu.se.jocl.expressions.VariableExp;
+import com.vgu.se.jocl.utils.VariableUtils;
 import com.vgu.se.jocl.visit.ParserVisitor;
 
 import net.sf.jsqlparser.expression.BinaryExpression;
