@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>SqlSI</name>
+	<name>org.vgu.ocl2psql</name>
 	<comment></comment>
 	<projects>
 	</projects>
