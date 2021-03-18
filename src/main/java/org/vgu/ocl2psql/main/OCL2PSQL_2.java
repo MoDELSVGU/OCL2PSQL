@@ -57,18 +57,12 @@ public class OCL2PSQL_2 {
 //        return returnModel;
 //    }
 //    
-//    public TTCReturnModel fromOCLXMIFileToSQLXMIStatement(File oclXMIFile) throws IOException {
-//        TTCReturnModel returnModel = new TTCReturnModel();
-//        DataModel dm = OCLParser.extractDataModel(oclXMIFile.getAbsolutePath());
-//        OclExp ocl = (OclExp) OCLParser.convertToExp(oclXMIFile.getAbsolutePath());
-//        ocl2PsqlSvc.setDataModel(dm);
-//        final long startNanoTime = System.nanoTime();
-//        Statement statement = ocl2PsqlSvc.mapToSQL(ocl);
-//        final long endNanoTime = System.nanoTime();
-//        returnModel.setOcl2sqlNanoTime(endNanoTime - startNanoTime);
-//        returnModel.setEStatement(SQLParser.transform(statement));
-//        return returnModel;
-//    }
+    public Statement fromOCLXMIFileToSQLStatement(File oclXMIFile) throws IOException {
+        DataModel dm = OCLParser.extractDataModel(oclXMIFile.getAbsolutePath());
+        OclExp ocl = (OclExp) OCLParser.convertToExp(oclXMIFile.getAbsolutePath());
+        ocl2PsqlSvc.setDataModel(dm);
+        return ocl2PsqlSvc.mapToSQL(ocl);
+    }
 
     public String mapOCLStringToSQLString(String oclExpression)
             throws OclParseException, ParseException, IOException {
