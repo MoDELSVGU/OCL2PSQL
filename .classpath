@@ -49,7 +49,7 @@
 	<classpathentry exported="true" kind="lib" path="src/main/resources/org.eclipse.equinox.common_3.10.300.v20190218-2100.jar"/>
 	<classpathentry exported="true" kind="lib" path="src/main/resources/org.eclipse.equinox.preferences_3.7.300.v20190218-2100.jar"/>
 	<classpathentry exported="true" kind="lib" path="src/main/resources/org.eclipse.osgi_3.13.300.v20190218-1622.jar"/>
-	<classpathentry exported="true" kind="lib" path="C:/Users/ngpbh/eclipse-workspace/ttc/ttc2020-ocl2sql/solutions/ReferenceXMI/dm2schema.jar"/>
-	<classpathentry exported="true" kind="lib" path="C:/Users/ngpbh/eclipse-workspace/ttc/ttc2020-ocl2sql/solutions/ReferenceXMI/jocl.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ngpbh/eclipse-modelling-workspace/OCL2PSQL-ttc/dm2schema.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ngpbh/eclipse-modelling-workspace/OCL2PSQL-ttc/jocl.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
