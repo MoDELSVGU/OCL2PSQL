@@ -18,7 +18,7 @@ limitations under the License.
 
 package org.vgu.ttc2020.model;
 
-import org.vgu.se.sql.EStatement;
+import sql.Statement;
 
 public class TTCReturnModel {
     private long ocl2sqlNanoTime;
@@ -32,11 +32,11 @@ public class TTCReturnModel {
         this.ocl2sqlNanoTime = ocl2sqlNanoTime;
     }
 
-    public EStatement getEStatement() {
-        return (EStatement) sql;
+    public Statement getEStatement() {
+        return (Statement) sql;
     }
 
-    public void setEStatement(EStatement sql) {
+    public void setEStatement(Statement sql) {
         this.sql = sql;
     }
 

@@ -58,37 +58,10 @@ public class OCL2PSQL_2 {
         return returnModel;
     }
     
-    public TTCReturnModel mapOCLXMIToSQLXMI(String dataModelName, String dataModel, String oclXMIExpression) throws IOException {
-        final String dirPath = System.getProperty("java.io.tmpdir");
+    public TTCReturnModel fromOCLXMIFileToSQLXMIStatement(File oclXMIFile) throws IOException {
         TTCReturnModel returnModel = new TTCReturnModel();
-        BufferedWriter output = null;
-        File dataModelFile = null;
-        try {
-            dataModelFile = new File(dirPath.concat("//").concat(dataModelName).concat(".xmi"));
-            output = new BufferedWriter(new FileWriter(dataModelFile));
-            output.write(dataModel);
-        } catch ( IOException e ) {
-            e.printStackTrace();
-        } finally {
-          if ( output != null ) {
-            output.close();
-          }
-        }
-        File file = null;
-        try {
-            file = new File(dirPath.concat("//").concat("input.xmi"));
-            output = new BufferedWriter(new FileWriter(file));
-            output.write(oclXMIExpression);
-        } catch ( IOException e ) {
-            e.printStackTrace();
-        } finally {
-          if ( output != null ) {
-            output.close();
-          }
-        }
-        String filePath = file.getAbsolutePath();
-        DataModel dm = OCLParser.extractDataModel(filePath);
-        OclExp ocl = (OclExp) OCLParser.convertToExp(filePath);
+        DataModel dm = OCLParser.extractDataModel(oclXMIFile.getAbsolutePath());
+        OclExp ocl = (OclExp) OCLParser.convertToExp(oclXMIFile.getAbsolutePath());
         ocl2PsqlSvc.setDataModel(dm);
         final long startNanoTime = System.nanoTime();
         Statement statement = ocl2PsqlSvc.mapToSQL(ocl);

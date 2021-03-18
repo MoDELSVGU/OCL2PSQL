@@ -142,7 +142,7 @@ public class DM2Schema {
             Trigger trigger = new Trigger(invariant.getLabel());
             trigger.setAction(TriggerAction.INSERT);
             trigger.setAfter(true);
-            trigger.setTable(new Table("Program"));
+//            trigger.setTable(new Table("Program"));
             DropTrigger dropTrigger = new DropTrigger();
             dropTrigger.setIfExists(true);
             dropTrigger.setTrigger(trigger);
@@ -200,12 +200,12 @@ public class DM2Schema {
         Database database = new Database(databaseName);
 
         DropDatabase dropDatabase = new DropDatabase();
-        dropDatabase.setName(database);
+//        dropDatabase.setName(database);
         dropDatabase.setIfExists(true);
         dbstatements.add(dropDatabase.toString());
 
         CreateDatabase createDatabase = new CreateDatabase();
-        createDatabase.setDatabase(database);
+//        createDatabase.setDatabase(database);
         dbstatements.add(createDatabase.toString());
 
         UseStatement useDatabase = new UseStatement(database.getDatabaseName());

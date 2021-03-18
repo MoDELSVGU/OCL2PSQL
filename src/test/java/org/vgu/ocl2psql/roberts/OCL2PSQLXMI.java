@@ -19,25 +19,77 @@ limitations under the License.
 
 package org.vgu.ocl2psql.roberts;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Scanner;
+import java.util.Arrays;
+import java.util.List;
 
 import org.vgu.ocl2psql.main.OCL2PSQL_2;
-import org.vgu.se.sql.EStatement;
 import org.vgu.se.sql.parser.SQLParser;
+
+import sql.Statement;
 
 public class OCL2PSQLXMI {
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        String dataModel = sc.nextLine();
-        String input = sc.nextLine();
-        OCL2PSQL_2 ocl2psql_2 = new OCL2PSQL_2();
-        try {
-            EStatement sql = ocl2psql_2.mapOCLXMIToSQLXMI("CarPerson", dataModel, input).getEStatement();
-            System.out.println(SQLParser.outputEStatementAsXMI(sql));
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    	List<String> tasks = Arrays.asList(
+    			 "Stage0Challenge0"
+    			,"Stage0Challenge1"
+    			,"Stage0Challenge2"
+    			,"Stage1Challenge0"
+    			,"Stage1Challenge1"
+    			,"Stage1Challenge2"
+    			,"Stage2Challenge0"
+    			,"Stage3Challenge0"
+    			,"Stage3Challenge1"
+    			,"Stage4Challenge0"
+    			,"Stage4Challenge1"
+    			,"Stage4Challenge2"
+    			,"Stage5Challenge0"
+    			,"Stage5Challenge1"
+    			,"Stage6Challenge0"
+    			,"Stage6Challenge1"
+    			,"Stage7Challenge0"
+    			,"Stage7Challenge1"
+    			,"Stage7Challenge2"
+    			,"Stage7Challenge3"
+    			,"Stage8Challenge0"
+    			,"Stage8Challenge1"
+    			,"Stage8Challenge2"
+    			,"Stage8Challenge3"
+    			,"Stage9Challenge0"
+    			,"Stage9Challenge1"
+    			,"Stage9Challenge2"
+    			,"Stage9Challenge3"
+    			);
+    	for(String task : tasks) {
+    		String oclExpXMIFullPath = "C:\\Users\\ngpbh\\eclipse-modelling-workspace\\OCLmt\\model\\%s.xmi";
+            String sqlExpXMIFullPath = "C:\\Users\\ngpbh\\eclipse-modelling-workspace\\SQLmt\\model\\%s.xmi";
+            OCL2PSQL_2 ocl2psql_2 = new OCL2PSQL_2();
+            try {
+            	String oclExpPath = String.format(oclExpXMIFullPath, task);
+            	File oclExpFile = new File(oclExpPath);
+                Statement sql = ocl2psql_2.fromOCLXMIFileToSQLXMIStatement(oclExpFile).getEStatement();
+                String sqlXMI = SQLParser.outputEStatementAsXMI(sql);
+    			BufferedWriter output = null;
+    			File dataModelFile = null;
+    			try {
+    				String sqlExpPath = String.format(sqlExpXMIFullPath, task);
+    				dataModelFile = new File(sqlExpPath);
+    				output = new BufferedWriter(new FileWriter(dataModelFile));
+    				output.write(sqlXMI);
+    			} catch (IOException e) {
+    				e.printStackTrace();
+    			} finally {
+    				if (output != null) {
+    					output.close();
+    				}
+    			}
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+    	}
     }
 }
