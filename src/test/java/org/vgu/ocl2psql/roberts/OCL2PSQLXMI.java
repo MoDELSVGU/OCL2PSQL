@@ -27,9 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.vgu.ocl2psql.main.OCL2PSQL_2;
-import org.vgu.se.sql.parser.SQLParser;
-
-import sql.Statement;
 
 public class OCL2PSQLXMI {
     public static void main(String[] args) {
@@ -70,15 +67,15 @@ public class OCL2PSQLXMI {
             try {
             	String oclExpPath = String.format(oclExpXMIFullPath, task);
             	File oclExpFile = new File(oclExpPath);
-                Statement sql = ocl2psql_2.fromOCLXMIFileToSQLXMIStatement(oclExpFile).getEStatement();
-                String sqlXMI = SQLParser.outputEStatementAsXMI(sql);
+//                Statement sql = ocl2psql_2.fromOCLXMIFileToSQLXMIStatement(oclExpFile).getEStatement();
+//                String sqlXMI = SQLParser.outputEStatementAsXMI(sql);
     			BufferedWriter output = null;
     			File dataModelFile = null;
     			try {
     				String sqlExpPath = String.format(sqlExpXMIFullPath, task);
     				dataModelFile = new File(sqlExpPath);
     				output = new BufferedWriter(new FileWriter(dataModelFile));
-    				output.write(sqlXMI);
+//    				output.write(sqlXMI);
     			} catch (IOException e) {
     				e.printStackTrace();
     			} finally {

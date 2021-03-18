@@ -32,7 +32,6 @@ import org.vgu.ocl2psql.ocl.parser.simple.SimpleO2PApi;
 import org.vgu.ocl2psql.ocl.roberts.exception.OclParseException;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 import org.vgu.se.ocl.parser.OCLParser;
-import org.vgu.se.sql.parser.SQLParser;
 import org.vgu.ttc2020.model.TTCReturnModel;
 
 import com.vgu.se.jocl.expressions.OclExp;
@@ -48,30 +47,30 @@ public class OCL2PSQL_2 {
         ocl2PsqlSvc.setDescriptionMode(false);
     }
     
-    public TTCReturnModel mapOCLStringToSQLXMI(String oclExpression) {
-        TTCReturnModel returnModel = new TTCReturnModel();
-        final long startNanoTime = System.nanoTime();
-        Statement statement = ocl2PsqlSvc.mapToSQL(oclExpression);
-        final long endNanoTime = System.nanoTime();
-        returnModel.setOcl2sqlNanoTime(endNanoTime - startNanoTime);
-        returnModel.setEStatement(SQLParser.transform(statement));
-        return returnModel;
-    }
-    
-    public TTCReturnModel fromOCLXMIFileToSQLXMIStatement(File oclXMIFile) throws IOException {
-        TTCReturnModel returnModel = new TTCReturnModel();
-        DataModel dm = OCLParser.extractDataModel(oclXMIFile.getAbsolutePath());
-        OclExp ocl = (OclExp) OCLParser.convertToExp(oclXMIFile.getAbsolutePath());
-        ocl2PsqlSvc.setDataModel(dm);
-        final long startNanoTime = System.nanoTime();
-        Statement statement = ocl2PsqlSvc.mapToSQL(ocl);
-        final long endNanoTime = System.nanoTime();
-        returnModel.setOcl2sqlNanoTime(endNanoTime - startNanoTime);
-        returnModel.setEStatement(SQLParser.transform(statement));
-        return returnModel;
-    }
+//    public TTCReturnModel mapOCLStringToSQLXMI(String oclExpression) {
+//        TTCReturnModel returnModel = new TTCReturnModel();
+//        final long startNanoTime = System.nanoTime();
+//        Statement statement = ocl2PsqlSvc.mapToSQL(oclExpression);
+//        final long endNanoTime = System.nanoTime();
+//        returnModel.setOcl2sqlNanoTime(endNanoTime - startNanoTime);
+//        returnModel.setEStatement(SQLParser.transform(statement));
+//        return returnModel;
+//    }
+//    
+//    public TTCReturnModel fromOCLXMIFileToSQLXMIStatement(File oclXMIFile) throws IOException {
+//        TTCReturnModel returnModel = new TTCReturnModel();
+//        DataModel dm = OCLParser.extractDataModel(oclXMIFile.getAbsolutePath());
+//        OclExp ocl = (OclExp) OCLParser.convertToExp(oclXMIFile.getAbsolutePath());
+//        ocl2PsqlSvc.setDataModel(dm);
+//        final long startNanoTime = System.nanoTime();
+//        Statement statement = ocl2PsqlSvc.mapToSQL(ocl);
+//        final long endNanoTime = System.nanoTime();
+//        returnModel.setOcl2sqlNanoTime(endNanoTime - startNanoTime);
+//        returnModel.setEStatement(SQLParser.transform(statement));
+//        return returnModel;
+//    }
 
-    public TTCReturnModel mapOCLStringToSQLString(String oclExpression)
+    public String mapOCLStringToSQLString(String oclExpression)
             throws OclParseException, ParseException, IOException {
         TTCReturnModel returnModel = new TTCReturnModel();
         final long startNanoTime = System.nanoTime();
@@ -79,7 +78,7 @@ public class OCL2PSQL_2 {
         final long endNanoTime = System.nanoTime();
         returnModel.setOcl2sqlNanoTime(endNanoTime - startNanoTime);
         returnModel.setStatement(((SimpleO2PApi) ocl2PsqlSvc).m2t((Select) statement));
-        return returnModel;
+        return returnModel.toString();
     }
 
     public Statement mapOCLStringToSQLModel(String oclExpression)
