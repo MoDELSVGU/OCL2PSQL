@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="C:/Users/ngpbh/eclipse-modelling-workspace/OCL2PSQL-ttc/dm2schema.jar"/>
-	<classpathentry exported="true" kind="lib" path="C:/Users/ngpbh/eclipse-modelling-workspace/OCL2PSQL-ttc/jocl.jar"/>
-	<classpathentry exported="true" kind="lib" path="ocl.jar"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
@@ -39,16 +36,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
-	<classpathentry exported="true" kind="lib" path="src/main/resources/javax.inject_1.0.0.v20091030.jar"/>
-	<classpathentry exported="true" kind="lib" path="src/main/resources/org.eclipse.core.contenttype_3.7.300.v20190215-2048.jar"/>
-	<classpathentry exported="true" kind="lib" path="src/main/resources/org.eclipse.core.jobs_3.10.300.v20190215-2048.jar"/>
-	<classpathentry exported="true" kind="lib" path="src/main/resources/org.eclipse.core.runtime_3.15.200.v20190301-1641.jar"/>
-	<classpathentry exported="true" kind="lib" path="src/main/resources/org.eclipse.emf.common_2.17.0.v20190920-0401.jar"/>
-	<classpathentry exported="true" kind="lib" path="src/main/resources/org.eclipse.emf.ecore_2.20.0.v20190920-0401.jar"/>
-	<classpathentry exported="true" kind="lib" path="src/main/resources/org.eclipse.emf.ecore.xmi_2.16.0.v20190528-0725.jar"/>
-	<classpathentry exported="true" kind="lib" path="src/main/resources/org.eclipse.equinox.app_1.4.100.v20190215-2139.jar"/>
-	<classpathentry exported="true" kind="lib" path="src/main/resources/org.eclipse.equinox.common_3.10.300.v20190218-2100.jar"/>
-	<classpathentry exported="true" kind="lib" path="src/main/resources/org.eclipse.equinox.preferences_3.7.300.v20190218-2100.jar"/>
-	<classpathentry exported="true" kind="lib" path="src/main/resources/org.eclipse.osgi_3.13.300.v20190218-1622.jar"/>
+	<classpathentry kind="lib" path="jocl.jar"/>
+	<classpathentry kind="lib" path="dm2schema.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
