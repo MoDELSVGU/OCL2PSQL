@@ -771,7 +771,8 @@ public class SimpleOclParser implements ParserVisitor {
         this.select.setSelectBody(plainSelect);
     }
 
-    private PlainSelect mapShortcut(AssociationClassCallExp exp) {
+    @SuppressWarnings("unused")
+	private PlainSelect mapShortcut(AssociationClassCallExp exp) {
 
         if (exp.getNavigationSource() instanceof VariableExp) {
             VariableExp variableExp = (VariableExp) exp.getNavigationSource();

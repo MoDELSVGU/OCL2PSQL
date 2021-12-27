@@ -1,0 +1,14 @@
+[
+{"class" : "A",
+ "attributes" : [
+    {"name" : "a", "type" : "String"}]
+},
+{"class" : "B",
+ "attributes" : [
+    {"name" : "b", "type" : "String"}]
+},
+{"association" : "C",
+ "ends" : ["ca", "cb"],
+ "classes" : ["B", "A"]
+}
+]
