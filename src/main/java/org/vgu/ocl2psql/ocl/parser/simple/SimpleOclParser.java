@@ -389,7 +389,7 @@ public class SimpleOclParser implements ParserVisitor {
                     }
                 }
 
-                join.setOnExpression(onExp);
+                join.addOnExpression(onExp);
 
                 plainSelect.setJoins(Arrays.asList(join));
             }
@@ -474,7 +474,7 @@ public class SimpleOclParser implements ParserVisitor {
             }
             groupByList.add(new Column(Arrays.asList(tmpSrcAlias, "val")));
 
-            groupBy.setGroupByExpressions(groupByList);
+            groupBy.addGroupByExpressions(groupByList);
 
             plainSelect.setGroupByElement(groupBy);
         }
@@ -548,7 +548,7 @@ public class SimpleOclParser implements ParserVisitor {
             }
             groupByExps.add(new Column(Arrays.asList(tmpSrcAlias, "val")));
 
-            groupBy.setGroupByExpressions(groupByExps);
+            groupBy.addGroupByExpressions(groupByExps);
 
             plainSelect.setGroupByElement(groupBy);
 
@@ -623,7 +623,7 @@ public class SimpleOclParser implements ParserVisitor {
             }
             groupByExps.add(new Column(Arrays.asList(tmpSrcAlias, "val")));
 
-            groupBy.setGroupByExpressions(groupByExps);
+            groupBy.addGroupByExpressions(groupByExps);
 
             plainSelect.setGroupByElement(groupBy);
 
@@ -689,7 +689,7 @@ public class SimpleOclParser implements ParserVisitor {
             groupByFields.add(new Column(Arrays.asList(tmpSourceAlias, "val")));
 
             GroupByElement groupByEl = new GroupByElement();
-            groupByEl.setGroupByExpressions(groupByFields);
+            groupByEl.addGroupByExpressions(groupByFields);
             plainSelect.setGroupByElement(groupByEl);
 
             return plainSelect;
@@ -896,7 +896,7 @@ public class SimpleOclParser implements ParserVisitor {
                     oppositeEndType.concat("_id"))),
                 new Column(Arrays.asList(referredEndType, oppositeEndName)));
 
-            leftJ.setOnExpression(EqOppos);
+            leftJ.addOnExpression(EqOppos);
 
             plainSelect.setJoins(Arrays.asList(leftJ));
         }
@@ -925,7 +925,7 @@ public class SimpleOclParser implements ParserVisitor {
             new Column(
                 Arrays.asList(oppositeEndType, oppositeEndType.concat("_id"))),
             new Column(Arrays.asList(associationTableName, oppositeEndName)));
-        leftJoin.setOnExpression(refVEqOppos);
+        leftJoin.addOnExpression(refVEqOppos);
         plainSelect.setJoins(Arrays.asList(leftJoin));
 
         ResSelectExpression res = new ResSelectExpression(
@@ -1152,7 +1152,7 @@ public class SimpleOclParser implements ParserVisitor {
             new Column(Arrays.asList(tmpObjAlias, "val")), new LongValue(1L));
 
         BinaryExpression onExp = buildBinExp("and", refVEqId, valEq1);
-        leftJ.setOnExpression(onExp);
+        leftJ.addOnExpression(onExp);
 
         return plainSelect;
     }
@@ -1241,7 +1241,7 @@ public class SimpleOclParser implements ParserVisitor {
             new Column(Arrays.asList(tmpObjAlias, "val")), new LongValue(1L));
 
         BinaryExpression onExp = buildBinExp("and", refVEqOppos, valEq1);
-        leftJ.setOnExpression(onExp);
+        leftJ.addOnExpression(onExp);
 
         plainSelect.setJoins(Arrays.asList(leftJ));
 
@@ -1332,7 +1332,7 @@ public class SimpleOclParser implements ParserVisitor {
                 new LongValue(1L));
 
             BinaryExpression onExp = buildBinExp("and", refVEqOppos, valEq1);
-            leftJ.setOnExpression(onExp);
+            leftJ.addOnExpression(onExp);
 
             plainSelect.setJoins(Arrays.asList(leftJ));
 
@@ -1391,7 +1391,7 @@ public class SimpleOclParser implements ParserVisitor {
                 new LongValue(1L));
 
             BinaryExpression onExp = buildBinExp("and", refVEqOppos, valEq1);
-            leftJ.setOnExpression(onExp);
+            leftJ.addOnExpression(onExp);
 
             plainSelect.setJoins(Arrays.asList(leftJ));
 
@@ -1464,7 +1464,7 @@ public class SimpleOclParser implements ParserVisitor {
             new Column(Arrays.asList(tmpObjAlias, "val")), new LongValue(1L));
 
         BinaryExpression onExp = buildBinExp("and", refVEqOppos, valEq1);
-        leftJ.setOnExpression(onExp);
+        leftJ.addOnExpression(onExp);
 
         plainSelect.setJoins(Arrays.asList(leftJ));
 
@@ -1695,7 +1695,7 @@ public class SimpleOclParser implements ParserVisitor {
             BinaryExpression resEqId = buildBinExp("=",
                 new Column(Arrays.asList(tmpSrcAlias, "res")), new Column(
                     Arrays.asList(typeCastedTo, typeCastedTo.concat("_id"))));
-            join.setOnExpression(resEqId);
+            join.addOnExpression(resEqId);
 
             plainSelect.setJoins(Arrays.asList(join));
         }
@@ -1834,7 +1834,7 @@ public class SimpleOclParser implements ParserVisitor {
                 }
             }
 
-            join.setOnExpression(onExp);
+            join.addOnExpression(onExp);
         }
 
         // Case 2
@@ -1967,7 +1967,7 @@ public class SimpleOclParser implements ParserVisitor {
                     new Column(Arrays.asList(tmpLeftAlias, refName)),
                     new Column(Arrays.asList(tmpRightAlias, refName)));
 
-                join.setOnExpression(onExp);
+                join.addOnExpression(onExp);
             }
         }
 
@@ -2058,7 +2058,7 @@ public class SimpleOclParser implements ParserVisitor {
             groupByFields.add(new Column(Arrays.asList(tmpSourceAlias, "val")));
 
             GroupByElement groupByEl = new GroupByElement();
-            groupByEl.setGroupByExpressions(groupByFields);
+            groupByEl.addGroupByExpressions(groupByFields);
             plainSelect.setGroupByElement(groupByEl);
 
             return plainSelect;
@@ -2137,7 +2137,7 @@ public class SimpleOclParser implements ParserVisitor {
                 }
             }
 
-            join.setOnExpression(onExp);
+            join.addOnExpression(onExp);
             plainSelect.setJoins(Arrays.asList(join));
         }
 
@@ -2233,7 +2233,7 @@ public class SimpleOclParser implements ParserVisitor {
             }
             groupByExps.add(new Column(Arrays.asList(tmpSrcAlias, "val")));
 
-            groupBy.setGroupByExpressions(groupByExps);
+            groupBy.addGroupByExpressions(groupByExps);
 
             plainSelect.setGroupByElement(groupBy);
 
@@ -2308,7 +2308,7 @@ public class SimpleOclParser implements ParserVisitor {
             }
             groupByExps.add(new Column(Arrays.asList(tmpSrcAlias, "val")));
 
-            groupBy.setGroupByExpressions(groupByExps);
+            groupBy.addGroupByExpressions(groupByExps);
 
             plainSelect.setGroupByElement(groupBy);
 
@@ -2393,7 +2393,7 @@ public class SimpleOclParser implements ParserVisitor {
             }
             groupByList.add(new Column(Arrays.asList(tmpSrcAlias, "val")));
 
-            groupBy.setGroupByExpressions(groupByList);
+            groupBy.addGroupByExpressions(groupByList);
 
             plainSelect.setGroupByElement(groupBy);
         }
@@ -2551,7 +2551,7 @@ public class SimpleOclParser implements ParserVisitor {
                 onCond = buildBinExp("and", onCond, srcRefEqbodyRef);
             }
 
-            join.setOnExpression(onCond);
+            join.addOnExpression(onCond);
 
             plainSelect.setJoins(Arrays.asList(join));
 
@@ -2740,7 +2740,7 @@ public class SimpleOclParser implements ParserVisitor {
                 onCond = buildBinExp("and", onCond, refBinExp);
             }
 
-            join.setOnExpression(onCond);
+            join.addOnExpression(onCond);
 
             plainSelect.setJoins(Arrays.asList(join));
         }
@@ -2899,7 +2899,7 @@ public class SimpleOclParser implements ParserVisitor {
                 tmpBodyAlias);
 
             GroupByElement groupBy = new GroupByElement();
-            groupBy.setGroupByExpressions(groupByExps);
+            groupBy.addGroupByExpressions(groupByExps);
 
             plainSelectInJoin.setGroupByElement(groupBy);
 
@@ -2925,7 +2925,7 @@ public class SimpleOclParser implements ParserVisitor {
                 }
             }
 
-            join.setOnExpression(onExp);
+            join.addOnExpression(onExp);
 
         }
 
@@ -3063,7 +3063,7 @@ public class SimpleOclParser implements ParserVisitor {
                 tmpBodyAlias);
 
             GroupByElement groupBy = new GroupByElement();
-            groupBy.setGroupByExpressions(groupByExps);
+            groupBy.addGroupByExpressions(groupByExps);
 
             plainSelectInJoin.setGroupByElement(groupBy);
 
@@ -3088,7 +3088,7 @@ public class SimpleOclParser implements ParserVisitor {
                 }
             }
 
-            join.setOnExpression(onExp);
+            join.addOnExpression(onExp);
         }
 
         return plainSelect;
@@ -3229,7 +3229,7 @@ public class SimpleOclParser implements ParserVisitor {
                     }
                 }
 
-                join.setOnExpression(onExp);
+                join.addOnExpression(onExp);
 
                 plainSelect.setJoins(Arrays.asList(join));
             }

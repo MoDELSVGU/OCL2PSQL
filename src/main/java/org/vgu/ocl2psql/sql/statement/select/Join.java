@@ -22,7 +22,8 @@ package org.vgu.ocl2psql.sql.statement.select;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 
 public class Join extends net.sf.jsqlparser.statement.select.Join {
-    public String toStringWithDescription() {
+    @SuppressWarnings("deprecation")
+	public String toStringWithDescription() {
         String rightItem;
         if(super.getRightItem() instanceof SubSelect) {
             rightItem = ((SubSelect) super.getRightItem()).toStringWithDescription();
