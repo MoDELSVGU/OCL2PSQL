@@ -18,23 +18,16 @@ limitations under the License.
 
 package org.vgu.ocl2psql;
 
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 
 import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
 import org.vgu.dm2schema.dm.DataModel;
 import org.vgu.ocl2psql.sql.statement.select.Select;
-import org.vgu.se.ocl.parser.OCLParser;
-import org.vgu.se.sql.parser.SQLParser;
-import org.vgu.ttc2020.model.TTCReturnModel;
 
 import com.vgu.se.jocl.exception.OclParserException;
 import com.vgu.se.jocl.expressions.Expression;
-import com.vgu.se.jocl.expressions.OclExp;
 
 import net.sf.jsqlparser.statement.Statement;
 
@@ -88,116 +81,9 @@ public class OCL2PSQL {
         service.setDataModel(dataModel);
     }
 
-    public TTCReturnModel mapOCLStringToSQLXMI(String oclExpression) {
-        TTCReturnModel returnModel = new TTCReturnModel();
-        final long startNanoTime = System.nanoTime();
-        Statement statement = service.mapToSQL(oclExpression);
-        final long endNanoTime = System.nanoTime();
-        returnModel.setOcl2sqlNanoTime(endNanoTime - startNanoTime);
-        returnModel.setEStatement(SQLParser.transform(statement));
-        return returnModel;
-    }
-
-    public TTCReturnModel mapOCLXMIToSQLXMI(String dataModelName,
-        String dataModel, String oclXMIExpression) throws IOException {
-        final String dirPath = System.getProperty("java.io.tmpdir");
-        TTCReturnModel returnModel = new TTCReturnModel();
-        BufferedWriter output = null;
-        File dataModelFile = null;
-        try {
-            dataModelFile = new File(
-                dirPath.concat("//").concat(dataModelName).concat(".xmi"));
-            output = new BufferedWriter(new FileWriter(dataModelFile));
-            output.write(dataModel);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (output != null) {
-                output.close();
-            }
-        }
-        File file = null;
-        try {
-            file = new File(dirPath.concat("//").concat("input.xmi"));
-            output = new BufferedWriter(new FileWriter(file));
-            output.write(oclXMIExpression);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (output != null) {
-                output.close();
-            }
-        }
-        String filePath = file.getAbsolutePath();
-        DataModel dm = OCLParser.extractDataModel(filePath);
-        OclExp ocl = (OclExp) OCLParser.convertToExp(filePath);
-        service.setDataModel(dm);
-        final long startNanoTime = System.nanoTime();
-        Statement statement = service.mapToSQL(ocl);
-        final long endNanoTime = System.nanoTime();
-        returnModel.setOcl2sqlNanoTime(endNanoTime - startNanoTime);
-        returnModel.setEStatement(SQLParser.transform(statement));
-        return returnModel;
-    }
-
-    public TTCReturnModel mapOCLStringToSQLString(String oclExpression)
-        throws OclParserException, ParseException, IOException {
-        TTCReturnModel returnModel = new TTCReturnModel();
-        final long startNanoTime = System.nanoTime();
-        Statement statement = service.mapToSQL(oclExpression);
-        final long endNanoTime = System.nanoTime();
-        returnModel.setOcl2sqlNanoTime(endNanoTime - startNanoTime);
-        returnModel
-            .setStatement(((SimpleService) service).m2t((Select) statement));
-        return returnModel;
-    }
-
     public Statement mapOCLStringToSQLModel(String oclExpression)
         throws OclParserException, ParseException, IOException {
         return service.mapToSQL(oclExpression);
-    }
-
-    public TTCReturnModel mapOCLXMIToSQLString(String dataModelName,
-        String dataModel, String oclXMIExpression) throws IOException {
-        final String dirPath = System.getProperty("java.io.tmpdir");
-        TTCReturnModel returnModel = new TTCReturnModel();
-        BufferedWriter output = null;
-        File dataModelFile = null;
-        try {
-            dataModelFile = new File(
-                dirPath.concat("//").concat(dataModelName).concat(".xmi"));
-            output = new BufferedWriter(new FileWriter(dataModelFile));
-            output.write(dataModel);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (output != null) {
-                output.close();
-            }
-        }
-        File file = null;
-        try {
-            file = new File(dirPath.concat("//").concat("input.xmi"));
-            output = new BufferedWriter(new FileWriter(file));
-            output.write(oclXMIExpression);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (output != null) {
-                output.close();
-            }
-        }
-        String filePath = file.getAbsolutePath();
-        DataModel dm = OCLParser.extractDataModel(filePath);
-        OclExp ocl = (OclExp) OCLParser.convertToExp(filePath);
-        service.setDataModel(dm);
-        final long startNanoTime = System.nanoTime();
-        Statement statement = service.mapToSQL(ocl);
-        final long endNanoTime = System.nanoTime();
-        returnModel.setOcl2sqlNanoTime(endNanoTime - startNanoTime);
-        returnModel
-            .setStatement(((SimpleService) service).m2t((Select) statement));
-        return returnModel;
     }
 
 }
