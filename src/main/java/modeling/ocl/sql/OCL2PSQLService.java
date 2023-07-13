@@ -16,16 +16,17 @@ limitations under the License.
 @author: thian
 ***************************************************************************/
 
-package org.vgu.ocl2psql;
+package modeling.ocl.sql;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
-import org.vgu.ocl2psql.sql.statement.select.Select;
 
 import com.vgu.se.jocl.expressions.Expression;
+
+import modeling.ocl.sql.statement.select.Select;
 
 public abstract class OCL2PSQLService {
 

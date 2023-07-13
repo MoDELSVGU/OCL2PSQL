@@ -17,7 +17,7 @@ limitations under the License.
 ***************************************************************************/
 
 
-package org.vgu.ocl2psql.sql.statement.select;
+package modeling.ocl.sql.statement.select;
 
 import net.sf.jsqlparser.statement.select.PlainSelect;
 

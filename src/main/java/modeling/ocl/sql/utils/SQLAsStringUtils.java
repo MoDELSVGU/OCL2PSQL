@@ -17,7 +17,7 @@ limitations under the License.
 ***************************************************************************/
 
 
-package org.vgu.ocl2psql.sql.utils;
+package modeling.ocl.sql.utils;
 
 import java.util.regex.Pattern;
 

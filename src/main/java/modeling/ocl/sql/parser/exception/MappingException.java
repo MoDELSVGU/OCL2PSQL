@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.vgu.ocl2psql.ocl.parser.exception;
+package modeling.ocl.sql.parser.exception;
 
 /**
  * @author rherschke

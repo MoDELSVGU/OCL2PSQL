@@ -1,4 +1,4 @@
-package org.vgu.ocl2psql.sql.statement.select;
+package modeling.ocl.sql.statement.select;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -144,8 +144,8 @@ public class PlainSelect
                 while (it.hasNext()) {
                     Join join = it.next();
                     String joinText;
-                    if (join instanceof org.vgu.ocl2psql.sql.statement.select.Join) {
-                        joinText = ((org.vgu.ocl2psql.sql.statement.select.Join) join)
+                    if (join instanceof modeling.ocl.sql.statement.select.Join) {
+                        joinText = ((modeling.ocl.sql.statement.select.Join) join)
                             .toStringWithDescription();
                     } else {
                         joinText = join.toString();
@@ -278,8 +278,8 @@ public class PlainSelect
                 while (it.hasNext()) {
                     Join join = it.next();
                     String joinText;
-                    if (join instanceof org.vgu.ocl2psql.sql.statement.select.Join) {
-                        joinText = ((org.vgu.ocl2psql.sql.statement.select.Join) join)
+                    if (join instanceof modeling.ocl.sql.statement.select.Join) {
+                        joinText = ((modeling.ocl.sql.statement.select.Join) join)
                             .toString();
                     } else {
                         joinText = join.toString();

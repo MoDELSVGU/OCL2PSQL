@@ -17,7 +17,7 @@ limitations under the License.
 ***************************************************************************/
 
 
-package org.vgu.ocl2psql.sql.statement.select;
+package modeling.ocl.sql.statement.select;
 
 import java.util.Iterator;
 

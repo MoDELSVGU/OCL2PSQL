@@ -15,24 +15,26 @@ limitations under the License.
 
 @author: ngpbh
 ***************************************************************************/
+package modeling.ocl.sql.statement.select;
 
+import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
-package org.vgu.ocl2psql.ocl.type;
-
-public class SingleType extends Type{
+public class RefSelectExpression extends SelectExpressionItem{
     
-    private String typeName;
-
-    public SingleType(String typeName) {
-        this.typeName = typeName;
+    private String variableName;
+    
+    public RefSelectExpression(String variableName) {
+        super();
+        this.variableName = variableName;
+        super.setAlias(new Alias("ref_".concat(variableName)));
     }
 
-    @Override
-    public String getTypeName() {
-        return this.typeName;
+    public String getVariableName() {
+        return variableName;
     }
 
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
+    public void setVariableName(String variableName) {
+        this.variableName = variableName;
     }
 }

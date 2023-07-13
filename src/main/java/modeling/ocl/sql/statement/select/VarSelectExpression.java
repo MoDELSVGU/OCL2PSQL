@@ -15,7 +15,7 @@ limitations under the License.
 
 @author: ngpbh
 ***************************************************************************/
-package org.vgu.ocl2psql.sql.statement.select;
+package modeling.ocl.sql.statement.select;
 
 import net.sf.jsqlparser.expression.Expression;
 

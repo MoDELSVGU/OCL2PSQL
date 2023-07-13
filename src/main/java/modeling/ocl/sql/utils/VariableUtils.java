@@ -15,16 +15,15 @@ limitations under the License.
 @author: ngpbh
 ***************************************************************************/
 
-package org.vgu.ocl2psql.sql.utils;
+package modeling.ocl.sql.utils;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
-import org.vgu.ocl2psql.sql.statement.select.VarSelectExpression;
-
 import com.vgu.se.jocl.expressions.Variable;
 
+import modeling.ocl.sql.statement.select.PlainSelect;
+import modeling.ocl.sql.statement.select.VarSelectExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
 

@@ -15,20 +15,20 @@ limitations under the License.
 
 @author: ngpbh
 ***************************************************************************/
-package org.vgu.ocl2psql.sql.statement.select;
+package modeling.ocl.sql.statement.select;
 
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
-public class ResSelectExpression extends SelectExpressionItem{
-    public ResSelectExpression() {
+public class ValSelectExpression extends SelectExpressionItem{
+    public ValSelectExpression() {
         super();
-        super.setAlias(new Alias("res"));
+        super.setAlias(new Alias("val"));
     }
     
-    public ResSelectExpression(Expression expression) {
+    public ValSelectExpression(Expression expression) {
         super(expression);
-        super.setAlias(new Alias("res"));
+        super.setAlias(new Alias("val"));
     }
 }

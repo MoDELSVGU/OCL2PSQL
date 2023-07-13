@@ -16,7 +16,7 @@ limitations under the License.
 @author: thian
 ***************************************************************************/
 
-package org.vgu.ocl2psql;
+package modeling.ocl.sql;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,12 +28,6 @@ import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.vgu.ocl2psql.ocl.parser.simple.SimpleOclParser;
-import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
-import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
-import org.vgu.ocl2psql.sql.statement.select.Select;
-import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
-import org.vgu.ocl2psql.sql.utils.SQLAsStringUtils;
 
 import com.vgu.se.jocl.expressions.Expression;
 import com.vgu.se.jocl.expressions.Variable;
@@ -41,6 +35,12 @@ import com.vgu.se.jocl.parser.simple.SimpleParser;
 import com.vgu.se.jocl.types.Type;
 
 import modeling.data.entities.DataModel;
+import modeling.ocl.sql.parser.simple.SimpleOclParser;
+import modeling.ocl.sql.statement.select.PlainSelect;
+import modeling.ocl.sql.statement.select.ResSelectExpression;
+import modeling.ocl.sql.statement.select.Select;
+import modeling.ocl.sql.statement.select.ValSelectExpression;
+import modeling.ocl.sql.utils.SQLAsStringUtils;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
 public class SimpleService extends OCL2PSQLService {

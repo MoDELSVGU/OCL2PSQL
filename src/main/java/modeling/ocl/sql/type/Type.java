@@ -17,22 +17,8 @@ limitations under the License.
 ***************************************************************************/
 
 
-package org.vgu.ocl2psql.ocl.type;
+package modeling.ocl.sql.type;
 
-public class CollectionType<E extends Type> extends Type {
-    private static final String COLLECTION = "Col";
-    private E elementType;
-
-    public void setElementType(E elementType) {
-        this.elementType = elementType;
-    }
-    
-    public Type getElementType() {
-        return elementType;
-    }
-    
-    @Override
-    public String getTypeName() {
-        return String.format("%s(%s)", COLLECTION, elementType.getTypeName());
-    }
+public abstract class Type {
+    public abstract String getTypeName();
 }

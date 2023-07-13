@@ -16,20 +16,11 @@ limitations under the License.
 @author: thian
 ***************************************************************************/
 
-package org.vgu.ocl2psql.ocl.parser.simple;
+package modeling.ocl.sql.parser.simple;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.vgu.ocl2psql.ocl.parser.exception.MappingException;
-import org.vgu.ocl2psql.sql.statement.select.Join;
-import org.vgu.ocl2psql.sql.statement.select.PlainSelect;
-import org.vgu.ocl2psql.sql.statement.select.ResSelectExpression;
-import org.vgu.ocl2psql.sql.statement.select.Select;
-import org.vgu.ocl2psql.sql.statement.select.SubSelect;
-import org.vgu.ocl2psql.sql.statement.select.ValSelectExpression;
-import org.vgu.ocl2psql.sql.statement.select.VarSelectExpression;
 
 import com.vgu.se.jocl.expressions.AssociationClassCallExp;
 import com.vgu.se.jocl.expressions.BooleanLiteralExp;
@@ -51,6 +42,14 @@ import com.vgu.se.jocl.utils.VariableUtils;
 import com.vgu.se.jocl.visit.ParserVisitor;
 
 import modeling.data.entities.DataModel;
+import modeling.ocl.sql.parser.exception.MappingException;
+import modeling.ocl.sql.statement.select.Join;
+import modeling.ocl.sql.statement.select.PlainSelect;
+import modeling.ocl.sql.statement.select.ResSelectExpression;
+import modeling.ocl.sql.statement.select.Select;
+import modeling.ocl.sql.statement.select.SubSelect;
+import modeling.ocl.sql.statement.select.ValSelectExpression;
+import modeling.ocl.sql.statement.select.VarSelectExpression;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.CaseExpression;
 import net.sf.jsqlparser.expression.Expression;
@@ -332,7 +331,7 @@ public class SimpleOclParser implements ParserVisitor {
 				ResSelectExpression res = new ResSelectExpression(resCase);
 				plainSelect.setRes(res);
 
-				org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsSrcOfSrcExp, plainSelect, tmpFlattenAlias);
+				modeling.ocl.sql.utils.VariableUtils.addVar(sVarsSrcOfSrcExp, plainSelect, tmpFlattenAlias);
 
 				plainSelect.setFromItem(tmpSourceOfSource);
 
@@ -438,7 +437,7 @@ public class SimpleOclParser implements ParserVisitor {
 			ResSelectExpression res = new ResSelectExpression(resCase);
 			plainSelect.setRes(res);
 
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
 
 			plainSelect.setFromItem(tmpSrc);
 
@@ -509,7 +508,7 @@ public class SimpleOclParser implements ParserVisitor {
 			ResSelectExpression res = new ResSelectExpression(resCase);
 			plainSelect.setRes(res);
 
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
 
 			plainSelect.setFromItem(tmpSrc);
 
@@ -581,7 +580,7 @@ public class SimpleOclParser implements ParserVisitor {
 			ResSelectExpression res = new ResSelectExpression(resCase);
 			plainSelect.setRes(res);
 
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
 
 			plainSelect.setFromItem(tmpSrc);
 
@@ -642,7 +641,7 @@ public class SimpleOclParser implements ParserVisitor {
 			List<Expression> groupByFields = new ArrayList<Expression>();
 
 			List<Variable> sVars = VariableUtils.SVars(exp);
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVars, plainSelect, tmpSourceAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVars, plainSelect, tmpSourceAlias);
 
 			for (Variable v : sVars) {
 				VarSelectExpression refVar = new VarSelectExpression(v.getName());
@@ -1014,7 +1013,7 @@ public class SimpleOclParser implements ParserVisitor {
 		plainSelect.addVar(v);
 
 		List<Variable> sVarsSrcV = VariableUtils.SVars(sourceExp);
-		org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsSrcV, plainSelect, tmpDmnAlias);
+		modeling.ocl.sql.utils.VariableUtils.addVar(sVarsSrcV, plainSelect, tmpDmnAlias);
 
 		plainSelect.setFromItem(tmpSource);
 
@@ -1058,7 +1057,7 @@ public class SimpleOclParser implements ParserVisitor {
 		plainSelect.setFromItem(tmpObj);
 
 		List<Variable> sVarsV = VariableUtils.SVars(srcExp);
-		org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsV, plainSelect, tmpObjAlias);
+		modeling.ocl.sql.utils.VariableUtils.addVar(sVarsV, plainSelect, tmpObjAlias);
 
 		Join leftJ = new Join();
 		leftJ.setLeft(true);
@@ -1143,7 +1142,7 @@ public class SimpleOclParser implements ParserVisitor {
 
 		List<Variable> sVarsV = VariableUtils.SVars(sourceExp);
 
-		org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsV, plainSelect, tmpObjAlias);
+		modeling.ocl.sql.utils.VariableUtils.addVar(sVarsV, plainSelect, tmpObjAlias);
 
 		sourceExp.accept(this);
 		Select vMap = this.getSelect();
@@ -1216,7 +1215,7 @@ public class SimpleOclParser implements ParserVisitor {
 
 			List<Variable> sVarsV = VariableUtils.SVars(sourceExp);
 
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsV, plainSelect, tmpObjAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsV, plainSelect, tmpObjAlias);
 
 			sourceExp.accept(this);
 			Select vMap = this.getSelect();
@@ -1280,7 +1279,7 @@ public class SimpleOclParser implements ParserVisitor {
 
 			List<Variable> sVarsV = VariableUtils.SVars(sourceExp);
 
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsV, plainSelect, tmpObjAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsV, plainSelect, tmpObjAlias);
 
 			sourceExp.accept(this);
 			Select vMap = this.getSelect();
@@ -1349,7 +1348,7 @@ public class SimpleOclParser implements ParserVisitor {
 
 		List<Variable> sVarsV = VariableUtils.SVars(sourceExp);
 
-		org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsV, plainSelect, tmpObjAlias);
+		modeling.ocl.sql.utils.VariableUtils.addVar(sVarsV, plainSelect, tmpObjAlias);
 
 		sourceExp.accept(this);
 		Select vMap = this.getSelect();
@@ -1426,7 +1425,7 @@ public class SimpleOclParser implements ParserVisitor {
 		ResSelectExpression res = new ResSelectExpression(resCase);
 		plainSelect.setRes(res);
 
-		org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsSrc, plainSelect, tmpSourceAlias);
+		modeling.ocl.sql.utils.VariableUtils.addVar(sVarsSrc, plainSelect, tmpSourceAlias);
 
 		plainSelect.setFromItem(tmpSource);
 
@@ -1480,7 +1479,7 @@ public class SimpleOclParser implements ParserVisitor {
 
 		plainSelect.setFromItem(tmpSrc);
 
-		org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsSrc, plainSelect, tmpSrcAlias);
+		modeling.ocl.sql.utils.VariableUtils.addVar(sVarsSrc, plainSelect, tmpSrcAlias);
 
 		return plainSelect;
 	}
@@ -1528,7 +1527,7 @@ public class SimpleOclParser implements ParserVisitor {
 		ResSelectExpression res = new ResSelectExpression(resCase);
 		plainSelect.setRes(res);
 
-		org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsSrc, plainSelect, tmpSrcAlias);
+		modeling.ocl.sql.utils.VariableUtils.addVar(sVarsSrc, plainSelect, tmpSrcAlias);
 
 		plainSelect.setFromItem(tmpSrc);
 
@@ -1572,7 +1571,7 @@ public class SimpleOclParser implements ParserVisitor {
 
 		typeCase.setElseExpression(new StringValue(typeCastedTo));
 
-		org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsSrc, plainSelect, tmpSrcAlias);
+		modeling.ocl.sql.utils.VariableUtils.addVar(sVarsSrc, plainSelect, tmpSrcAlias);
 
 		plainSelect.setFromItem(tmpSrc);
 
@@ -1610,7 +1609,7 @@ public class SimpleOclParser implements ParserVisitor {
 		ValSelectExpression val = new ValSelectExpression(new Column(Arrays.asList(tmpAlias, "val")));
 		plainSelect.setVal(val);
 
-		org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsTmp, plainSelect, tmpAlias);
+		modeling.ocl.sql.utils.VariableUtils.addVar(sVarsTmp, plainSelect, tmpAlias);
 
 		plainSelect.setFromItem(tmp);
 
@@ -1717,14 +1716,14 @@ public class SimpleOclParser implements ParserVisitor {
 
 		// Case 2
 		if (!isEmptyFvLeft && isSubsetSvRightOfSvLeft) {
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
 
 			plainSelect.setFromItem(tmpLeft);
 			join.setRightItem(tmpRight);
 		}
 		// case 3
 		else if (!isEmptyFvRight && isSubsetSvLeftOfSvRight) {
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
 
 			plainSelect.setFromItem(tmpRight);
 			join.setRightItem(tmpLeft);
@@ -1732,8 +1731,8 @@ public class SimpleOclParser implements ParserVisitor {
 		// case 4
 		else if (!isEmptyFvLeft && !isEmptyFvLeft && !isSubsetSvLeftOfSvRight && !isSubsetSvRightOfSvLeft) {
 
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
 
 			plainSelect.setFromItem(tmpLeft);
 			join.setRightItem(tmpRight);
@@ -1844,14 +1843,14 @@ public class SimpleOclParser implements ParserVisitor {
 
 		// Case 2
 		if (!isEmptyFvLeft && isSubsetSvRightOfSvLeft) {
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
 
 			plainSelect.setFromItem(tmpLeft);
 			join.setRightItem(tmpRight);
 		}
 		// case 3
 		else if (!isEmptyFvRight && isSubsetSvLeftOfSvRight) {
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
 
 			plainSelect.setFromItem(tmpRight);
 			join.setRightItem(tmpLeft);
@@ -1859,8 +1858,8 @@ public class SimpleOclParser implements ParserVisitor {
 		// case 4
 		else if (!isEmptyFvLeft && !isEmptyFvLeft && !isSubsetSvLeftOfSvRight && !isSubsetSvRightOfSvLeft) {
 
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsLeft, plainSelect, tmpLeftAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsRight, plainSelect, tmpRightAlias);
 
 			plainSelect.setFromItem(tmpLeft);
 			join.setRightItem(tmpRight);
@@ -1911,7 +1910,7 @@ public class SimpleOclParser implements ParserVisitor {
 			List<Expression> groupByFields = new ArrayList<Expression>();
 
 			List<Variable> sVars = VariableUtils.SVars(exp);
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVars, plainSelect, tmpSourceAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVars, plainSelect, tmpSourceAlias);
 
 			for (Variable v : sVars) {
 				VarSelectExpression refVar = new VarSelectExpression(v.getName());
@@ -2014,9 +2013,9 @@ public class SimpleOclParser implements ParserVisitor {
 			sVarsRemained.remove(v);
 
 			if (isVarInFVarsB) {
-				org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsS, plainSelect, tmpBodyAlias);
+				modeling.ocl.sql.utils.VariableUtils.addVar(sVarsS, plainSelect, tmpBodyAlias);
 
-				org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsRemained, plainSelect, tmpBodyAlias);
+				modeling.ocl.sql.utils.VariableUtils.addVar(sVarsRemained, plainSelect, tmpBodyAlias);
 
 				plainSelect.setFromItem(tmpBody);
 
@@ -2079,7 +2078,7 @@ public class SimpleOclParser implements ParserVisitor {
 			ResSelectExpression res = new ResSelectExpression(resCase);
 			plainSelect.setRes(res);
 
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
 
 			plainSelect.setFromItem(tmpSrc);
 
@@ -2151,7 +2150,7 @@ public class SimpleOclParser implements ParserVisitor {
 			ResSelectExpression res = new ResSelectExpression(resCase);
 			plainSelect.setRes(res);
 
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
 
 			plainSelect.setFromItem(tmpSrc);
 
@@ -2231,7 +2230,7 @@ public class SimpleOclParser implements ParserVisitor {
 			ResSelectExpression res = new ResSelectExpression(resCase);
 			plainSelect.setRes(res);
 
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
 
 			plainSelect.setFromItem(tmpSrc);
 
@@ -2348,8 +2347,8 @@ public class SimpleOclParser implements ParserVisitor {
 			ResSelectExpression res = new ResSelectExpression(resCase);
 			plainSelect.setRes(res);
 
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(svBodyComplementExcludeCurrentVar, plainSelect,
+			modeling.ocl.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSrcAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(svBodyComplementExcludeCurrentVar, plainSelect,
 					tmpBodyAlias);
 
 			plainSelect.setFromItem(tmpSrc);
@@ -2518,8 +2517,8 @@ public class SimpleOclParser implements ParserVisitor {
 			plainSelect.setRes(res);
 
 			// Ref columns
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSourceAlias);
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(svBodyComplementExcludeCurrentVar, plainSelect,
+			modeling.ocl.sql.utils.VariableUtils.addVar(svSrc, plainSelect, tmpSourceAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(svBodyComplementExcludeCurrentVar, plainSelect,
 					tmpBodyAlias);
 
 			plainSelect.setFromItem(tmpSource);
@@ -2661,8 +2660,8 @@ public class SimpleOclParser implements ParserVisitor {
 
 			plainSelect.setRes(res);
 
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsSrc, plainSelect, tmpSourceAlias);
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsComplement, plainSelect, tmpBodyAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsSrc, plainSelect, tmpSourceAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsComplement, plainSelect, tmpBodyAlias);
 
 			plainSelect.setFromItem(tmpSource);
 
@@ -2689,7 +2688,7 @@ public class SimpleOclParser implements ParserVisitor {
 
 //            System.out.println("Exp:" + exp.getOclStr() + "\nBody Exp:" + bodyExp.getOclStr() + "\n" + sVarsBody);
 
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsBodyLessV, plainSelectInJoin, tmpBodyAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsBodyLessV, plainSelectInJoin, tmpBodyAlias);
 
 			plainSelectInJoin.setFromItem(tmpBody);
 
@@ -2709,7 +2708,7 @@ public class SimpleOclParser implements ParserVisitor {
 			plainSelectInJoin.setWhere(whereCond);
 
 			List<Expression> groupByExps = new ArrayList<Expression>();
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVarToList(sVarsBodyLessV, groupByExps, tmpBodyAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVarToList(sVarsBodyLessV, groupByExps, tmpBodyAlias);
 
 			GroupByElement groupBy = new GroupByElement();
 			groupBy.addGroupByExpressions(groupByExps);
@@ -2829,8 +2828,8 @@ public class SimpleOclParser implements ParserVisitor {
 
 			plainSelect.setRes(res);
 
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsSrc, plainSelect, tmpSourceAlias);
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsComplement, plainSelect, tmpBodyAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsSrc, plainSelect, tmpSourceAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsComplement, plainSelect, tmpBodyAlias);
 
 			plainSelect.setFromItem(tmpSource);
 
@@ -2851,7 +2850,7 @@ public class SimpleOclParser implements ParserVisitor {
 			List<Variable> sVarsBodyLessV = new ArrayList<Variable>(sVarsBody);
 //            sVarsBodyLessV.remove(v);
 
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsBodyLessV, plainSelectInJoin, tmpBodyAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVar(sVarsBodyLessV, plainSelectInJoin, tmpBodyAlias);
 
 			plainSelectInJoin.setFromItem(tmpBody);
 
@@ -2860,7 +2859,7 @@ public class SimpleOclParser implements ParserVisitor {
 			plainSelectInJoin.setWhere(whereCond);
 
 			List<Expression> groupByExps = new ArrayList<Expression>();
-			org.vgu.ocl2psql.sql.utils.VariableUtils.addVarToList(sVarsBodyLessV, groupByExps, tmpBodyAlias);
+			modeling.ocl.sql.utils.VariableUtils.addVarToList(sVarsBodyLessV, groupByExps, tmpBodyAlias);
 
 			GroupByElement groupBy = new GroupByElement();
 			groupBy.addGroupByExpressions(groupByExps);
@@ -2971,7 +2970,7 @@ public class SimpleOclParser implements ParserVisitor {
 				ResSelectExpression res = new ResSelectExpression(resCase);
 				plainSelect.setRes(res);
 
-				org.vgu.ocl2psql.sql.utils.VariableUtils.addVar(sVarsSrcOfSrcExp, plainSelect, tmpFlattenAlias);
+				modeling.ocl.sql.utils.VariableUtils.addVar(sVarsSrcOfSrcExp, plainSelect, tmpFlattenAlias);
 
 				plainSelect.setFromItem(tmpSourceOfSource);
 
