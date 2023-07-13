@@ -23,12 +23,12 @@ import java.io.IOException;
 
 import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
-import org.vgu.dm2schema.dm.DataModel;
 import org.vgu.ocl2psql.sql.statement.select.Select;
 
 import com.vgu.se.jocl.exception.OclParserException;
 import com.vgu.se.jocl.expressions.Expression;
 
+import modeling.data.entities.DataModel;
 import net.sf.jsqlparser.statement.Statement;
 
 public class OCL2PSQL {

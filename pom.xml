@@ -1,48 +1,51 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.vgu.ocl2psql</groupId>
-  <artifactId>ocl2psql</artifactId>
-  <version>0.0.2</version>
-  
-  <dependencies>
-  
-  <!-- https://mvnrepository.com/artifact/com.github.jsqlparser/jsqlparser -->
-<dependency>
-    <groupId>com.github.jsqlparser</groupId>
-    <artifactId>jsqlparser</artifactId>
-    <version>4.2</version>
-</dependency>
-  
- <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
-<dependency>
-  <groupId>mysql</groupId>
-  <artifactId>mysql-connector-java</artifactId>
-  <version>[8.0.16,)</version>
-</dependency>
-<dependency>
-		<groupId>com.googlecode.json-simple</groupId>
-		<artifactId>json-simple</artifactId>
-		<version>1.1</version>
-</dependency>
-<dependency>
-  <groupId>junit</groupId>
-  <artifactId>junit</artifactId>
-  <version>[4.13.1,)</version>
-</dependency>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.vgu.ocl2psql</groupId>
+	<artifactId>ocl2psql</artifactId>
+	<version>0.0.2</version>
 
-  </dependencies>
-  <build>
-    <sourceDirectory>src/main/java</sourceDirectory>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
-        <configuration>
-          <source>1.14</source>
-          <target>1.14</target>
-        </configuration>
-      </plugin>
-      
-    </plugins>
-  </build>
+	<dependencies>
+
+		<!-- https://mvnrepository.com/artifact/com.github.jsqlparser/jsqlparser -->
+		<dependency>
+			<groupId>io.github.modelsvgu</groupId>
+			<artifactId>sqlj</artifactId>
+			<version>1.0.2-ASC</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.modelsvgu</groupId>
+			<artifactId>datamodelj</artifactId>
+			<version>1.0.8-ASC</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.modelsvgu</groupId>
+			<artifactId>oclj</artifactId>
+			<version>1.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>[4.13.1,)</version>
+		</dependency>
+
+	</dependencies>
+	<build>
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<source>1.14</source>
+					<target>1.14</target>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
 </project>

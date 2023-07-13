@@ -113,9 +113,9 @@ public class PlainSelect
         if (super.getTop() != null) {
             sql.append(super.getTop()).append(" ");
         }
-        if (super.getMySqlSqlNoCache()) {
-            sql.append("SQL_NO_CACHE").append(" ");
-        }
+//        if (super.getMySqlSqlNoCache()) {
+//            sql.append("SQL_NO_CACHE").append(" ");
+//        }
         if (super.getMySqlSqlCalcFoundRows()) {
             sql.append("SQL_CALC_FOUND_ROWS").append(" ");
         }
@@ -247,9 +247,9 @@ public class PlainSelect
         if (super.getTop() != null) {
             sql.append(super.getTop()).append(" ");
         }
-        if (super.getMySqlSqlNoCache()) {
-            sql.append("SQL_NO_CACHE").append(" ");
-        }
+//        if (super.getMySqlSqlNoCache()) {
+//            sql.append("SQL_NO_CACHE").append(" ");
+//        }
         if (super.getMySqlSqlCalcFoundRows()) {
             sql.append("SQL_CALC_FOUND_ROWS").append(" ");
         }
